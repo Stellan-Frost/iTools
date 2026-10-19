@@ -56,7 +56,7 @@
 - `page-chrome/MetadataChip` 用于首页目录摘要、分类/工具卡片、标题上下文、任务页、管理目录/元数据、工具页与详情中的静态元数据标签。标签仅用于适合压缩呈现的 metadata，不承诺所有元数据均显示为 chip；正文内容和样本输入继续用可读文本。
 - Favicon 与品牌 Logo 沿用原稿资源（代理复核 SHA-256 与源文件匹配）；功能图标继续使用本地 Material Symbols Rounded 字体，不以品牌图替代功能符号。
 - 顶栏以图标呈现品牌、最近任务、主题、管理预览和窄屏导航，搜索保留图标与“搜索工具”文字。搜索快捷键 Ctrl/Cmd+K 仍有效，但不在顶栏展示键位提示。窄屏菜单图标固定在顶栏右端并打开导航抽屉；抽屉复用同一手风琴。420 px 以下改为紧凑两行，420 px 及以上保持单行，所有控件目标为 48 px。功能入口不丢失。600 px 与 840 px 的适配继续使用共享断点。
-- **本轮移动搜索导航实现记录（待根 Agent 完成视觉与QA验收）：** 共享 `ToolSearchEntry` 使用适配层公开的 M3 `SearchBar`，用于顶栏和首页 hero，保持一致的 full 圆角。输入框为只读快捷入口；点击或 Enter 打开现有命令面板，Ctrl/Cmd+K 快捷键保留。移动顶栏只渲染搜索框，分类抽屉入口放在 SearchBar 官方 leading slot 内；抽屉承载主题、管理预览和独立最近任务页入口，避免窄屏叠加浮层。桌面品牌、搜索、最近任务、主题和管理入口保留。此项实现与响应式视觉结果尚待最终验证，不构成验收通过声明。
+- **本轮移动搜索导航实现：** 共享 `ToolSearchEntry` 使用适配层公开的 M3 `SearchBar`，用于顶栏和首页 hero，保持一致的 full 圆角。只读搜索入口按 Enter 打开现有命令面板，Ctrl/Cmd+K 快捷键保留。移动顶栏只渲染搜索框，分类抽屉入口放在 SearchBar leading slot 内；抽屉承载主题、管理预览和独立最近任务页入口。桌面品牌、搜索、最近任务、主题和管理入口保留。最终视口及交互验收见下方 2026-10-19 最终移动搜索导航验收。
 - 工具详情通过主库 Dialog 展示分类、简介和元数据，并以“关闭”和“前往”作为对应操作。关闭由 Dialog 的标准行为负责，进入动效由内容层级变化表达。
 - 页面组合只使用 `--md-sys-color-*`、`--md-sys-typescale-*`、现有形状/间距/动效 Token；新增导航宽度、行高、图标、焦点环、state-layer opacity 与按压/对话框进入 scale token 记录在适配层 README。分类和对话框动效遵循 `prefers-reduced-motion`；抽屉开合继续由主库 NavigationDrawer 负责。
 - 阶段 2 原截图均保留原版顶栏样式，作为历史验收记录，不代表本轮图标式顶栏。图标顶栏已完成桌面、390 px 与 320 px 的浏览器复查，截图和实测结果见下方最终验收记录。窄屏菜单位于顶栏最右端并打开抽屉；工具详情可关闭，关闭后首页保持不变，重开抽屉会保留分类展开状态。
@@ -89,7 +89,9 @@
 | 移动导航抽屉 · 390×844 | [teal-mobile-drawer.png](assets/stage-2/teal-mobile-drawer.png) |
 | 移动工具详情 Dialog · 390×844 | [teal-mobile-dialog.png](assets/stage-2/teal-mobile-dialog.png) |
 
-### 图标顶栏与最终适配验收
+### 早期图标顶栏与旧搜索按钮记录（历史实现）
+
+以下图标顶栏和旧 Button 搜索控件截图仅记录先前实现，不代表当前搜索栏、移动顶栏或导航验收结果。当前实现与最终截图见下方“2026-10-19 最终移动搜索导航验收”。
 
 - **布局与目标尺寸：通过。** 在 1280×900 桌面和 390×844 移动视口中，顶栏除带搜索图标的“搜索工具”外无其它可见文字。图标按钮和搜索控件目标为 48 px；420 px 起单行，≤419 px 两行。320 px 与 420 px 下均实测 `clientWidth == scrollWidth`，无横向溢出；840 px 起显示桌面导航。
 - **形状：通过。** 全局 hero 与 group 圆角为 32 px；移动 NavigationDrawer 外侧两角为 32 px；ToolInfoDialog 与搜索 Dialog 为 48 px，内部 code 为 32 px。NavigationDrawer 外侧圆角已修正组件库内部固定的 16 px。
@@ -97,7 +99,7 @@
 - **质量门禁：通过。** `pnpm build`、`pnpm test`、`pnpm lint`、`pnpm typecheck` 全部通过，共 20 项测试（契约 4、适配层 8、应用 8）；根 Agent 最终 `pnpm format:check`、`git diff --check` 和 `pnpm peers check` 均通过。
 - **阶段状态：完成并等待用户下一步。** 本轮不启动阶段 3。
 
-本轮图标顶栏截图：
+早期图标顶栏与旧搜索按钮截图（历史）：
 
 | 视口与状态 | 截图 |
 | --- | --- |
@@ -106,9 +108,26 @@
 | 移动工具详情 Dialog · 390×844 | [topbar-dialog-mobile.png](assets/stage-2/topbar-dialog-mobile.png) |
 | 移动导航抽屉 · 390×844 | [topbar-drawer-mobile.png](assets/stage-2/topbar-drawer-mobile.png) |
 
+### 2026-10-19 最终移动搜索导航验收
+
+- **视口与入口：通过。** 根 Agent 实测 1280×900 桌面首页、840×900 断点首页、390×844 移动首页/深色抽屉/详情/管理/任务页，以及 320×844 移动管理页；各页 `clientWidth == scrollWidth`，无横向溢出。移动 header 可见直接子组件仅一个 SearchBar，分类导航图标位于 SearchBar 内，无外置更多、品牌、主题、管理或历史入口。
+- **交互：通过。** 点击 leading 导航图标只打开 drawer，不触发搜索。抽屉主题切换即时生效；管理和历史入口关闭 drawer 后跳转，历史进入现有 tasks 页。搜索 Enter 打开 Palette；Escape 关闭并恢复焦点，不会因焦点恢复再次打开。
+- **组件与形状：通过。** 首页和 header 共用 `ToolSearchEntry` / `SearchBar`，computed 圆角均为 9999 px。IconButton 实测 48×48 px 且为圆形；独立图标底板和 ToolInfoDialog 标题图标底板为 40 px 圆形；品牌展示为 32 px 圆形。6 个 SVG 源文件字节未改，SHA-256 与新品牌 ZIP 中对应文件逐一匹配，页面新 Logo 已加载。全局矩形 32 px、Dialog 48 px 圆角保持现状。
+- **质量门禁：通过。** 根 Agent 汇总 `pnpm test` 共 22 项（contracts 4、adapter 9、app 9），`pnpm build`、`pnpm lint`、`pnpm typecheck` 通过；`pnpm format:check`、`git diff --check`、`pnpm peers check` 由根 Agent 汇总通过。
+- **阶段状态：完成并等待用户下一步。** 本轮不启动阶段 3。
+
+最终验收截图：
+
+| 视口与状态 | 截图 |
+| --- | --- |
+| 桌面首页 · 1280×900 | [search-desktop-home.png](assets/stage-2/search-desktop-home.png) |
+| 移动首页 · 390×844 | [search-mobile-home.png](assets/stage-2/search-mobile-home.png) |
+| 深色移动抽屉 · 390×844 | [search-mobile-drawer-dark.png](assets/stage-2/search-mobile-drawer-dark.png) |
+| 移动工具详情 Dialog · 390×844 | [search-mobile-tool-dialog.png](assets/stage-2/search-mobile-tool-dialog.png) |
+
 ### 阶段 2 原版视觉检查留档（历史截图）
 
-以下截图记录原洋红主题与此前文字式顶栏，仅用于回溯旧版本，不作为 2026-10-19 鸭青主题、壳层圆角、手风琴容器或本轮图标式顶栏的验收证据。当前顶栏视口截图见上表。
+以下截图记录原洋红主题与此前文字式顶栏，仅用于回溯旧版本，不作为 2026-10-19 鸭青主题、壳层圆角、手风琴容器或当前顶栏的验收证据。当前搜索顶栏视口截图见最终移动搜索导航验收。
 
 | 视口与状态 | 截图 | 观察 |
 | --- | --- | --- |
