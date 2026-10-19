@@ -1,9 +1,14 @@
 import fastifyStatic from '@fastify/static';
 import type { SsrRenderer } from '@itools/contracts';
 import Fastify, { type FastifyInstance } from 'fastify';
+import { registerOpenApi } from './api/openapi.js';
+import type { ApiOptions } from './api/options.js';
+import { registerApi } from './api/routes.js';
 import { injectHtml } from './html.js';
 import { buildRobotsTxt } from './robots.js';
 import { buildSitemap } from './sitemap.js';
+
+export type { ApiOptions } from './api/options.js';
 
 export interface StaticRoots {
   readonly assets: string;
@@ -17,6 +22,8 @@ export interface CreateAppOptions {
   /** 开发环境注入 Vite middleware；测试与生产不提供。 */
   registerDevMiddleware?(app: FastifyInstance): Promise<void>;
   staticRoots?: StaticRoots;
+  /** 只读 API 依赖；缺省时端点仍存在，但目录相关请求返回 503。 */
+  readonly api?: ApiOptions;
 }
 
 const HTML_CACHE_CONTROL = 'public, max-age=0, must-revalidate';
@@ -56,6 +63,11 @@ export async function createApp(
       .header('cache-control', METADATA_CACHE_CONTROL)
       .send(buildRobotsTxt(options.siteOrigin)),
   );
+
+  // API 必须先于 404 处理器注册，避免被 SSR 通配逻辑吞掉。
+  // 未注入依赖时仍提供端点，由路由返回 503 明确表达不可用。
+  await registerOpenApi(app);
+  registerApi(app, options.api ?? {});
 
   app.setNotFoundHandler(async (request, reply) => {
     if (request.method !== 'GET' && request.method !== 'HEAD') {

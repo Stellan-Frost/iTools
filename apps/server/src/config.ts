@@ -8,6 +8,8 @@ export interface ServerConfig {
   readonly port: number;
   readonly siteOrigin: string;
   readonly webRoot: string;
+  /** 缺省时目录完全来自代码注册表，健康检查报 skipped。 */
+  readonly databaseUrl?: string;
 }
 
 const DEFAULT_PORT = 5173;
@@ -23,8 +25,25 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): ServerConfig {
   const port = readPort(env.PORT);
   const siteOrigin = readSiteOrigin(env.SITE_ORIGIN);
   const webRoot = readWebRoot(env.WEB_ROOT);
+  const databaseUrl = readDatabaseUrl(env.DATABASE_URL);
 
-  return { mode, host, port, siteOrigin, webRoot };
+  return {
+    mode,
+    host,
+    port,
+    siteOrigin,
+    webRoot,
+    ...(databaseUrl === undefined ? {} : { databaseUrl }),
+  };
+}
+
+function readDatabaseUrl(raw: string | undefined): string | undefined {
+  if (raw === undefined || raw.trim() === '') return undefined;
+  const value = raw.trim();
+  if (!/^postgres(ql)?:\/\//.test(value)) {
+    throw new Error('DATABASE_URL must be a postgres connection string.');
+  }
+  return value;
 }
 
 function readMode(raw: string | undefined): ServerMode {

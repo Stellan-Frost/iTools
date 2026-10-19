@@ -79,6 +79,7 @@ type RegistryEntry =
 - `implemented`：可执行、可索引、进 Sitemap。当前没有实例。
 - `disabled`：不可直达，返回 404，不进导航/搜索/Sitemap。
 - 默认注册表（`toolRegistry`）：6 个 preview + 1 个 disabled（`csv-inspector`），`implemented` 为空。
+- 数据库只能**降级**：阶段 7 起 `tools.availability_override` 仅允许 `'disabled'`，用于运营下架；数据库无法把工具改成 `implemented`（D27）。
 - 排序：`metadata.order` 升序，同序按 id。
 - 查询 API：`listTools`、`listVisibleTools`、`listImplementedTools`、`findTool`、`findVisibleTool`、`listVisibleByCategory`、`searchVisibleTools`、`listSitemapPaths`。
 - 注入：`createToolRegistry(implementedEntries)` 用于组合工具包；默认注册表不包含任何工具包。

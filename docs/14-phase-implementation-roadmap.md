@@ -1,6 +1,6 @@
 # 14 · 分阶段实施路线图
 
-> 状态：**阶段 0–6 已完成**；阶段 7–13 未开始。验收只依据代码、自动化测试、构建产物和可复现证据，不接受口头声明。
+> 状态：**阶段 0–7 已完成**；阶段 8–13 未开始。验收只依据代码、自动化测试、构建产物和可复现证据，不接受口头声明。
 > 验收顺序按 D06：不依赖数据库/任务运行时的部分先验收，完整集成验收在阶段 7 之后（见 [13](13-acceptance-open-decisions.md)）。
 
 ## 0. 阶段状态
@@ -14,7 +14,7 @@
 | 4 | 全局框架、三态注册表、预览状态 | ✅ 完成（无可执行工具） |
 | 5 | 任务运行时与 Worker | ✅ 完成（运行时包 + fixture 验收，未接工具/UI） |
 | 6 | 文件资产与 IndexedDB | ✅ 完成（存储包 + fake-indexeddb 验收，未接工具/UI） |
-| 7 | 后端、数据库与 API | ⏳ 未开始 |
+| 7 | 后端、数据库与 API | ✅ 完成（只读 API + 迁移/Seed/OpenAPI；认证属阶段 8） |
 | 8 | 唯一管理员与管理后台 | ⏳ 未开始 |
 | 9 | 安全、隐私与依赖治理 | ⏳ 未开始 |
 | 10 | PWA、缓存与更新 | ⏳ 未开始 |
@@ -100,21 +100,34 @@
 - 未做真实浏览器验证（Safari 事务窗口、多标签页 `blocked`、真实配额），属阶段 11 E2E。
 - 归档未分片，base64 体积约增 33%。
 
-## 4. 阶段 7：后端、数据库与 API
+## 4. 阶段 7：后端、数据库与 API ✅
 
 **目标**：可验证的服务端数据层、类型安全 API、可追踪迁移。
 
-**任务**
+**交付**（`packages/db` + `apps/server/src/api` + `apps/web/src/api`；4 个 subagent 并行，文件零重叠）
 
-- Fastify + PostgreSQL + Drizzle + TypeBox；`/api/v1`。
-- 工具目录、双语元数据、元数据版本、管理员会话表；OpenAPI 从实际路由生成。
-- 连接池、超时、空闲回收、优雅关闭、健康检查。
+- PostgreSQL 17 + Drizzle schema：`tools` / `tool_localizations` / `tool_metadata_versions` / `admin_sessions`。
+- 版本化 SQL 迁移执行器：单文件单事务、sha256 checksum、幂等、失败整体回滚。
+- Seed：注册表全量「不存在则插入」，不覆盖已有 order 与文案，可重复执行。
+- 目录合并（M1/D27）：注册表提供身份、分类、可用性；数据库只能覆盖排序与文案，且只能下架。
+- 只读 API：`/api/v1/tools`、`/api/v1/tools/:id`、`/api/v1/health/{live,ready}`、`/api/v1/openapi.json`；统一错误信封与 requestId。
+- 连接池（max 10、超时、statement_timeout）、ready 探测 1 秒硬超时且不抛错、优雅关闭。
+- 前端 `createToolApiClient` + `toolCatalogQueryOptions`（staleTime 60s），错误码 `NETWORK_ERROR` / `INVALID_RESPONSE` / 服务端 code。
+- 无 `DATABASE_URL` 时目录回落注册表，服务照常启动。
 
-**验收**
+**验收证据**
 
-- 新环境通过版本化迁移与 Seed 初始化；关键约束由唯一键/外键/事务保障。
-- API 输入输出经 Schema 校验，错误结构与状态码一致；OpenAPI 与真实路由一致。
-- 无效关键配置启动失败且日志不泄露秘密值。
+- 44 项数据库测试（迁移 8、连接池 2、探测 4、pg 仓储 9、目录合并 12、Seed 9），全部跑在真实 PostgreSQL 17.6 上。
+- 服务端 31 项：原有 14 项 + API 13 项 + 端到端 4 项（迁移 → Seed → 合并 → HTTP）。
+- 前端 9 项客户端测试。
+- 生产模式冒烟：`/api/v1/tools` 200（6 条、`public, max-age=60`）、未知工具 404 `TOOL_NOT_FOUND`、`/health/ready` 200 `database:ok`、OpenAPI 5 条路径。
+- `pnpm verify` 通过：409 项测试、28 项 HTTP 验收。
+
+**未完成（有意留到后续）**
+
+- 无写接口、无认证、无 CSRF、无限流（阶段 8/9）；`admin_sessions` 与 `tool_metadata_versions` 只有表结构。
+- 前端客户端未接入任何页面。
+- 多进程并发迁移无 advisory lock；`db:generate` 未纳入流程，结构权威是 `tables.ts`。
 
 ## 5. 阶段 8：唯一管理员与管理后台
 

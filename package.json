@@ -15,13 +15,14 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "eslint apps packages scripts && pnpm check:boundaries && pnpm check:imports && pnpm check:tokens && pnpm check:privacy",
-    "test": "node scripts/run-turbo.mjs test",
+    "test": "node --env-file-if-exists=.env scripts/run-turbo.mjs test",
     "typecheck": "node scripts/run-turbo.mjs typecheck",
     "check:imports": "node scripts/check-import-boundaries.mjs",
     "check:tokens": "node scripts/check-design-tokens.mjs",
     "check:privacy": "node scripts/check-no-network.mjs",
     "check:i18n": "node scripts/check-i18n-keys.mjs",
-    "verify": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm check:tools && pnpm check:i18n && node scripts/verify-stage-4.mjs"
+    "verify": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm check:tools && pnpm check:i18n && node scripts/verify-stage-4.mjs",
+    "test:db": "node --env-file-if-exists=.env scripts/run-turbo.mjs test --filter=@itools/db"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

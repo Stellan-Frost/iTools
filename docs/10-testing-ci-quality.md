@@ -1,7 +1,7 @@
 # 10 · 测试、质量与 CI
 
 > 状态：**本地测试与质量门禁已实现；CI、Playwright、性能预算未实现（阶段 11）**。
-> 当前基线：339 项 Vitest 测试、28 项生产 HTTP 验收，全部通过。
+> 当前基线：409 项 Vitest 测试、28 项生产 HTTP 验收，全部通过。数据库测试跑在真实 PostgreSQL 上。
 
 ## 1. 工具链
 
@@ -44,6 +44,8 @@ node scripts/verify-stage-4.mjs
 - `scripts/verify-stage-3.mjs` 已删除，只保留 `verify-stage-4.mjs`。
 - `@itools/task-runtime` 的测试替身放在 `src/test-support/`，由 `tsconfig.build.json` 排除，**不会进入 dist**；运行时测试不依赖真实定时器、真实 Worker 或系统时钟。
 - `@itools/asset-store` 同样把内存仓储与伪 URL/配额放在 `src/test-support/` 并从构建排除；IndexedDB 测试使用 `fake-indexeddb`（devDependency），**未在真实浏览器验证**。
+- 数据库测试需要 `TEST_DATABASE_URL`：`pnpm test` 通过 `node --env-file-if-exists=.env` 加载本地配置；`turbo.json` 的 `test` 任务已声明 `env: ["TEST_DATABASE_URL"]`，否则 Turbo 严格模式会丢弃该变量。
+- 测试库安全闸门：库名必须以 `_test` 结尾，否则测试支持层直接拒绝运行；测试会重建该库的 `public` schema，**绝不允许指向开发库或生产库**。
 
 ## 3. 测试分布
 
@@ -60,6 +62,12 @@ node scripts/verify-stage-4.mjs
 | asset-store | `application/*.test.ts` | 45 | 对象 URL 引用计数、资产服务、结果提交、归档导入回滚 |
 | asset-store | `infrastructure/indexeddb/*.test.ts` | 24 | 迁移、原子写入、删除联动、配额降级（`fake-indexeddb`） |
 | asset-store | `create-asset-store.test.ts` | 6 | 真实 IDB 组装：读写、引用、URL、清理、归档往返、关闭 |
+| db | `migrate.test.ts` | 8 | 建表、幂等、checksum 拒绝改写、失败整体回滚、顺序依赖 |
+| db | `infrastructure/*.test.ts` | 15 | 连接池、健康探测硬超时、pg 仓储聚合/级联/单事务 |
+| db | `catalog/*.test.ts` | 21 | 覆盖合并、排序、逐字段回落、来源标记、Seed 幂等 |
+| web | `api/*.test.ts` | 9 | 客户端解析、错误码映射、URL 编码、Query 选项 |
+| server | `api/api.test.ts` | 13 | 列表/单条/404/503、健康三态、缓存头、OpenAPI |
+| server | `catalog-integration.test.ts` | 4 | 真实 PG 端到端：迁移 → Seed → 合并 → HTTP |
 | adapter | 5 个测试文件 | 9 | Dialog、IconButton、Drawer、图标、主题 |
 | web | `app/route.test.ts` | 33 | URL 解析/生成、可用性、404 |
 | web | `app/seo.test.ts` | 3 | noindex、canonical |

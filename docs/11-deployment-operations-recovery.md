@@ -1,6 +1,40 @@
 # 11 · 部署、运维与恢复
 
-> 状态：**未实现（阶段 12）**。当前只有本地构建与 `node dist/index.js` 运行方式；没有 Docker、Compose、反向代理、健康检查、备份或回滚。
+> 状态：**生产部署未实现（阶段 12）；本地开发数据库已可用（阶段 7）**。当前只有本地构建与 `node dist/index.js` 运行方式；没有 Docker、Compose、反向代理、备份或回滚。
+
+## 本地开发数据库（已实现）
+
+本机没有 Docker 与 psql，因此使用**便携版 PostgreSQL 17.6**，不注册系统服务、不需要管理员权限，删除 `C:/itools-pg` 即可完全清理。
+
+| 项 | 值 |
+| --- | --- |
+| 二进制 | `C:/itools-pg/bin` |
+| 数据目录 | `C:/itools-pg/data` |
+| 监听 | `127.0.0.1:5432`（仅本机） |
+| 开发库 / 测试库 | `itools` / `itools_test` |
+| 连接串 | 见 `.env`（gitignored），模板见 `.env.example` |
+
+启动与初始化：
+
+```sh
+# 启动（前台运行，Ctrl+C 停止）
+C:/itools-pg/bin/postgres.exe -D "C:/itools-pg/data" -p 5432 -c listen_addresses=127.0.0.1
+
+# 首次初始化（已执行过，无需重复）
+C:/itools-pg/bin/initdb.exe -D "C:/itools-pg/data" -U itools --auth=scram-sha-256 --pwfile=... -E UTF8 --locale=C
+C:/itools-pg/bin/createdb.exe -h 127.0.0.1 -U itools itools
+C:/itools-pg/bin/createdb.exe -h 127.0.0.1 -U itools itools_test
+```
+
+迁移与 Seed（服务启动**不会**自动执行）：
+
+```sh
+pnpm --filter @itools/db build
+node --env-file=.env packages/db/dist/cli/migrate.js
+node --env-file=.env packages/db/dist/cli/seed.js
+```
+
+安全约束：测试只连 `TEST_DATABASE_URL`，且库名必须以 `_test` 结尾，否则测试支持层直接拒绝运行；测试会重建该库的 `public` schema。
 
 ## 生产拓扑
 - Linux + Docker Compose。

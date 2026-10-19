@@ -1,14 +1,28 @@
 import middie from '@fastify/middie';
 import type { FastifyInstance } from 'fastify';
 import { createApp } from './app.js';
+import { createCatalogRuntime } from './catalog-runtime.js';
 import { loadConfig, type ServerConfig } from './config.js';
 
 interface Runtime {
   readonly app: FastifyInstance;
   closeRenderer?: () => Promise<void>;
+  closeCatalog?: () => Promise<void>;
 }
 
 async function createRuntime(config: ServerConfig): Promise<Runtime> {
+  const catalogRuntime = createCatalogRuntime({
+    ...(config.databaseUrl === undefined
+      ? {}
+      : { databaseUrl: config.databaseUrl }),
+  });
+  const api = {
+    catalog: catalogRuntime.catalog,
+    ...(catalogRuntime.probeDatabase === undefined
+      ? {}
+      : { probeDatabase: catalogRuntime.probeDatabase }),
+  };
+
   if (config.mode === 'development') {
     const { createDevRenderer } = await import('./renderer/dev.js');
     const dev = await createDevRenderer(config.webRoot);
@@ -17,6 +31,7 @@ async function createRuntime(config: ServerConfig): Promise<Runtime> {
       renderer: dev.renderer,
       siteOrigin: config.siteOrigin,
       getTemplate: dev.getTemplate,
+      api,
       registerDevMiddleware: async (instance) => {
         // middie 的 decorate 在插件加载后才生效，因此把 use 推迟到 after 回调。
         instance.register(middie);
@@ -26,7 +41,11 @@ async function createRuntime(config: ServerConfig): Promise<Runtime> {
       },
     });
 
-    return { app, closeRenderer: dev.close };
+    return {
+      app,
+      closeRenderer: dev.close,
+      closeCatalog: catalogRuntime.close,
+    };
   }
 
   const { createProdRenderer } = await import('./renderer/prod.js');
@@ -35,13 +54,14 @@ async function createRuntime(config: ServerConfig): Promise<Runtime> {
     renderer: prod.renderer,
     siteOrigin: config.siteOrigin,
     getTemplate: prod.getTemplate,
+    api,
     staticRoots: {
       assets: `${config.webRoot}/dist/client/assets`,
       brandIcons: `${config.webRoot}/dist/client/brand-icon`,
     },
   });
 
-  return { app };
+  return { app, closeCatalog: catalogRuntime.close };
 }
 
 async function main(): Promise<void> {
@@ -58,6 +78,7 @@ async function main(): Promise<void> {
       await runtime.app.close();
     } finally {
       await runtime.closeRenderer?.();
+      await runtime.closeCatalog?.();
     }
   };
 

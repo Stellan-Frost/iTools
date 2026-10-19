@@ -15,6 +15,7 @@
 | `/{locale}/{category}/{toolId}` | 工具页 | 工具必须可见且分类匹配 |
 | `/{locale}/tasks` | 任务页 | 本地样本；`noindex` |
 | `/{locale}/admin` | 管理预览 | 未认证；`noindex` |
+| `/api/v1/**` | 只读 API | JSON；不参与 SSR 与 Sitemap，详见 [06](06-backend-database-api.md) |
 
 补充规则：
 

@@ -1,8 +1,8 @@
 # iTools
 
-iTools 是一个本地运行的 Web 工具站项目。阶段 0–6 已完成：Monorepo、MD3 设计系统、Fastify SSR、`/zh-CN` 与 `/en` 路由、双语页面、真实 404、Sitemap/robots、三态工具注册表（`preview / implemented / disabled`）、任务运行时（状态机、调度器、Worker 池、取消协议），以及本地文件资产存储（IndexedDB、对象 URL、保留清理、归档导入导出）。
+iTools 是一个本地运行的 Web 工具站项目。阶段 0–7 已完成：Monorepo、MD3 设计系统、Fastify SSR、`/zh-CN` 与 `/en` 路由、双语页面、真实 404、Sitemap/robots、三态工具注册表（`preview / implemented / disabled`）、任务运行时（状态机、调度器、Worker 池、取消协议）、本地文件资产存储（IndexedDB、对象 URL、保留清理、归档导入导出），以及数据库与只读 API（PostgreSQL、迁移、Seed、`/api/v1`、OpenAPI）。
 
-当前 6 个可见样本是 `preview`，另有 1 个 `disabled` 样本；`implemented` 为 0：**没有可执行工具**。任务运行时与资产存储已实现但未接入任何工具或页面。数据库、认证、PWA、CI 与部署均未实现。
+当前 6 个可见样本是 `preview`，另有 1 个 `disabled` 样本；`implemented` 为 0：**没有可执行工具**。任务运行时与资产存储已实现但未接入任何工具或页面；管理员认证、PWA、CI 与部署未实现。
 
 ## 从这里开始
 
@@ -47,7 +47,11 @@ pnpm check:i18n                   # 需先构建 app-core
 node scripts/verify-stage-4.mjs   # 需先 build
 ```
 
-当前基线：339 项测试通过，28 项 HTTP 验收通过。CI 与 Playwright 尚未接入。
+当前基线：409 项测试通过，28 项 HTTP 验收通过。CI 与 Playwright 尚未接入。
+
+## 本地数据库
+
+开发库使用便携版 PostgreSQL 17（`C:/itools-pg`，不注册系统服务），启动方式与迁移/Seed 命令见 [11 · 部署与运维](docs/11-deployment-operations-recovery.md)。`pnpm dev` 与 `pnpm test` 会自动加载 `.env`；没有 `DATABASE_URL` 时服务照常启动，目录回落到代码注册表。
 
 ## 文档
 

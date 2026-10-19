@@ -1,12 +1,12 @@
 # 00 · 架构总览与开发入口
 
-> 状态：**已实现阶段 0–6**（Monorepo、设计系统、SSR 路由、i18n/SEO、三态工具注册表、任务运行时、本地文件资产）。
+> 状态：**已实现阶段 0–7**（Monorepo、设计系统、SSR 路由、i18n/SEO、三态工具注册表、任务运行时、本地文件资产、数据库与只读 API）。
 > 目标站点：`itools.wataa.men`。
 > 本文是新 Agent 的唯一入口：先读本文，再按需读 01–15。
 
 ## 1. 项目是什么
 
-公开发布的多工具网站：首页、音频、图像、视频、文本、其他分类；工具尽量在浏览器本地处理，不上传用户文件。普通用户免登录；管理员后台、数据库尚未实现。
+公开发布的多工具网站：首页、音频、图像、视频、文本、其他分类；工具尽量在浏览器本地处理，不上传用户文件。普通用户免登录；管理员后台尚未实现。
 
 **当前可交付的真实能力**
 
@@ -15,9 +15,10 @@
 - 三态工具注册表：`preview`（可见、只读、noindex）、`implemented`（可执行、可索引）、`disabled`（404）。
 - 全局任务运行时：7 态状态机、FIFO + 资源感知调度、Worker 池、协作取消与超时强杀、结果提交后才算完成。
 - 本地文件资产存储：源/中间/结果三类资产、IndexedDB 原子写入、对象 URL 生命周期、保留策略、配额提示、归档导出导入。
+- 数据库与 API：PostgreSQL + Drizzle、版本化迁移、Seed、只读 `/api/v1/tools`、liveness/readiness、OpenAPI、前端类型安全客户端；注册表权威，数据库只做覆盖。
 - 6 个可见样本工具是 `preview`，另有 1 个 `disabled` 样本（`csv-inspector`，用于 404 验收）；`implemented` 为 0，**没有任何真实工具可执行**。
 
-**明确未实现**：数据库、API、管理员认证、真实工具执行与任务 UI、真实 Worker 脚本与页面接线、PWA、CI、部署。
+**明确未实现**：管理员认证与后台写接口、真实工具执行与任务 UI、真实 Worker 脚本与页面接线、PWA、CI、部署。
 
 ## 2. 工作区与依赖方向
 
@@ -28,17 +29,19 @@
 | `packages/app-core` | 三态工具注册表、分类、样本任务、i18n 资源与 `createI18n` | contracts |
 | `packages/task-runtime` | 任务状态机、调度器、Worker 池、消息协议（不依赖 React/DOM/Node） | contracts |
 | `packages/asset-store` | 文件资产模型、IndexedDB 仓储、对象 URL、保留清理、归档导入导出 | contracts |
-| `packages/contracts` | 共享契约：locale、SSR 渲染、工具 manifest、注册表条目、任务/Worker 协议、资产/归档形状、API | 无工作区依赖 |
+| `packages/db` | Drizzle schema、迁移、Seed、pg 仓储、注册表覆盖合并 | contracts、app-core |
+| `packages/contracts` | 共享契约：locale、SSR 渲染、工具 manifest、注册表条目、任务/Worker 协议、资产/归档形状、目录 API | 无工作区依赖 |
 | `packages/design-system-adapter` | MD3 组件、鸭青主题、字体与全局样式 | 无工作区依赖 |
 
 依赖方向（由 `scripts/check-boundaries.mjs` 约束）：
 
 ```
 apps/web  →  app-core / design-system-adapter / contracts
-apps/server → contracts
+apps/server → contracts / db
 app-core  → contracts
 task-runtime → contracts
 asset-store  → contracts
+db → contracts / app-core
 contracts → （仅 typebox）
 ```
 
@@ -68,6 +71,10 @@ cd apps/server && NODE_ENV=production node dist/index.js
 | `HOST` / `PORT` | `127.0.0.1` / `5173` | 监听地址与端口 |
 | `SITE_ORIGIN` | `http://localhost:5173` | canonical / Sitemap 绝对来源 |
 | `WEB_ROOT` | `../web`（相对启动目录） | web 源码与产物根目录 |
+| `DATABASE_URL` | 无 | 缺省时目录完全来自注册表，`/health/ready` 报 `skipped` |
+| `TEST_DATABASE_URL` | 无 | 仅测试使用，库名必须以 `_test` 结尾 |
+
+本地开发库为便携版 PostgreSQL 17（`C:/itools-pg`），启动与初始化见 [11](11-deployment-operations-recovery.md)。`pnpm dev` / `pnpm test` 通过 `--env-file-if-exists=.env` 加载本地配置。
 
 质量门禁：
 
@@ -84,7 +91,7 @@ node scripts/verify-stage-4.mjs   # 生产产物 HTTP 验收；需先 build
 pnpm verify                # 以上全链路总门禁
 ```
 
-当前基线：测试 339 项（contracts 9、app-core 49、task-runtime 66、asset-store 131、adapter 9、web 61、server 14），HTTP 验收 28 项通过。CI 尚未接入。
+当前基线：测试 409 项（contracts 9、app-core 49、task-runtime 66、asset-store 131、db 44、adapter 9、web 70、server 31），HTTP 验收 28 项通过。CI 尚未接入。
 
 ## 4. 代码地图
 
@@ -99,6 +106,9 @@ pnpm verify                # 以上全链路总门禁
 | `apps/web/src/components/app-shell/**` | 顶部栏、抽屉、手风琴导航、工具详情 Dialog |
 | `apps/web/src/components/page-chrome/**` | 标题、通知、徽标等展示组件 |
 | `apps/server/src/app.ts` | Fastify 路由、SSR 注入、静态资源、缓存头 |
+| `apps/server/src/api/**` | `/api/v1` 只读路由、健康检查、OpenAPI |
+| `apps/server/src/catalog-runtime.ts` | 目录运行时：有 `DATABASE_URL` 走数据库，否则回落注册表 |
+| `apps/web/src/api/**` | 类型安全 API 客户端与 TanStack Query 选项 |
 | `apps/server/src/renderer/{dev,prod}.ts` | Vite middleware / 构建产物加载 |
 | `packages/app-core/src/registry/**` | 注册表条目、查询、校验、Sitemap 路径 |
 | `packages/app-core/src/catalog/**` | 分类与样本任务 |
@@ -109,6 +119,10 @@ pnpm verify                # 以上全链路总门禁
 | `packages/asset-store/src/domain/**` | 资产校验、引用完整性、保留策略、归档编解码 |
 | `packages/asset-store/src/application/**` | 端口（冻结）、资产服务、对象 URL、结果提交、归档服务 |
 | `packages/asset-store/src/infrastructure/indexeddb/**` | 数据库迁移、资产仓储、浏览器配额 |
+| `packages/db/src/schema/tables.ts` | 数据库表定义（冻结） |
+| `packages/db/src/migrate.ts` | 版本化迁移执行器（事务 + checksum） |
+| `packages/db/src/catalog/**` | 注册表与覆盖合并、Seed |
+| `packages/db/src/infrastructure/**` | pg 连接池、目录仓储、Seed 写入器、健康探测 |
 | `packages/contracts/src/**` | 所有跨包类型与 Schema |
 
 ## 5. 核心规则（开发前必读）
@@ -133,7 +147,7 @@ pnpm verify                # 以上全链路总门禁
 | 03 | 工具注册契约与统一页面 | 契约/注册表/页面骨架已实现，执行 UI 未实现 |
 | 04 | 任务运行时与 Worker | 已实现（阶段 5；未接工具与 UI） |
 | 05 | 文件资产与 IndexedDB | 已实现（阶段 6；未接工具与 UI） |
-| 06 | 后端、数据库与 API | 未实现（阶段 7） |
+| 06 | 后端、数据库与 API | 已实现（阶段 7；只读 API，无认证） |
 | 07 | 管理后台 | 仅预览（阶段 8） |
 | 08 | 安全与隐私 | 部分（本地边界已遵守，CSP/认证未实现） |
 | 09 | PWA、离线与缓存 | 未实现（阶段 10） |
@@ -148,6 +162,6 @@ pnpm verify                # 以上全链路总门禁
 
 按 [14](14-phase-implementation-roadmap.md) 与 [13](13-acceptance-open-decisions.md)：
 
-- 阶段 7 是后端、数据库与 API（Fastify + PostgreSQL + Drizzle + TypeBox，`/api/v1`）。开工前需确认可用的 PostgreSQL 实例与迁移执行方式；D16（端口是否冻结）仍待在真实第二实现出现时决定。
+- 阶段 8 是唯一管理员与后台写接口：一次性初始化、会话 Cookie、CSRF、来源检查、服务端授权、固定速率限制、元数据版本预览与回滚。`admin_sessions` 与 `tool_metadata_versions` 表已就绪，但**尚无任何写接口**。
 - 工具清单已确认（D24，31 条 / 30 个可执行），但**首个真实工具的排期未定**。接入时按 03 §5 做注册表注入点重构，并同时接 `@itools/task-runtime`（执行）与 `@itools/asset-store`（结果持久化）。
 - 汇率工具第 68/69 题仍暂缓。

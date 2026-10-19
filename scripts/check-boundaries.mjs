@@ -7,7 +7,7 @@ const allowedWorkspaceDependencies = {
   '@itools/task-runtime': new Set(['@itools/contracts']),
   '@itools/asset-store': new Set(['@itools/contracts']),
   '@itools/design-system-adapter': new Set(),
-  '@itools/db': new Set(['@itools/contracts']),
+  '@itools/db': new Set(['@itools/contracts', '@itools/app-core']),
   '@itools/web': new Set([
     '@itools/contracts',
     '@itools/app-core',

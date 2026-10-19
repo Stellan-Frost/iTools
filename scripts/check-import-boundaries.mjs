@@ -15,13 +15,14 @@ const ALLOWED = {
   '@itools/app-core': ['@itools/contracts'],
   '@itools/task-runtime': ['@itools/contracts'],
   '@itools/asset-store': ['@itools/contracts'],
+  '@itools/db': ['@itools/contracts', '@itools/app-core'],
   '@itools/design-system-adapter': [],
   '@itools/web': [
     '@itools/contracts',
     '@itools/app-core',
     '@itools/design-system-adapter',
   ],
-  '@itools/server': ['@itools/contracts'],
+  '@itools/server': ['@itools/contracts', '@itools/db'],
 };
 
 const TOOL_ALLOWED = [
