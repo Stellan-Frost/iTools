@@ -1,7 +1,7 @@
 # 10 · 测试、质量与 CI
 
 > 状态：**本地测试与质量门禁已实现；CI、Playwright、性能预算未实现（阶段 11）**。
-> 当前基线：207 项 Vitest 测试、28 项生产 HTTP 验收，全部通过。
+> 当前基线：339 项 Vitest 测试、28 项生产 HTTP 验收，全部通过。
 
 ## 1. 工具链
 
@@ -38,22 +38,28 @@ node scripts/verify-stage-4.mjs
 事实：
 
 - `check:tools`、`check:i18n` 与 HTTP 验收脚本依赖构建产物，**不在 `pnpm lint` 链**；`pnpm verify` 已按正确顺序串联。
-- `pnpm lint` 现在包含：ESLint 严格规则、`check-boundaries`（清单）、`check-imports`（源码 import）、`check-tokens`（硬编码颜色/内联样式）。
+- `pnpm lint` 现在包含：ESLint 严格规则、`check-boundaries`（清单）、`check-imports`（源码 import）、`check-tokens`（硬编码颜色/内联样式）、`check:privacy`（本地包禁止网络调用）。
+- 隐私门禁：`scripts/check-no-network.mjs` 扫描 `asset-store` 与 `task-runtime` 的生产源码，出现 `fetch` / `XMLHttpRequest` / `WebSocket` / `EventSource` / `sendBeacon` 即失败；新增本地处理包必须加入该脚本的白名单并说明理由。
 - ESLint 会阻断：`any`、裸 HTML 控件、直接使用 `m3-expressive-react`、深层导入、server 越界依赖、生产文件超过 400 行、`console.log`、未使用变量。
 - `scripts/verify-stage-3.mjs` 已删除，只保留 `verify-stage-4.mjs`。
 - `@itools/task-runtime` 的测试替身放在 `src/test-support/`，由 `tsconfig.build.json` 排除，**不会进入 dist**；运行时测试不依赖真实定时器、真实 Worker 或系统时钟。
+- `@itools/asset-store` 同样把内存仓储与伪 URL/配额放在 `src/test-support/` 并从构建排除；IndexedDB 测试使用 `fake-indexeddb`（devDependency），**未在真实浏览器验证**。
 
 ## 3. 测试分布
 
 | 包 | 文件 | 数量 | 覆盖 |
 | --- | --- | --- | --- |
-| contracts | `contracts.test.ts` | 8 | 任务状态、工具 manifest、API 错误、环境、locale、可用性、Worker 协议、资源预算 |
+| contracts | `contracts.test.ts` | 9 | 任务状态、工具 manifest、API 错误、环境、locale、可用性、Worker 协议、资源预算、资产归档 |
 | app-core | `catalog/catalog.test.ts` | 6 | 分类、样本任务、双语 |
 | app-core | `registry/registry.test.ts` | 30 | 默认注册表、可见性、Sitemap、搜索、fixture 注入、执行契约、10 类校验 |
 | app-core | `i18n/i18n.test.ts` | 13 | 命名空间、翻译、键一致性、extraResources |
 | task-runtime | `domain/*.test.ts` | 16 | 状态机合法/非法转换、终态、资源预算三重限制 |
 | task-runtime | `application/*.test.ts` | 26 | 队列顺序、三重预算、成功/失败/取消/队列满/销毁、运行时订阅与事件 |
 | task-runtime | `infrastructure/worker/*.test.ts` | 24 | 协议校验、Worker 池复用与排队、启动/完成/错误/取消/超时/崩溃 |
+| asset-store | `domain/*.test.ts` | 56 | 草稿校验、引用完整性、保留策略、归档编解码 |
+| asset-store | `application/*.test.ts` | 45 | 对象 URL 引用计数、资产服务、结果提交、归档导入回滚 |
+| asset-store | `infrastructure/indexeddb/*.test.ts` | 24 | 迁移、原子写入、删除联动、配额降级（`fake-indexeddb`） |
+| asset-store | `create-asset-store.test.ts` | 6 | 真实 IDB 组装：读写、引用、URL、清理、归档往返、关闭 |
 | adapter | 5 个测试文件 | 9 | Dialog、IconButton、Drawer、图标、主题 |
 | web | `app/route.test.ts` | 33 | URL 解析/生成、可用性、404 |
 | web | `app/seo.test.ts` | 3 | noindex、canonical |
@@ -68,6 +74,7 @@ node scripts/verify-stage-4.mjs
 - 改注册表：必须覆盖 `check:tools` 的负向用例与 Sitemap 规则。
 - 改 UI 组件：更新组件测试；不要用 `any`、`@ts-ignore` 或跳过断言来“修好”测试。
 - 新增工具：契约测试、页面测试、SSR HTTP 测试独立运行，不得依赖其它工具。
+- 改资产/存储：必须补充 `asset-store` 的领域或仓储测试；IndexedDB 用例使用 `fake-indexeddb`，不得依赖真实浏览器；**不得用真实用户数据作为测试夹具**。
 
 ## 5. 阶段 11 的 CI 门禁（目标）
 

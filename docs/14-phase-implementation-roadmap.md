@@ -1,6 +1,6 @@
 # 14 · 分阶段实施路线图
 
-> 状态：**阶段 0–5 已完成**；阶段 6–13 未开始。验收只依据代码、自动化测试、构建产物和可复现证据，不接受口头声明。
+> 状态：**阶段 0–6 已完成**；阶段 7–13 未开始。验收只依据代码、自动化测试、构建产物和可复现证据，不接受口头声明。
 > 验收顺序按 D06：不依赖数据库/任务运行时的部分先验收，完整集成验收在阶段 7 之后（见 [13](13-acceptance-open-decisions.md)）。
 
 ## 0. 阶段状态
@@ -13,7 +13,7 @@
 | 3 | 路由、SSR、i18n、SEO | ✅ 完成（可独立验收部分） |
 | 4 | 全局框架、三态注册表、预览状态 | ✅ 完成（无可执行工具） |
 | 5 | 任务运行时与 Worker | ✅ 完成（运行时包 + fixture 验收，未接工具/UI） |
-| 6 | 文件资产与 IndexedDB | ⏳ 未开始 |
+| 6 | 文件资产与 IndexedDB | ✅ 完成（存储包 + fake-indexeddb 验收，未接工具/UI） |
 | 7 | 后端、数据库与 API | ⏳ 未开始 |
 | 8 | 唯一管理员与管理后台 | ⏳ 未开始 |
 | 9 | 安全、隐私与依赖治理 | ⏳ 未开始 |
@@ -73,20 +73,32 @@
 - 无任务 UI、无 IndexedDB 持久化、无真实 Worker 脚本；浏览器内 Worker 行为无 E2E（阶段 11）。
 - 预算数值未经性能基线校准。
 
-## 3. 阶段 6：文件资产与 IndexedDB
+## 3. 阶段 6：文件资产与 IndexedDB ✅
 
 **目标**：统一管理源文件、中间文件、结果与任务引用，本地数据不被意外清理或外传。
 
-**任务**
+**交付**（`packages/asset-store`，依赖仅 contracts；4 个 subagent 并行、文件零重叠）
 
-- IndexedDB repository、资产引用、Object URL 生命周期、配额提示、清理与归档导入导出。
-- 源文件默认保留 7 天；清理跳过使用中/被引用文件；D01 必须先解决。
+- 资产模型 `source / intermediate / result`，写入前校验，`sizeBytes` 只取真实内容大小。
+- IndexedDB 仓储：`assets` / `blobs` / `references` / `tasks` / `meta`，写入单事务原子化；版本化增量迁移，**永不自动清库**（D01 已决）。
+- 对象 URL 注册表：按 Blob 引用计数、幂等释放、`releaseAll` 后旧句柄失效。
+- 保留策略：源文件 7 天、结果长期保留；跳过 `not-source` > `referenced` > `active-task`；时间无法解析时保守保留。
+- 配额：`estimate()` / `requestPersistence()`，缺失字段不伪造、被拒不抛错。
+- 归档：单 JSON + 内置 base64；导入先全量校验再写入；`replaceExisting` 走快照恢复，否则只回滚本次新增。
+- `createAssetResultCommitter` 结构兼容 `commitResult`，不引入 task-runtime 依赖。
+- 隐私门禁 `scripts/check-no-network.mjs` 纳入 `pnpm lint`。
 
-**验收**
+**验收证据**
 
-- 增删改查、引用关系、Object URL 释放有测试；配额不足/部分写入失败/导入失败不破坏已有结果。
-- 清理不删除活动任务依赖的源文件；归档导入校验版本/引用/容量。
-- 网络审计证明文件与结果未上传；未获批准不得自动清空生产数据。
+- 131 项资产测试（领域 33、应用 35、IndexedDB 24、归档 33、组装 6），IndexedDB 用例跑在 `fake-indexeddb` 上。
+- 契约测试 +1（资产记录 / 归档外壳 Schema）。
+- `pnpm verify` 通过：339 项测试、28 项 HTTP、`check:privacy` 通过。
+
+**未完成（有意留到后续）**
+
+- 未接页面与任务运行时（D26）；工具仍不可执行，`implemented` 为 0。
+- 未做真实浏览器验证（Safari 事务窗口、多标签页 `blocked`、真实配额），属阶段 11 E2E。
+- 归档未分片，base64 体积约增 33%。
 
 ## 4. 阶段 7：后端、数据库与 API
 

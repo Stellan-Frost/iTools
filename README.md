@@ -1,8 +1,8 @@
 # iTools
 
-iTools 是一个本地运行的 Web 工具站项目。阶段 0–5 已完成：Monorepo、MD3 设计系统、Fastify SSR、`/zh-CN` 与 `/en` 路由、双语页面、真实 404、Sitemap/robots、三态工具注册表（`preview / implemented / disabled`），以及任务运行时（状态机、调度器、Worker 池、取消协议）。
+iTools 是一个本地运行的 Web 工具站项目。阶段 0–6 已完成：Monorepo、MD3 设计系统、Fastify SSR、`/zh-CN` 与 `/en` 路由、双语页面、真实 404、Sitemap/robots、三态工具注册表（`preview / implemented / disabled`）、任务运行时（状态机、调度器、Worker 池、取消协议），以及本地文件资产存储（IndexedDB、对象 URL、保留清理、归档导入导出）。
 
-当前 6 个可见样本是 `preview`，另有 1 个 `disabled` 样本；`implemented` 为 0：**没有可执行工具**。任务运行时已实现但未接入任何工具或页面。数据库、文件资产、认证、PWA、CI 与部署均未实现。
+当前 6 个可见样本是 `preview`，另有 1 个 `disabled` 样本；`implemented` 为 0：**没有可执行工具**。任务运行时与资产存储已实现但未接入任何工具或页面。数据库、认证、PWA、CI 与部署均未实现。
 
 ## 从这里开始
 
@@ -47,7 +47,7 @@ pnpm check:i18n                   # 需先构建 app-core
 node scripts/verify-stage-4.mjs   # 需先 build
 ```
 
-当前基线：207 项测试通过，28 项 HTTP 验收通过。CI 与 Playwright 尚未接入。
+当前基线：339 项测试通过，28 项 HTTP 验收通过。CI 与 Playwright 尚未接入。
 
 ## 文档
 

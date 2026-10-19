@@ -14,6 +14,7 @@ const ALLOWED = {
   '@itools/contracts': [],
   '@itools/app-core': ['@itools/contracts'],
   '@itools/task-runtime': ['@itools/contracts'],
+  '@itools/asset-store': ['@itools/contracts'],
   '@itools/design-system-adapter': [],
   '@itools/web': [
     '@itools/contracts',

@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest';
 import Value from 'typebox/value';
 import {
   ApiErrorSchema,
+  AssetArchiveSchema,
+  AssetRecordSchema,
   DEFAULT_LOCALE,
   LOCALES,
   ServerEnvironmentSchema,
@@ -109,6 +111,42 @@ describe('shared contracts', () => {
 
   it('freezes the tool availability states', () => {
     expect(TOOL_AVAILABILITIES).toEqual(['preview', 'implemented', 'disabled']);
+  });
+
+  it('validates asset records and archive envelopes', () => {
+    const record = {
+      assetId: 'asset-1',
+      role: 'result',
+      name: 'out.png',
+      mimeType: 'image/png',
+      sizeBytes: 12,
+      createdAt: '2026-10-19T00:00:00.000Z',
+    };
+    expect(Value.Check(AssetRecordSchema, record)).toBe(true);
+    expect(Value.Check(AssetRecordSchema, { ...record, role: 'temp' })).toBe(
+      false,
+    );
+    expect(Value.Check(AssetRecordSchema, { ...record, sizeBytes: -1 })).toBe(
+      false,
+    );
+    expect(Value.Check(AssetRecordSchema, { ...record, sizeBytes: 1.5 })).toBe(
+      false,
+    );
+
+    const archive = {
+      formatVersion: 1,
+      createdAt: '2026-10-19T00:00:00.000Z',
+      assets: [{ record, references: [] }],
+      tasks: [],
+    };
+    expect(Value.Check(AssetArchiveSchema, archive)).toBe(true);
+    expect(
+      Value.Check(AssetArchiveSchema, { ...archive, formatVersion: 0 }),
+    ).toBe(false);
+    // 未知字段必须被拒绝，避免归档格式悄悄漂移。
+    expect(Value.Check(AssetArchiveSchema, { ...archive, extra: 1 })).toBe(
+      false,
+    );
   });
 
   it('validates worker protocol messages in both directions', () => {

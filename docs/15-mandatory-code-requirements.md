@@ -9,10 +9,11 @@
 | 格式 | `pnpm format:check`（Prettier） | 是 |
 | Lint | `pnpm lint`（ESLint + 清单边界 + 源码边界 + Token） | 是 |
 | 类型 | `pnpm typecheck`（TS strict） | 是 |
-| 测试 | `pnpm test`（Vitest，207 项） | 是 |
+| 测试 | `pnpm test`（Vitest，339 项） | 是 |
 | 构建 | `pnpm build`（Turbo） | 是 |
 | 注册表 | `pnpm check:tools`（需先 build） | 是 |
 | i18n 键 | `pnpm check:i18n`（需先 build） | 是 |
+| 隐私（本地包禁网） | `pnpm check:privacy`（已并入 lint） | 是 |
 | SSR/HTTP | `node scripts/verify-stage-4.mjs` | 是 |
 | 总门禁 | `pnpm verify`（以上全链路） | 是 |
 | CI | **未接入**，阶段 11 | 否 |
@@ -64,6 +65,8 @@
 - 用户文件、处理结果与普通用户任务数据默认只在浏览器本地处理和保存。
 - 不得未经授权将文件、结果、任务数据、遥测或错误报告发送到服务器或第三方。
 - IndexedDB、Cache Storage 与服务器数据库是不同数据边界；不得用清理应用缓存的逻辑清理用户数据。
+- 本地数据升级只走版本化增量迁移，**禁止在升级路径中自动清库**；清空仅限用户显式触发。
+- `asset-store` 与 `task-runtime` 的生产源码禁止 `fetch` / `XMLHttpRequest` / `WebSocket` / `EventSource` / `sendBeacon`（`check:privacy` 阻断）。
 - 日志禁止记录凭据、Cookie、文件内容、处理结果和敏感参数。
 - 工具缺少必要浏览器能力时，应解释并禁用执行；不得自动把用户文件转到服务器处理。
 
