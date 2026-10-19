@@ -6,3 +6,6 @@ coverage/
 .env.*
 !.env.example
 *.tsbuildinfo
+
+# 项目记忆与本地数据不进版本库
+.workbuddy/
