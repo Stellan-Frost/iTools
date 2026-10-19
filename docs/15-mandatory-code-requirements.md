@@ -1,8 +1,25 @@
 # 15 · 强制代码要求与不可违反的约束
 
-本文是所有 Agent 的强制检查表。若仓库原始要求与本文件有冲突，根 Agent 必须先核对原始决策记录，不得自行选择较方便的方案。
+> 状态：**生效中**。本文是所有 Agent 的强制检查表。若仓库原始要求与本文件有冲突，根 Agent 必须先核对原始决策记录，不得自行选择较方便的方案。
 
-## 技术栈与工程规范
+## 0. 当前执行方式（2026-10-19 审计后）
+
+| 要求 | 执行手段 | 是否自动阻断 |
+| --- | --- | --- |
+| 格式 | `pnpm format:check`（Prettier） | 是（本地） |
+| Lint | `pnpm lint`（ESLint + 包清单边界） | 是（本地） |
+| 类型 | `pnpm typecheck`（TS strict） | 是（本地） |
+| 测试 | `pnpm test`（Vitest，139 项） | 是（本地） |
+| 构建 | `pnpm build`（Turbo） | 是（本地） |
+| 注册表 | `pnpm check:tools`（需先 build） | 是（手动执行） |
+| SSR/HTTP | `node scripts/verify-stage-4.mjs` | 是（手动执行） |
+| CI | **未接入**，阶段 11 | 否 |
+| 重复代码/非法 import 静态分析 | **未接入** | 否 |
+| 性能/包体预算 | **未测**，阶段 11 | 否 |
+
+审计结论（2026-10-19）：无 `any`、`@ts-ignore`、`@ts-expect-error` 或 `eslint-disable`；无裸 HTML 交互控件；十六进制颜色只存在于主题种子与主题测试；i18n 键全部有引用；壳层已拆分为 `AppShell`/`AppShellTopBar`/`AppShellDrawer`，单文件职责明确。仍存在的已知项：无 CI、无浏览器 E2E、无性能预算。
+
+## 1. 技术栈与工程规范
 - Monorepo：pnpm Workspace + Turborepo。
 - 前端：React + Vite；Fastify 负责 SSR 与静态资源托管。
 - 后端：Node.js + TypeScript + Fastify。
@@ -46,7 +63,17 @@
 - 不开展独立无障碍专项；不得擅自将无障碍工程扩展为额外阶段或改变已确认的产品范围。
 - 最近任务既有轻量面板入口，也有独立管理页面。
 - 不存在或停用的工具直达 URL 必须返回真实 HTTP 404。
+- 工具可用性按三态处理：`preview` 可见但只读、200 + noindex、不进 Sitemap；`implemented` 可执行、可索引；`disabled` 404。不得把预览工具描述成可执行。
+- 预览态不得出现伪造进度、伪造“校验通过”或伪造结果。
 - 中英文路由与文案均按既定 i18n 规范处理。
+
+## 单一来源（强制）
+
+- 工具身份、分类、可用性、展示元数据：只在 `packages/app-core/src/registry/**`。
+- 分类：只在 `packages/app-core/src/catalog/**`。
+- 文案：只在 `packages/app-core/src/i18n/resources/**` 或注册表双语字段；不得在组件里硬编码用户可见文本。
+- 视觉 Token：只在 `packages/design-system-adapter/src`；Web 只通过 CSS 变量引用。
+- 注册表条目、分类、i18n 键、工具文案不得在前端/后端/文档中各自维护副本；由查询函数与 `check:tools`、测试保持一致。
 
 ## Agent 纪律
 - 不得重新询问已经确认的架构事项。

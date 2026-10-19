@@ -9,8 +9,6 @@ export const admin = {
     kicker: 'CATALOG PREVIEW',
     title: 'Tool catalog',
     count: '{{total}} items',
-    enabled: 'Enabled',
-    disabled: 'Disabled',
     toggleLabel: 'Toggle {{name}} status',
     helper:
       'The switches only demonstrate interaction state; catalog data is not persisted.',

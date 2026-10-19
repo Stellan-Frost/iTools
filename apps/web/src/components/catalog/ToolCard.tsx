@@ -3,6 +3,7 @@ import type { RegistryEntry } from '@itools/app-core';
 import { useTranslation } from 'react-i18next';
 import { AppIcon } from '../app-icon/AppIcon.js';
 import { MetadataChip } from '../page-chrome/MetadataChip.js';
+import { PreviewBadge } from '../page-chrome/PreviewBadge.js';
 import { useAppNavigation } from '../../app/navigation.js';
 import styles from './ToolCard.module.css';
 
@@ -14,7 +15,7 @@ interface ToolCardProps {
 
 export function ToolCard({ tool, categoryName, onOpen }: ToolCardProps) {
   const { locale } = useAppNavigation();
-  const { t } = useTranslation(['catalog', 'common']);
+  const { t } = useTranslation('catalog');
   const metadata = tool.metadata;
 
   return (
@@ -27,9 +28,7 @@ export function ToolCard({ tool, categoryName, onOpen }: ToolCardProps) {
           <div className={styles.heading}>
             <h3>{metadata.name[locale]}</h3>
             <MetadataChip label={categoryName} />
-            {tool.availability === 'preview' ? (
-              <MetadataChip label={t('catalog:tool.previewBadge')} />
-            ) : null}
+            {tool.availability === 'preview' ? <PreviewBadge /> : null}
           </div>
           <p>{metadata.summary[locale]}</p>
           <Button variant="text" onClick={onOpen}>

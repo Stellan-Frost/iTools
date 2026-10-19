@@ -1,5 +1,7 @@
 # 06 · 后端、数据库与 API
 
+> 状态：**未实现（阶段 7）**。当前没有数据库、API、迁移或 OpenAPI；`packages/contracts` 只有环境 Schema 与数据形状。当前服务端配置见 [00](00-architecture-overview.md)。
+
 ## 运行栈
 - Node.js + TypeScript + Fastify。
 - PostgreSQL 主关系数据库。

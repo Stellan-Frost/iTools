@@ -1,5 +1,4 @@
 export const common = {
-  appName: 'iTools',
   skipToContent: 'Skip to main content',
   brandHomeLabel: 'iTools home',
   theme: {
@@ -31,7 +30,6 @@ export const common = {
     previewSuffix: 'UI preview',
   },
   language: {
-    label: 'Language',
     zhCN: '简体中文',
     en: 'English',
     switchLanguage: 'Switch language',
@@ -41,10 +39,6 @@ export const common = {
     title: 'Page not found',
     description:
       'This address has no matching page. It may have moved or is not enabled.',
-  },
-  previewNotice: {
-    title: 'UI preview',
-    body: 'This page shows interface structure only. No real processing is connected yet.',
   },
   meta: {
     homeTitle: 'iTools · Everyday tools in one clear place',

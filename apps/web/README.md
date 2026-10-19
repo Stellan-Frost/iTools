@@ -1,6 +1,6 @@
 # Web 应用（SSR + 客户端水合）
 
-`apps/web` 是 React 19 + Vite 的 iTools 前端，负责人 React 组件、URL 路由、双语页面、SEO head 与 SSR 渲染函数。它由 `apps/server` 通过 Fastify 托管；不再有独立的内存路由入口。
+`apps/web` 是 React 19 + Vite 的 iTools 前端，负责 React 组件、URL 路由、双语页面、SEO head 与 SSR 渲染函数。它由 `apps/server` 通过 Fastify 托管；不再有独立的内存路由入口。
 
 ## 入口
 

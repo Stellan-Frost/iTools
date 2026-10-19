@@ -29,7 +29,6 @@ export function ToolSearchEntry({
         onOpenNavigation ? (
           <IconButton
             className={styles.navigationButton}
-            style={{ borderRadius: 'var(--md-sys-shape-corner-full)' }}
             icon={<AppIcon name="menu" />}
             aria-label={t('navigation:openNavigation')}
             aria-expanded={navigationExpanded}

@@ -3,7 +3,6 @@ export const catalog = {
     browseCategory: '浏览分类',
     openTool: '打开工具',
     startFromCategory: '从分类开始',
-    viewCategorySamples: '查看分类样本',
     browseOtherCategory: '浏览其他分类',
     backHome: '返回首页',
   },
@@ -42,7 +41,6 @@ export const catalog = {
   },
   tool: {
     eyebrow: '{{category}} · 工具界面预览',
-    previewBadge: '预览',
     previewBody: '该工具尚未实现，当前仅展示页面结构与示例布局。',
     previewInputHint: '输入区将在工具实现后启用。',
     previewTaskBody: '任务运行时将在工具实现后接入。',
@@ -51,7 +49,6 @@ export const catalog = {
     notFoundBody: '该工具不存在或已停用。',
     input: {
       title: '输入',
-      samplePrefix: '示例内容：{{sample}}',
     },
     workspace: {
       title: '主工作区',

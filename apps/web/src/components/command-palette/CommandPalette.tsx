@@ -4,7 +4,7 @@ import { getCategory, searchVisibleTools } from '@itools/app-core';
 import { useTranslation } from 'react-i18next';
 import { useAppNavigation } from '../../app/navigation.js';
 import { AppIcon } from '../app-icon/AppIcon.js';
-import { PreviewBadge } from '../app-shell/PreviewBadge.js';
+import { PreviewBadge } from '../page-chrome/PreviewBadge.js';
 import styles from './CommandPalette.module.css';
 
 interface CommandPaletteProps {

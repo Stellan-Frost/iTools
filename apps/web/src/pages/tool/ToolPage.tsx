@@ -3,7 +3,7 @@ import { findVisibleTool, getCategory } from '@itools/app-core';
 import { useTranslation } from 'react-i18next';
 import { PageHeading } from '../../components/page-chrome/PageHeading.js';
 import { PreviewNotice } from '../../components/page-chrome/PreviewNotice.js';
-import { MetadataChip } from '../../components/page-chrome/MetadataChip.js';
+import { PreviewBadge } from '../../components/page-chrome/PreviewBadge.js';
 import { useAppNavigation } from '../../app/navigation.js';
 import { ToolInputSection } from './ToolInputSection.js';
 import {
@@ -46,11 +46,7 @@ export function ToolPage({ toolId }: ToolPageProps) {
         eyebrow={t('catalog:tool.eyebrow', { category: categoryName })}
         title={metadata.name[locale]}
         description={metadata.summary[locale]}
-        actions={
-          tool.availability === 'preview' ? (
-            <MetadataChip label={t('catalog:tool.previewBadge')} />
-          ) : null
-        }
+        actions={tool.availability === 'preview' ? <PreviewBadge /> : null}
       />
       <PreviewNotice>{t('catalog:tool.previewBody')}</PreviewNotice>
       <div className={styles.sections}>

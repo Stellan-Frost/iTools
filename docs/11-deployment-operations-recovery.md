@@ -1,5 +1,7 @@
 # 11 · 部署、运维与恢复
 
+> 状态：**未实现（阶段 12）**。当前只有本地构建与 `node dist/index.js` 运行方式；没有 Docker、Compose、反向代理、健康检查、备份或回滚。
+
 ## 生产拓扑
 - Linux + Docker Compose。
 - 容器：Fastify 应用与 PostgreSQL，使用私有网络、持久化卷和健康检查。

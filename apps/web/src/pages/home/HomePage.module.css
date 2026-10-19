@@ -172,11 +172,6 @@
   gap: var(--itools-space-3);
 }
 
-.sampleCaption {
-  color: var(--md-sys-color-on-surface-variant);
-  font-size: var(--md-sys-typescale-body-small-size);
-}
-
 .privacyNote {
   display: flex;
   align-items: flex-start;
@@ -263,4 +258,8 @@
     align-items: flex-start;
     flex-direction: column;
   }
+}
+
+.heroSecondaryAction {
+  color: var(--md-sys-color-on-primary-container);
 }

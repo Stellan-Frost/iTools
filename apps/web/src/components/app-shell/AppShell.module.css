@@ -45,25 +45,11 @@
   padding-inline: var(--itools-space-6);
 }
 
-.brand {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+.brandButton {
   width: var(--itools-space-12);
   min-width: var(--itools-space-12);
   height: var(--itools-space-12);
-  border: 0;
-  background: transparent;
-  color: var(--md-sys-color-on-surface);
-  cursor: pointer;
-  padding: 0;
-}
-
-.brand:focus-visible {
-  border-radius: var(--itools-shape-corner-rectangle);
-  outline: var(--itools-layout-focus-ring-width) solid
-    var(--md-sys-color-primary);
-  outline-offset: var(--itools-space-1);
+  flex: 0 0 auto;
 }
 
 .brandMark {

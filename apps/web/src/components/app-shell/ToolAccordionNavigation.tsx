@@ -3,10 +3,11 @@ import {
   listVisibleByCategory,
   type CategoryId,
 } from '@itools/app-core';
+import { ListItem } from '@itools/design-system-adapter';
 import { useTranslation } from 'react-i18next';
 import { useAppNavigation } from '../../app/navigation.js';
 import { AppIcon } from '../app-icon/AppIcon.js';
-import { PreviewBadge } from './PreviewBadge.js';
+import { PreviewBadge } from '../page-chrome/PreviewBadge.js';
 import styles from './ToolAccordionNavigation.module.css';
 
 export interface ToolAccordionNavigationProps {
@@ -27,17 +28,17 @@ export function ToolAccordionNavigation({
 
   return (
     <nav className={styles.root} aria-label={t('categoriesLabel')}>
-      <button
-        className={styles.home}
-        type="button"
-        onClick={onNavigateHome}
-        aria-label={t('home')}
-      >
-        <span className={styles.categoryIcon}>
-          <AppIcon name="home" />
-        </span>
-        <span>{t('home')}</span>
-      </button>
+      <ul className={styles.plainList}>
+        <ListItem
+          headline={t('home')}
+          leading={
+            <span className={styles.categoryIcon}>
+              <AppIcon name="home" />
+            </span>
+          }
+          onClick={onNavigateHome}
+        />
+      </ul>
 
       {CATEGORIES.map((category) => {
         const isExpanded = expandedCategoryIds.has(category.id);
@@ -51,21 +52,25 @@ export function ToolAccordionNavigation({
             key={category.id}
             data-expanded={isExpanded}
           >
-            <button
-              className={styles.categoryTrigger}
-              type="button"
-              aria-expanded={isExpanded}
-              aria-controls={toolListId}
-              onClick={() => onToggleCategory(category.id)}
-            >
-              <span className={styles.categoryIcon}>
-                <AppIcon name={category.icon} />
-              </span>
-              <span className={styles.categoryLabel}>{categoryName}</span>
-              <span className={styles.chevron}>
-                <AppIcon name="expand_more" />
-              </span>
-            </button>
+            <ul className={styles.plainList}>
+              <ListItem
+                headline={categoryName}
+                selected={isExpanded}
+                leading={
+                  <span className={styles.categoryIcon}>
+                    <AppIcon name={category.icon} />
+                  </span>
+                }
+                trailing={
+                  <span className={styles.chevron}>
+                    <AppIcon name="expand_more" />
+                  </span>
+                }
+                aria-expanded={isExpanded}
+                aria-controls={toolListId}
+                onClick={() => onToggleCategory(category.id)}
+              />
+            </ul>
             <ul
               className={styles.toolList}
               id={toolListId}
@@ -76,24 +81,24 @@ export function ToolAccordionNavigation({
             >
               {categoryTools.length > 0 ? (
                 categoryTools.map((entry) => (
-                  <li key={entry.metadata.id}>
-                    <button
-                      className={styles.toolItem}
-                      type="button"
-                      aria-haspopup="dialog"
-                      onClick={() => onOpenTool(entry.metadata.id)}
-                    >
+                  <ListItem
+                    key={entry.metadata.id}
+                    headline={
+                      <span className={styles.toolLabel}>
+                        {entry.metadata.name[locale]}
+                        {entry.availability === 'preview' ? (
+                          <PreviewBadge />
+                        ) : null}
+                      </span>
+                    }
+                    leading={
                       <span className={styles.toolIcon}>
                         <AppIcon name={entry.metadata.icon} />
                       </span>
-                      <span className={styles.toolLabel}>
-                        {entry.metadata.name[locale]}
-                      </span>
-                      {entry.availability === 'preview' ? (
-                        <PreviewBadge />
-                      ) : null}
-                    </button>
-                  </li>
+                    }
+                    aria-haspopup="dialog"
+                    onClick={() => onOpenTool(entry.metadata.id)}
+                  />
                 ))
               ) : (
                 <li className={styles.emptyState}>{t('emptyCategory')}</li>

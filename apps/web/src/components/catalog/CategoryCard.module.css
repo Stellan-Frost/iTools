@@ -18,13 +18,6 @@
   font-size: 1.5rem;
 }
 
-.count {
-  margin: var(--itools-space-2) 0 0;
-  color: var(--md-sys-color-on-surface-variant);
-  font-size: var(--md-sys-typescale-label-medium-size);
-  line-height: var(--md-sys-typescale-label-medium-line-height);
-}
-
 .card h3,
 .description {
   margin: 0;

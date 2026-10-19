@@ -8,163 +8,33 @@
   color: var(--md-sys-color-on-surface);
 }
 
-.home,
-.categoryTrigger,
-.toolItem {
-  position: relative;
-  display: flex;
-  width: 100%;
+.plainList {
+  display: grid;
   min-width: 0;
-  align-items: center;
-  gap: var(--itools-space-3);
-  border: 0;
+  grid-template-columns: minmax(0, 1fr);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.plainList:first-child {
+  margin-block-end: var(--itools-space-2);
+}
+
+.categoryGroup {
+  display: grid;
+  min-width: 0;
+  grid-template-rows: auto minmax(0, 0fr);
   border-radius: var(--itools-shape-corner-rectangle);
-  background: transparent;
-  color: var(--md-sys-color-on-surface-variant);
-  cursor: pointer;
-  text-align: start;
   transition:
+    grid-template-rows var(--itools-motion-duration-medium)
+      var(--itools-motion-easing-emphasized),
     background-color var(--itools-motion-duration-short)
-      var(--itools-motion-easing-standard),
-    color var(--itools-motion-duration-short)
-      var(--itools-motion-easing-standard),
-    transform var(--itools-motion-duration-short)
       var(--itools-motion-easing-standard);
 }
 
-.home,
-.categoryTrigger {
-  min-height: var(--itools-layout-navigation-item-min-height);
-  padding: var(--itools-space-2) var(--itools-space-3);
-  font-family: var(--md-sys-typescale-label-large-font);
-  font-size: var(--md-sys-typescale-label-large-size);
-  font-weight: var(--md-sys-typescale-label-large-weight);
-  line-height: var(--md-sys-typescale-label-large-line-height);
-  letter-spacing: var(--md-sys-typescale-label-large-tracking);
-}
-
-.home {
-  min-height: var(--itools-layout-navigation-home-min-height);
-  margin-block-end: var(--itools-space-2);
-  background: var(--md-sys-color-surface-container);
-  color: var(--md-sys-color-on-surface);
-}
-
-.home:hover {
-  background: color-mix(
-    in srgb,
-    var(--md-sys-color-on-surface) var(--itools-state-layer-hover-opacity),
-    var(--md-sys-color-surface-container)
-  );
-}
-
-.categoryTrigger:hover,
-.toolItem:hover {
-  background: color-mix(
-    in srgb,
-    var(--md-sys-color-on-surface) var(--itools-state-layer-hover-opacity),
-    transparent
-  );
-}
-
-.home:focus-visible,
-.categoryTrigger:focus-visible,
-.toolItem:focus-visible {
-  outline: var(--itools-layout-focus-ring-width) solid
-    var(--md-sys-color-primary);
-  outline-offset: var(--itools-layout-focus-ring-inset);
-  background: color-mix(
-    in srgb,
-    var(--md-sys-color-on-surface) var(--itools-state-layer-focus-opacity),
-    transparent
-  );
-  color: var(--md-sys-color-on-surface);
-}
-
-.home:focus-visible {
-  background: color-mix(
-    in srgb,
-    var(--md-sys-color-on-surface) var(--itools-state-layer-focus-opacity),
-    var(--md-sys-color-surface-container)
-  );
-}
-
-.categoryGroup[data-expanded='true'] .categoryTrigger:focus-visible {
-  background: color-mix(
-    in srgb,
-    var(--md-sys-color-on-secondary-container)
-      var(--itools-state-layer-focus-opacity),
-    var(--md-sys-color-secondary-container)
-  );
-}
-
-.home:active,
-.categoryTrigger:active,
-.toolItem:active {
-  transform: scale(var(--itools-motion-feedback-scale));
-  background: color-mix(
-    in srgb,
-    var(--md-sys-color-on-surface) var(--itools-state-layer-pressed-opacity),
-    transparent
-  );
-}
-
-.home:active {
-  background: color-mix(
-    in srgb,
-    var(--md-sys-color-on-surface) var(--itools-state-layer-pressed-opacity),
-    var(--md-sys-color-surface-container)
-  );
-}
-
-.categoryGroup[data-expanded='true'] .categoryTrigger:active {
-  background: color-mix(
-    in srgb,
-    var(--md-sys-color-on-secondary-container)
-      var(--itools-state-layer-pressed-opacity),
-    var(--md-sys-color-secondary-container)
-  );
-}
-
-.categoryGroup[data-expanded='true']
-  .toolItem:not([aria-current='page']):not([aria-selected='true']):hover {
-  background: color-mix(
-    in srgb,
-    var(--md-sys-color-on-secondary-container)
-      var(--itools-state-layer-hover-opacity),
-    var(--md-sys-color-secondary-container)
-  );
-}
-
-.categoryGroup[data-expanded='true']
-  .toolItem:not([aria-current='page']):not(
-    [aria-selected='true']
-  ):focus-visible {
-  background: color-mix(
-    in srgb,
-    var(--md-sys-color-on-secondary-container)
-      var(--itools-state-layer-focus-opacity),
-    var(--md-sys-color-secondary-container)
-  );
-  color: var(--md-sys-color-on-secondary-container);
-}
-
-.categoryGroup[data-expanded='true']
-  .toolItem:not([aria-current='page']):not([aria-selected='true']):active {
-  background: color-mix(
-    in srgb,
-    var(--md-sys-color-on-secondary-container)
-      var(--itools-state-layer-pressed-opacity),
-    var(--md-sys-color-secondary-container)
-  );
-}
-
-.home > span:last-child,
-.categoryLabel,
-.toolLabel {
-  min-width: 0;
-  flex: 1;
-  overflow-wrap: anywhere;
+.categoryGroup[data-expanded='true'] {
+  grid-template-rows: auto minmax(0, 1fr);
 }
 
 .categoryIcon,
@@ -188,50 +58,10 @@
   color: var(--md-sys-color-on-secondary-container);
 }
 
-.categoryGroup {
-  display: grid;
-  min-width: 0;
-  grid-template-rows: auto minmax(0, 0fr);
-  border-radius: var(--itools-shape-corner-rectangle);
-  transition:
-    grid-template-rows var(--itools-motion-duration-medium)
-      var(--itools-motion-easing-emphasized),
-    background-color var(--itools-motion-duration-short)
-      var(--itools-motion-easing-standard),
-    color var(--itools-motion-duration-short)
-      var(--itools-motion-easing-standard);
-}
-
-.categoryGroup[data-expanded='true'] {
-  grid-template-rows: auto minmax(0, 1fr);
-  background: var(--md-sys-color-secondary-container);
-  color: var(--md-sys-color-on-secondary-container);
-}
-
-.categoryTrigger {
-  grid-row: 1;
-  color: var(--md-sys-color-on-surface-variant);
-}
-
-.categoryGroup[data-expanded='true'] .categoryTrigger {
-  background: transparent;
-  color: var(--md-sys-color-on-secondary-container);
-}
-
-.categoryGroup[data-expanded='true'] .categoryTrigger:hover {
-  background: color-mix(
-    in srgb,
-    var(--md-sys-color-on-secondary-container)
-      var(--itools-state-layer-hover-opacity),
-    var(--md-sys-color-secondary-container)
-  );
-}
-
 .chevron {
   display: inline-flex;
   width: var(--itools-layout-navigation-icon-size);
   height: var(--itools-layout-navigation-icon-size);
-  flex: 0 0 var(--itools-layout-navigation-icon-size);
   align-items: center;
   justify-content: center;
   color: var(--md-sys-color-on-surface-variant);
@@ -248,6 +78,14 @@
   transform: rotate(180deg);
 }
 
+.toolLabel {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: var(--itools-space-2);
+  overflow-wrap: anywhere;
+}
+
 .toolList {
   display: grid;
   min-height: 0;
@@ -258,7 +96,6 @@
   padding: var(--itools-space-1) var(--itools-space-1) var(--itools-space-2)
     var(--itools-space-6);
   overflow: hidden;
-  color: var(--md-sys-color-on-secondary-container);
   list-style: none;
   opacity: 0;
   transform: translateY(calc(var(--itools-space-2) * -1));
@@ -287,84 +124,6 @@
     var(--itools-motion-easing-standard) both;
 }
 
-.toolItem {
-  min-height: var(--itools-layout-navigation-tool-min-height);
-  padding: var(--itools-space-2) var(--itools-space-3);
-  color: var(--md-sys-color-on-surface-variant);
-  font-family: var(--md-sys-typescale-body-medium-font);
-  font-size: var(--md-sys-typescale-body-medium-size);
-  font-weight: var(--md-sys-typescale-body-medium-weight);
-  line-height: var(--md-sys-typescale-body-medium-line-height);
-  letter-spacing: var(--md-sys-typescale-body-medium-tracking);
-}
-
-.toolItem[aria-current='page'],
-.toolItem[aria-selected='true'] {
-  background: var(--md-sys-color-primary-container);
-  color: var(--md-sys-color-on-primary-container);
-}
-
-.toolItem[aria-current='page'] .toolIcon,
-.toolItem[aria-selected='true'] .toolIcon {
-  background: var(--md-sys-color-primary-container);
-  color: var(--md-sys-color-on-primary-container);
-}
-
-.categoryGroup[data-expanded='true'] .categoryIcon {
-  color: var(--md-sys-color-on-primary-container);
-}
-
-.categoryGroup[data-expanded='true'] .toolIcon {
-  background: var(--md-sys-color-surface-container-high);
-  color: var(--md-sys-color-on-surface);
-}
-
-.categoryGroup[data-expanded='true']
-  .toolItem:not([aria-current='page']):not([aria-selected='true']) {
-  color: var(--md-sys-color-on-secondary-container);
-}
-
-.categoryGroup[data-expanded='true'] .toolItem[aria-current='page']:hover,
-.categoryGroup[data-expanded='true'] .toolItem[aria-selected='true']:hover {
-  background: color-mix(
-    in srgb,
-    var(--md-sys-color-on-primary-container)
-      var(--itools-state-layer-hover-opacity),
-    var(--md-sys-color-primary-container)
-  );
-  color: var(--md-sys-color-on-primary-container);
-}
-
-.categoryGroup[data-expanded='true']
-  .toolItem[aria-current='page']:focus-visible,
-.categoryGroup[data-expanded='true']
-  .toolItem[aria-selected='true']:focus-visible {
-  background: color-mix(
-    in srgb,
-    var(--md-sys-color-on-primary-container)
-      var(--itools-state-layer-focus-opacity),
-    var(--md-sys-color-primary-container)
-  );
-  color: var(--md-sys-color-on-primary-container);
-}
-
-.categoryGroup[data-expanded='true'] .toolItem[aria-current='page']:active,
-.categoryGroup[data-expanded='true'] .toolItem[aria-selected='true']:active {
-  background: color-mix(
-    in srgb,
-    var(--md-sys-color-on-primary-container)
-      var(--itools-state-layer-pressed-opacity),
-    var(--md-sys-color-primary-container)
-  );
-  color: var(--md-sys-color-on-primary-container);
-}
-
-.categoryGroup[data-expanded='true'] .toolItem[aria-current='page'] .toolIcon,
-.categoryGroup[data-expanded='true'] .toolItem[aria-selected='true'] .toolIcon {
-  background: var(--md-sys-color-primary-container);
-  color: var(--md-sys-color-on-primary-container);
-}
-
 .emptyState {
   padding: var(--itools-space-2) var(--itools-space-3);
   color: var(--md-sys-color-on-secondary-container);
@@ -386,20 +145,11 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .home,
-  .categoryTrigger,
-  .toolItem,
   .categoryGroup,
   .chevron,
   .toolList {
     animation: none;
     transition: none;
-  }
-
-  .home:active,
-  .categoryTrigger:active,
-  .toolItem:active {
-    transform: none;
   }
 
   .toolList[data-expanded='true'] > li {

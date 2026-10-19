@@ -76,8 +76,6 @@ describe('阶段 4 预览文案', () => {
     const zh = createI18n('zh-CN');
     const en = createI18n('en');
 
-    expect(zh.t('catalog:tool.previewBadge')).toBe('预览');
-    expect(en.t('catalog:tool.previewBadge')).toBe('Preview');
     expect(zh.t('catalog:tool.previewInputHint')).toBe(
       '输入区将在工具实现后启用。',
     );

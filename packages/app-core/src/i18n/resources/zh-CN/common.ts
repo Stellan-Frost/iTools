@@ -1,5 +1,4 @@
 export const common = {
-  appName: 'iTools',
   skipToContent: '跳到主要内容',
   brandHomeLabel: 'iTools 首页',
   theme: {
@@ -31,7 +30,6 @@ export const common = {
     previewSuffix: '界面预览',
   },
   language: {
-    label: '语言',
     zhCN: '简体中文',
     en: 'English',
     switchLanguage: '切换语言',
@@ -40,10 +38,6 @@ export const common = {
     eyebrow: '404',
     title: '页面不存在',
     description: '这个地址没有对应的页面，可能已移动或尚未启用。',
-  },
-  previewNotice: {
-    title: '界面预览',
-    body: '当前页面展示界面结构，尚未接入真实处理。',
   },
   meta: {
     homeTitle: 'iTools · 把日常小工具放在一个清楚的地方',

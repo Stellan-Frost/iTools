@@ -34,8 +34,8 @@ export function HomePage() {
           <div className={styles.heroActions}>
             <ToolSearchEntry onOpenSearch={openSearch} />
             <Button
+              className={styles.heroSecondaryAction}
               variant="text"
-              style={{ color: 'var(--md-sys-color-on-primary-container)' }}
               onClick={() =>
                 navigate({ page: 'category', categoryId: firstCategory.id })
               }

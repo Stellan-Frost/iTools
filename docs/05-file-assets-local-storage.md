@@ -1,5 +1,7 @@
 # 05 · 文件资产与浏览器本地存储
 
+> 状态：**未实现（阶段 6）**。当前没有文件资产模型、IndexedDB、Object URL 生命周期或归档导入导出；工具页不接收文件。D01（清库 vs 长期保留）仍未决，见 [13](13-acceptance-open-decisions.md)。
+
 ## 统一资产模型
 至少区分 `source`、`intermediate`、`result`；每项有稳定 ID、文件名、MIME 提示、大小、创建时间、关联 task ID、引用关系和持久化状态。
 - Blob 由统一 IndexedDB repository 管理；工具不得直接创建自有数据库表或绕过仓储层。

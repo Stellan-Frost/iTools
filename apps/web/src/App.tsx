@@ -93,15 +93,11 @@ export function App({ initialLocale, initialRoute }: AppProps) {
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
+  const openSearch = useCallback(() => setIsSearchOpen(true), []);
+
   const navigation = useMemo<AppNavigation>(
-    () => ({
-      locale,
-      route,
-      navigate,
-      switchLocale,
-      openSearch: () => setIsSearchOpen(true),
-    }),
-    [locale, route, navigate, switchLocale],
+    () => ({ locale, route, navigate, switchLocale, openSearch }),
+    [locale, route, navigate, switchLocale, openSearch],
   );
 
   return (
@@ -114,7 +110,7 @@ export function App({ initialLocale, initialRoute }: AppProps) {
               onToggleTheme={() =>
                 setThemeMode((mode) => (mode === 'light' ? 'dark' : 'light'))
               }
-              onOpenSearch={() => setIsSearchOpen(true)}
+              onOpenSearch={openSearch}
             >
               <CurrentPage route={route} />
             </AppShell>

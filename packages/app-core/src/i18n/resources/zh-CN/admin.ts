@@ -8,8 +8,6 @@ export const admin = {
     kicker: 'CATALOG PREVIEW',
     title: '工具目录',
     count: '{{total}} 项',
-    enabled: '启用',
-    disabled: '停用',
     toggleLabel: '切换 {{name}} 状态',
     helper: '状态开关只用于查看交互状态，目录数据不会持久化。',
   },

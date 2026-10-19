@@ -11,7 +11,7 @@ import { admin as enAdmin } from './en/admin.js';
 
 /**
  * 唯一 i18n 资源聚合入口，由根 Agent 维护。
- * 各命名空间文件按 docs/20 的文件所有权分别由不同 Agent 维护。
+ * 各命名空间文件按 docs/12 的文件所有权分别由不同 Agent 维护。
  */
 export const resources = {
   'zh-CN': {

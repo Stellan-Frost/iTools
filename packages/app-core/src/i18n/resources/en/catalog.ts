@@ -3,7 +3,6 @@ export const catalog = {
     browseCategory: 'Browse category',
     openTool: 'Open tool',
     startFromCategory: 'Start with a category',
-    viewCategorySamples: 'View category samples',
     browseOtherCategory: 'Browse another category',
     backHome: 'Back to home',
   },
@@ -44,7 +43,6 @@ export const catalog = {
   },
   tool: {
     eyebrow: '{{category}} · Tool UI preview',
-    previewBadge: 'Preview',
     previewBody:
       'This tool is not implemented yet. This page only shows its layout and sample content.',
     previewInputHint: 'Input is disabled until this tool is implemented.',
@@ -56,7 +54,6 @@ export const catalog = {
     notFoundBody: 'This tool does not exist or is disabled.',
     input: {
       title: 'Input',
-      samplePrefix: 'Sample content: {{sample}}',
     },
     workspace: {
       title: 'Workspace',

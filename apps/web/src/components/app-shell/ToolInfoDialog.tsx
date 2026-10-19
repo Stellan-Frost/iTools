@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { AppIcon } from '../app-icon/AppIcon.js';
 import { MetadataChip } from '../page-chrome/MetadataChip.js';
 import { useAppNavigation } from '../../app/navigation.js';
-import { PreviewBadge } from './PreviewBadge.js';
+import { PreviewBadge } from '../page-chrome/PreviewBadge.js';
 import styles from './ToolInfoDialog.module.css';
 
 interface ToolInfoDialogProps {

@@ -13,7 +13,7 @@ interface ToolInputSectionProps {
  */
 export function ToolInputSection({ tool }: ToolInputSectionProps) {
   const { locale } = useAppNavigation();
-  const { t } = useTranslation(['catalog']);
+  const { t } = useTranslation('catalog');
 
   const preview = tool.metadata.preview;
   const multiline =
