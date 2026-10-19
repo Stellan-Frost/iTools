@@ -71,7 +71,6 @@ html {
 
 body {
   margin: 0;
-  min-width: 20rem;
   font-family: var(--md-sys-typescale-plain-font-family);
 }
 
