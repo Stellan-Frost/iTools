@@ -165,6 +165,6 @@ pnpm verify                # 以上全链路总门禁
 
 按 [14](14-phase-implementation-roadmap.md) 与 [13](13-acceptance-open-decisions.md)：
 
-- 阶段 10 是 PWA、缓存与更新：预缓存应用代码、重型引擎按需缓存、更新经用户确认、Cache Storage 与 IndexedDB 分离（D02 需先定）。
+- 阶段 10 是 PWA、缓存与更新：预缓存应用代码、重型引擎按需缓存、更新经用户确认、Cache Storage 与 IndexedDB 分离。**D02 已决为 D36**（版本化 cache 下载完成后才激活并清空全部旧缓存，含引擎；不留上一版本，提供「修复安装」）。
 - 工具清单已确认（D24，31 条 / 30 个可执行），但**首个真实工具的排期未定**。接入时按 03 §5 做注册表注入点重构，并同时接 `@itools/task-runtime`（执行）与 `@itools/asset-store`（结果持久化）。
 - 汇率工具第 68/69 题仍暂缓。
