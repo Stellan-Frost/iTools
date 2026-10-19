@@ -48,17 +48,15 @@
 .brand {
   display: inline-flex;
   align-items: center;
-  gap: var(--itools-space-2);
+  justify-content: center;
+  width: var(--itools-layout-navigation-item-min-height);
+  min-width: var(--itools-layout-navigation-item-min-height);
+  height: var(--itools-layout-navigation-item-min-height);
   border: 0;
   background: transparent;
   color: var(--md-sys-color-on-surface);
   cursor: pointer;
-  font-family: var(--md-sys-typescale-title-large-font);
-  font-size: var(--md-sys-typescale-title-large-size);
-  font-weight: var(--md-sys-typescale-title-large-weight);
-  line-height: var(--md-sys-typescale-title-large-line-height);
-  letter-spacing: var(--md-sys-typescale-title-large-tracking);
-  white-space: nowrap;
+  padding: 0;
 }
 
 .brand:focus-visible {
@@ -75,19 +73,6 @@
   object-fit: contain;
 }
 
-.previewTag {
-  border-radius: var(--md-sys-shape-corner-full);
-  background: var(--md-sys-color-secondary-container);
-  color: var(--md-sys-color-on-secondary-container);
-  padding: var(--itools-space-1) var(--itools-space-3);
-  font-family: var(--md-sys-typescale-label-medium-font);
-  font-size: var(--md-sys-typescale-label-medium-size);
-  font-weight: var(--md-sys-typescale-label-medium-weight);
-  line-height: var(--md-sys-typescale-label-medium-line-height);
-  letter-spacing: var(--md-sys-typescale-label-medium-tracking);
-  white-space: nowrap;
-}
-
 .topActions {
   display: flex;
   min-width: 0;
@@ -97,26 +82,19 @@
   margin-inline-start: auto;
 }
 
+.topBarIcon,
+.mobileNavigationButton {
+  width: var(--itools-layout-navigation-item-min-height);
+  min-width: var(--itools-layout-navigation-item-min-height);
+  height: var(--itools-layout-navigation-item-min-height);
+  min-height: var(--itools-layout-navigation-item-min-height);
+}
+
 .searchButton {
   min-width: 12rem;
-  justify-content: space-between;
-}
-
-.searchLabel,
-.recentLabel {
+  min-height: var(--itools-layout-navigation-item-min-height);
+  flex: 0 0 auto;
   white-space: nowrap;
-}
-
-.searchButton kbd {
-  border: 1px solid var(--md-sys-color-outline-variant);
-  border-radius: var(--itools-shape-corner-rectangle);
-  color: var(--md-sys-color-on-surface-variant);
-  padding: var(--itools-space-2) var(--itools-space-3);
-  font-family: var(--md-sys-typescale-label-small-font);
-  font-size: var(--md-sys-typescale-label-small-size);
-  font-weight: var(--md-sys-typescale-label-small-weight);
-  line-height: var(--md-sys-typescale-label-small-line-height);
-  letter-spacing: var(--md-sys-typescale-label-small-tracking);
 }
 
 .recentAnchor {
@@ -203,11 +181,9 @@
   .topBar {
     display: grid;
     min-height: auto;
-    grid-template-areas:
-      'brand navigation'
-      'actions actions';
-    grid-template-columns: minmax(0, 1fr) auto;
-    row-gap: var(--itools-space-2);
+    grid-template-areas: 'brand search actions navigation';
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
+    column-gap: var(--itools-space-1);
     padding-block: var(--itools-space-2);
   }
 
@@ -216,26 +192,25 @@
     justify-self: start;
   }
 
-  .previewTag {
-    display: none;
+  .searchButton {
+    grid-area: search;
+    min-width: 0;
+    width: 100%;
+    justify-content: flex-start;
+    padding-inline: var(--itools-space-2);
   }
 
   .topActions {
     grid-area: actions;
-    width: 100%;
-    justify-content: space-between;
+    width: auto;
+    justify-content: flex-end;
     gap: var(--itools-space-1);
     margin-inline-start: 0;
   }
 
   .mobileNavigationButton {
-    display: inline-flex;
-    min-height: var(--itools-layout-navigation-item-min-height);
     grid-area: navigation;
     justify-self: end;
-    margin-inline-start: auto;
-    padding-inline: var(--itools-space-3);
-    white-space: nowrap;
   }
 
   .layout {
@@ -244,26 +219,6 @@
 
   .mainContent {
     padding-block: var(--itools-space-6) var(--itools-space-12);
-  }
-
-  .searchButton {
-    min-width: 0;
-    flex: 1 1 auto;
-    justify-content: space-between;
-    padding-inline: var(--itools-space-2);
-  }
-
-  .searchButton kbd {
-    display: none;
-  }
-
-  .searchLabel {
-    max-width: 7ch;
-    overflow: hidden;
-  }
-
-  .recentLabel {
-    font-size: var(--md-sys-typescale-label-medium-size);
   }
 }
 
@@ -282,6 +237,21 @@
 
   .drawerHeader {
     padding-inline: var(--itools-space-3);
+  }
+}
+
+@media (max-width: 379px) {
+  .topBar {
+    grid-template-areas:
+      'brand search navigation'
+      'actions actions actions';
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    row-gap: var(--itools-space-1);
+  }
+
+  .topActions {
+    width: 100%;
+    justify-content: flex-end;
   }
 }
 

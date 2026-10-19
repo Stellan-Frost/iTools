@@ -117,30 +117,25 @@ export function AppShell({
             alt=""
             aria-hidden="true"
           />
-          <span>iTools</span>
         </button>
-        <span className={styles.previewTag}>界面预览</span>
+        <Button
+          className={styles.searchButton}
+          variant="outlined"
+          startIcon={<AppIcon name="search" />}
+          onClick={onOpenSearch}
+        >
+          <span className={styles.searchLabel}>搜索工具</span>
+        </Button>
         <div className={styles.topActions}>
-          <Button
-            className={styles.searchButton}
-            variant="outlined"
-            startIcon={<AppIcon name="search" />}
-            onClick={onOpenSearch}
-          >
-            <span className={styles.searchLabel}>搜索工具</span>
-            <kbd>⌘ K</kbd>
-          </Button>
           <div className={styles.recentAnchor}>
-            <Button
-              variant="text"
-              startIcon={<AppIcon name="history" />}
+            <IconButton
+              className={styles.topBarIcon}
+              icon={<AppIcon name="history" />}
               aria-label="最近任务"
               aria-expanded={isRecentOpen}
               aria-controls="recent-tasks-panel"
               onClick={() => setIsRecentOpen((isOpen) => !isOpen)}
-            >
-              <span className={styles.recentLabel}>最近任务</span>
-            </Button>
+            />
             {isRecentOpen ? (
               <RecentTasksPanel
                 onClose={() => setIsRecentOpen(false)}
@@ -153,6 +148,7 @@ export function AppShell({
             ) : null}
           </div>
           <IconButton
+            className={styles.topBarIcon}
             icon={
               <AppIcon
                 name={themeMode === 'light' ? 'dark_mode' : 'light_mode'}
@@ -161,22 +157,22 @@ export function AppShell({
             aria-label={themeMode === 'light' ? '切换深色模式' : '切换浅色模式'}
             onClick={onToggleTheme}
           />
-          <Button variant="tonal" onClick={() => onNavigate({ page: 'admin' })}>
-            {isCompact ? '后台' : '管理预览'}
-          </Button>
+          <IconButton
+            className={styles.topBarIcon}
+            icon={<AppIcon name="admin_panel_settings" />}
+            aria-label="管理预览"
+            onClick={() => onNavigate({ page: 'admin' })}
+          />
         </div>
         {isCompact ? (
-          <Button
+          <IconButton
             className={styles.mobileNavigationButton}
-            variant="tonal"
-            startIcon={<AppIcon name="menu" />}
+            icon={<AppIcon name="menu" />}
             aria-label="展开"
             aria-expanded={isDrawerOpen}
             aria-controls="mobile-navigation-drawer"
             onClick={() => setIsDrawerOpen(true)}
-          >
-            展开
-          </Button>
+          />
         ) : null}
       </header>
 

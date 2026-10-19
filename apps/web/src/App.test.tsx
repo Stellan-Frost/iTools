@@ -47,7 +47,11 @@ describe('stage 2 application preview', () => {
     expect(categoryCount.tagName).toBe('SPAN');
     expect(categoryCount).not.toHaveAttribute('role');
     expect(categoryCount).not.toHaveAttribute('tabindex');
-    expect(screen.getByRole('button', { name: '搜索工具' })).toBeEnabled();
+    expect(
+      within(screen.getByRole('banner')).getByRole('button', {
+        name: '搜索工具',
+      }),
+    ).toBeEnabled();
   });
 
   it('expands multiple desktop categories without navigating', async () => {
