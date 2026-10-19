@@ -34,6 +34,7 @@
 .hero h1 {
   max-width: 15ch;
   margin: var(--itools-space-3) 0 0;
+  text-wrap: balance;
   font-family: var(--md-sys-typescale-display-small-font);
   font-size: var(--md-sys-typescale-display-small-size);
   font-weight: var(--md-sys-typescale-display-small-weight);

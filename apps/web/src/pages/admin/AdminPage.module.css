@@ -93,6 +93,12 @@
   font-size: var(--md-sys-typescale-body-small-size);
 }
 
+.toolDetails > span {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--itools-space-1);
+}
+
 .helper {
   margin: var(--itools-space-2) 0 0;
 }
