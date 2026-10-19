@@ -1,0 +1,45 @@
+.card {
+  display: flex;
+  min-height: 15rem;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--itools-space-2);
+  padding: var(--itools-space-4);
+}
+
+.iconWrap {
+  display: grid;
+  width: 3rem;
+  aspect-ratio: 1;
+  place-items: center;
+  border-radius: var(--md-sys-shape-corner-medium);
+  background: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
+  font-size: 1.5rem;
+}
+
+.count {
+  margin: var(--itools-space-2) 0 0;
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: var(--md-sys-typescale-label-medium-size);
+  line-height: var(--md-sys-typescale-label-medium-line-height);
+}
+
+.card h3,
+.description {
+  margin: 0;
+}
+
+.card h3 {
+  font-family: var(--md-sys-typescale-title-large-font);
+  font-size: var(--md-sys-typescale-title-large-size);
+  font-weight: var(--md-sys-typescale-title-large-weight);
+  line-height: var(--md-sys-typescale-title-large-line-height);
+}
+
+.description {
+  flex: 1;
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: var(--md-sys-typescale-body-medium-size);
+  line-height: var(--md-sys-typescale-body-medium-line-height);
+}

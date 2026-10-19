@@ -1,0 +1,95 @@
+.page {
+  width: min(100%, var(--itools-layout-content-max));
+  margin-inline: auto;
+}
+
+.listHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--itools-space-3);
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+  padding: var(--itools-space-4) 1.25rem;
+}
+
+.listHeader h2,
+.listHeader span {
+  margin: 0;
+}
+
+.listHeader h2 {
+  font-family: var(--md-sys-typescale-title-large-font);
+  font-size: var(--md-sys-typescale-title-large-size);
+  font-weight: var(--md-sys-typescale-title-large-weight);
+}
+
+.listHeader span {
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: var(--md-sys-typescale-body-small-size);
+}
+
+.taskList {
+  display: grid;
+  margin: 0;
+  padding: var(--itools-space-2) 1.25rem;
+  list-style: none;
+}
+
+.taskList li {
+  display: flex;
+  min-height: 5rem;
+  align-items: center;
+  gap: var(--itools-space-3);
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+}
+
+.taskList li:last-child {
+  border-bottom: 0;
+}
+
+.taskIcon {
+  display: grid;
+  width: 2.75rem;
+  flex: 0 0 2.75rem;
+  aspect-ratio: 1;
+  place-items: center;
+  border-radius: var(--md-sys-shape-corner-medium);
+  background: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
+  font-size: 1.375rem;
+}
+
+.taskDetails {
+  display: grid;
+  min-width: 0;
+  flex: 1;
+  gap: var(--itools-space-1);
+}
+
+.taskDetails strong {
+  font-family: var(--md-sys-typescale-title-medium-font);
+  font-size: var(--md-sys-typescale-title-medium-size);
+  font-weight: var(--md-sys-typescale-title-medium-weight);
+}
+
+.taskDetails span {
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: var(--md-sys-typescale-body-small-size);
+}
+
+@media (max-width: 599px) {
+  .listHeader,
+  .taskList {
+    padding-inline: var(--itools-space-3);
+  }
+
+  .taskList li {
+    align-items: flex-start;
+    flex-wrap: wrap;
+    padding-block: var(--itools-space-3);
+  }
+
+  .taskDetails {
+    flex-basis: calc(100% - 4rem);
+  }
+}
