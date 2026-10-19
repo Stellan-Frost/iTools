@@ -49,9 +49,9 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: var(--itools-layout-navigation-item-min-height);
-  min-width: var(--itools-layout-navigation-item-min-height);
-  height: var(--itools-layout-navigation-item-min-height);
+  width: var(--itools-space-12);
+  min-width: var(--itools-space-12);
+  height: var(--itools-space-12);
   border: 0;
   background: transparent;
   color: var(--md-sys-color-on-surface);
@@ -84,15 +84,15 @@
 
 .topBarIcon,
 .mobileNavigationButton {
-  width: var(--itools-layout-navigation-item-min-height);
-  min-width: var(--itools-layout-navigation-item-min-height);
-  height: var(--itools-layout-navigation-item-min-height);
-  min-height: var(--itools-layout-navigation-item-min-height);
+  width: var(--itools-space-12);
+  min-width: var(--itools-space-12);
+  height: var(--itools-space-12);
+  min-height: var(--itools-space-12);
 }
 
 .searchButton {
   min-width: 12rem;
-  min-height: var(--itools-layout-navigation-item-min-height);
+  min-height: var(--itools-space-12);
   flex: 0 0 auto;
   white-space: nowrap;
 }
@@ -240,7 +240,7 @@
   }
 }
 
-@media (max-width: 379px) {
+@media (max-width: 419px) {
   .topBar {
     grid-template-areas:
       'brand search navigation'

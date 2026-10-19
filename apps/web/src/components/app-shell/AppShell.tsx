@@ -124,7 +124,7 @@ export function AppShell({
           startIcon={<AppIcon name="search" />}
           onClick={onOpenSearch}
         >
-          <span className={styles.searchLabel}>搜索工具</span>
+          搜索工具
         </Button>
         <div className={styles.topActions}>
           <div className={styles.recentAnchor}>
