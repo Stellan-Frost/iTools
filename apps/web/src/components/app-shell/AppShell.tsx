@@ -3,12 +3,12 @@ import {
   Button,
   IconButton,
   NavigationDrawer,
-  NavigationRail,
 } from '@itools/design-system-adapter';
 import type { AppRoute } from '../../app/route.js';
-import { getTool } from '../../data/sample-catalog.js';
+import { getTool, type ToolDefinition } from '../../data/sample-catalog.js';
 import { AppIcon } from '../app-icon/AppIcon.js';
-import { NavigationItems } from './NavigationItems.js';
+import { ToolAccordionNavigation } from './ToolAccordionNavigation.js';
+import { ToolInfoDialog } from './ToolInfoDialog.js';
 import { RecentTasksPanel } from '../recent-tasks/RecentTasksPanel.js';
 import { useCompactViewport } from './use-compact-viewport.js';
 import styles from './AppShell.module.css';
@@ -22,16 +22,10 @@ interface AppShellProps {
   onToggleTheme: () => void;
 }
 
-function routeToDestination(route: AppRoute) {
+function routeToCategoryId(route: AppRoute) {
   if (route.page === 'category') return route.categoryId;
-  if (route.page === 'tool') return getTool(route.toolId)?.categoryId ?? 'home';
-  return 'home';
-}
-
-function destinationToRoute(destination: string): AppRoute {
-  return destination === 'home'
-    ? { page: 'home' }
-    : { page: 'category', categoryId: destination };
+  if (route.page === 'tool') return getTool(route.toolId)?.categoryId;
+  return undefined;
 }
 
 export function AppShell({
@@ -43,14 +37,28 @@ export function AppShell({
   onToggleTheme,
 }: AppShellProps) {
   const isCompact = useCompactViewport();
-  const [isRailExpanded, setIsRailExpanded] = useState(true);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isRecentOpen, setIsRecentOpen] = useState(false);
-  const selectedDestination = routeToDestination(route);
+  const [expandedCategoryIds, setExpandedCategoryIds] = useState<Set<string>>(
+    () => {
+      const categoryId = routeToCategoryId(route);
+      return categoryId ? new Set([categoryId]) : new Set();
+    },
+  );
+  const [selectedTool, setSelectedTool] = useState<ToolDefinition | null>(null);
 
   useEffect(() => {
     if (!isCompact) setIsDrawerOpen(false);
   }, [isCompact]);
+
+  useEffect(() => {
+    const categoryId = routeToCategoryId(route);
+    if (!categoryId) return;
+    setExpandedCategoryIds((expandedIds) => {
+      if (expandedIds.has(categoryId)) return expandedIds;
+      return new Set(expandedIds).add(categoryId);
+    });
+  }, [route]);
 
   useEffect(() => {
     function handleShortcut(event: KeyboardEvent) {
@@ -64,9 +72,26 @@ export function AppShell({
     return () => window.removeEventListener('keydown', handleShortcut);
   }, [onOpenSearch]);
 
-  const selectDestination = (_event: unknown, destination: string) => {
-    onNavigate(destinationToRoute(destination));
+  const toggleCategory = (categoryId: string) => {
+    setExpandedCategoryIds((expandedIds) => {
+      const nextExpandedIds = new Set(expandedIds);
+      if (nextExpandedIds.has(categoryId)) nextExpandedIds.delete(categoryId);
+      else nextExpandedIds.add(categoryId);
+      return nextExpandedIds;
+    });
+  };
+
+  const openToolInformation = (toolId: string) => {
+    const tool = getTool(toolId);
+    if (!tool) return;
+    if (isCompact) setIsDrawerOpen(false);
+    setSelectedTool(tool);
+  };
+
+  const navigateToTool = (toolId: string) => {
+    setSelectedTool(null);
     setIsDrawerOpen(false);
+    onNavigate({ page: 'tool', toolId });
   };
 
   const openTaskTool = (toolId: string) => {
@@ -80,13 +105,6 @@ export function AppShell({
         跳到主要内容
       </a>
       <header className={styles.topBar}>
-        {isCompact ? (
-          <IconButton
-            icon={<AppIcon name="menu" />}
-            aria-label="打开分类导航"
-            onClick={() => setIsDrawerOpen(true)}
-          />
-        ) : null}
         <button
           className={styles.brand}
           type="button"
@@ -144,38 +162,30 @@ export function AppShell({
             {isCompact ? '后台' : '管理预览'}
           </Button>
         </div>
+        {isCompact ? (
+          <Button
+            className={styles.mobileNavigationButton}
+            variant="tonal"
+            startIcon={<AppIcon name="menu" />}
+            aria-label="展开"
+            aria-expanded={isDrawerOpen}
+            aria-controls="mobile-navigation-drawer"
+            onClick={() => setIsDrawerOpen(true)}
+          >
+            展开
+          </Button>
+        ) : null}
       </header>
 
-      <div
-        className={`${styles.layout} ${isRailExpanded ? styles.railExpanded : styles.railCollapsed}`}
-      >
+      <div className={styles.layout}>
         {!isCompact ? (
           <aside className={styles.desktopNavigation} aria-label="桌面分类导航">
-            <NavigationRail
-              aria-label="工具分类"
-              value={selectedDestination}
-              onChange={selectDestination}
-              variant={isRailExpanded ? 'expanded' : 'collapsed'}
-              header={
-                <div className={styles.railHeader}>
-                  <IconButton
-                    icon={
-                      <AppIcon
-                        name={isRailExpanded ? 'chevron_left' : 'chevron_right'}
-                      />
-                    }
-                    aria-label={
-                      isRailExpanded ? '收起分类侧栏' : '展开分类侧栏'
-                    }
-                    aria-expanded={isRailExpanded}
-                    onClick={() => setIsRailExpanded((expanded) => !expanded)}
-                  />
-                  {isRailExpanded ? <span>浏览分类</span> : null}
-                </div>
-              }
-            >
-              <NavigationItems type="rail" isRailExpanded={isRailExpanded} />
-            </NavigationRail>
+            <ToolAccordionNavigation
+              expandedCategoryIds={expandedCategoryIds}
+              onToggleCategory={toggleCategory}
+              onNavigateHome={() => onNavigate({ page: 'home' })}
+              onOpenTool={openToolInformation}
+            />
           </aside>
         ) : null}
         <main className={styles.mainContent} id="main-content" tabIndex={-1}>
@@ -185,18 +195,40 @@ export function AppShell({
 
       {isCompact ? (
         <NavigationDrawer
+          id="mobile-navigation-drawer"
           aria-label="工具分类"
           aria-hidden={!isDrawerOpen}
           inert={!isDrawerOpen}
           variant="modal"
           open={isDrawerOpen}
-          value={selectedDestination}
-          onChange={selectDestination}
           onClose={() => setIsDrawerOpen(false)}
         >
-          <NavigationItems type="drawer" />
+          <div className={styles.drawerContent}>
+            <div className={styles.drawerHeader}>
+              <span>浏览分类</span>
+              <IconButton
+                icon={<AppIcon name="close" />}
+                aria-label="关闭分类导航"
+                onClick={() => setIsDrawerOpen(false)}
+              />
+            </div>
+            <ToolAccordionNavigation
+              expandedCategoryIds={expandedCategoryIds}
+              onToggleCategory={toggleCategory}
+              onNavigateHome={() => {
+                setIsDrawerOpen(false);
+                onNavigate({ page: 'home' });
+              }}
+              onOpenTool={openToolInformation}
+            />
+          </div>
         </NavigationDrawer>
       ) : null}
+      <ToolInfoDialog
+        tool={selectedTool}
+        onClose={() => setSelectedTool(null)}
+        onNavigate={navigateToTool}
+      />
     </div>
   );
 }

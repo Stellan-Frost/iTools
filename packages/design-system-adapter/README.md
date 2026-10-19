@@ -166,9 +166,27 @@ Spacing tokens use a 4px base scale and rem units so they respond to the user's 
 
 CSS custom properties cannot be used as media-query thresholds, so write these same values as literal `rem` values in `@media`. The tokens document the shared breakpoints for app styles and TypeScript consumers.
 
-`--itools-layout-content-max` is `80rem`, `--itools-layout-readable-max` is `72ch`, `--itools-layout-sidebar-width` is `17.5rem`, and `--itools-layout-page-gutter` grows from `1rem` to `1.5rem` at medium and `2rem` at expanded. Use these values in app-owned page layout CSS. The component library's established shape tokens remain authoritative: `--md-sys-shape-corner-none` 0px, extra-small 4px, small 8px, medium 12px, large 16px, large-increased 20px, extra-large 28px, extra-large-increased 32px, extra-extra-large 48px, full 9999px. Typography roles use the library's `--md-sys-typescale-*` tokens and Roboto/Noto Sans SC font family values.
+`--itools-layout-content-max` is `80rem`, `--itools-layout-readable-max` is `72ch`, `--itools-layout-sidebar-width` is `18.5rem`, and `--itools-layout-page-gutter` grows from `1rem` to `1.5rem` at medium and `2rem` at expanded. Use these values in app-owned page layout CSS. The component library's established shape tokens remain authoritative: `--md-sys-shape-corner-none` 0px, extra-small 4px, small 8px, medium 12px, large 16px, large-increased 20px, extra-large 28px, extra-large-increased 32px, extra-extra-large 48px, full 9999px. Typography roles use the library's `--md-sys-typescale-*` tokens and Roboto/Noto Sans SC font family values.
 
-App motion tokens are `--itools-motion-duration-instant` 0ms, short 150ms, medium 250ms, long 400ms, and standard/emphasized easing `cubic-bezier(0.2, 0, 0, 1)`. `prefers-reduced-motion: reduce` sets all adapter durations to 0ms. The underlying library is configured with the standard motion scheme and its own CSS also sets spatial spring durations to zero for reduced motion.
+Navigation and shell layout tokens are app-owned dimensions, added to keep the persistent accordion, compact header, and detail metadata aligned across desktop and drawer presentations:
+
+| Token | Value | Use |
+| --- | ---: | --- |
+| `--itools-layout-app-bar-height` | `4.5rem` | Desktop top bar and sticky navigation offset |
+| `--itools-layout-brand-mark-size` | `2rem` | App brand mark |
+| `--itools-layout-navigation-item-min-height` | `3.5rem` | Home/category rows and compact drawer trigger; 56px target |
+| `--itools-layout-navigation-home-min-height` | `3.75rem` | Home row emphasis |
+| `--itools-layout-navigation-tool-min-height` | `3rem` | Tool rows; 48px touch target |
+| `--itools-layout-navigation-icon-size` | `1.5rem` | Accordion category and tool icons |
+| `--itools-layout-dialog-metadata-label-width` | `5rem` | Metadata label column before compact stacking |
+| `--itools-layout-focus-ring-width` | `0.125rem` | Visible keyboard focus ring |
+| `--itools-layout-focus-ring-inset` | `-0.125rem` | Keep row focus rings visible inside the clipped accordion list |
+
+`--itools-state-layer-hover-opacity` is `8%`; focus and pressed layers are `10%`. These opacity values blend the semantic `on-surface` role into the current surface and avoid fixed state colors. The accordion uses the existing short/medium motion durations and standard/emphasized easing for row feedback, expansion, and chevron rotation; no separate component duration is needed.
+
+The small press response uses `--itools-motion-feedback-scale` (`0.99`); the dialog content entrance uses `--itools-motion-dialog-entry-scale` (`0.985`) with the existing medium duration. These scales are shared motion parameters so individual surfaces do not introduce unrelated values.
+
+App motion tokens are `--itools-motion-duration-instant` 0ms, short 150ms, medium 250ms, long 400ms, and standard/emphasized easing `cubic-bezier(0.2, 0, 0, 1)`. `prefers-reduced-motion: reduce` sets all adapter durations to 0ms and app-owned accordion/dialog animations are disabled. The underlying library is configured with the standard motion scheme and its own CSS also sets spatial spring durations to zero for reduced motion. The mobile drawer continues to use the library `NavigationDrawer` open/close transition; app-owned drawer content only controls its scroll and heading layout.
 
 ## Local fonts, icons and licenses
 

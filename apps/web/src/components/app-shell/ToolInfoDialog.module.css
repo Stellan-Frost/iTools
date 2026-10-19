@@ -1,0 +1,153 @@
+.content {
+  display: grid;
+  width: 100%;
+  max-width: var(--itools-layout-readable-max);
+  gap: var(--itools-space-4);
+  color: var(--md-sys-color-on-surface);
+  animation: dialogContentEnter var(--itools-motion-duration-medium)
+    var(--itools-motion-easing-emphasized) both;
+}
+
+.eyebrow {
+  margin: 0;
+  color: var(--md-sys-color-primary);
+  font-family: var(--md-sys-typescale-label-large-font);
+  font-size: var(--md-sys-typescale-label-large-size);
+  font-weight: var(--md-sys-typescale-label-large-weight);
+  line-height: var(--md-sys-typescale-label-large-line-height);
+  letter-spacing: var(--md-sys-typescale-label-large-tracking);
+}
+
+.title {
+  display: block;
+  max-width: var(--itools-layout-readable-max);
+  overflow-wrap: anywhere;
+  color: var(--md-sys-color-on-surface);
+  font-family: var(--md-sys-typescale-headline-small-font);
+  font-size: var(--md-sys-typescale-headline-small-size);
+  font-weight: var(--md-sys-typescale-headline-small-weight);
+  line-height: var(--md-sys-typescale-headline-small-line-height);
+  letter-spacing: var(--md-sys-typescale-headline-small-tracking);
+}
+
+.description {
+  margin: 0;
+  color: var(--md-sys-color-on-surface-variant);
+  font-family: var(--md-sys-typescale-body-large-font);
+  font-size: var(--md-sys-typescale-body-large-size);
+  font-weight: var(--md-sys-typescale-body-large-weight);
+  line-height: var(--md-sys-typescale-body-large-line-height);
+  letter-spacing: var(--md-sys-typescale-body-large-tracking);
+  overflow-wrap: anywhere;
+}
+
+.metadata {
+  display: grid;
+  gap: var(--itools-space-3);
+  margin: 0;
+  padding-block: var(--itools-space-4);
+  border-block: 1px solid var(--md-sys-color-outline-variant);
+}
+
+.metadata > div {
+  display: grid;
+  min-width: 0;
+  grid-template-columns:
+    minmax(var(--itools-layout-dialog-metadata-label-width), 0.32fr)
+    minmax(0, 1fr);
+  align-items: start;
+  gap: var(--itools-space-3);
+}
+
+.metadata dt {
+  color: var(--md-sys-color-on-surface-variant);
+  font-family: var(--md-sys-typescale-label-medium-font);
+  font-size: var(--md-sys-typescale-label-medium-size);
+  font-weight: var(--md-sys-typescale-label-medium-weight);
+  line-height: var(--md-sys-typescale-label-medium-line-height);
+  letter-spacing: var(--md-sys-typescale-label-medium-tracking);
+}
+
+.metadata dd {
+  min-width: 0;
+  margin: 0;
+  color: var(--md-sys-color-on-surface);
+  font-family: var(--md-sys-typescale-body-medium-font);
+  font-size: var(--md-sys-typescale-body-medium-size);
+  font-weight: var(--md-sys-typescale-body-medium-weight);
+  line-height: var(--md-sys-typescale-body-medium-line-height);
+  letter-spacing: var(--md-sys-typescale-body-medium-tracking);
+  overflow-wrap: anywhere;
+}
+
+.metadata dd > span {
+  display: block;
+}
+
+.metadata dd > span + span {
+  margin-block-start: var(--itools-space-2);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.metadata dd code {
+  display: inline-block;
+  max-width: 100%;
+  margin-block-start: var(--itools-space-1);
+  border-radius: var(--md-sys-shape-corner-small);
+  background: var(--md-sys-color-surface-container-high);
+  color: var(--md-sys-color-on-surface);
+  padding: var(--itools-space-1) var(--itools-space-2);
+  font-family: var(--md-sys-typescale-body-small-font);
+  font-size: var(--md-sys-typescale-body-small-size);
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.metadata dd ul {
+  display: grid;
+  gap: var(--itools-space-1);
+  margin: var(--itools-space-2) 0 0;
+  padding-inline-start: var(--itools-space-4);
+}
+
+.metadata dd li {
+  padding-inline-start: var(--itools-space-1);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--itools-space-2);
+}
+
+@keyframes dialogContentEnter {
+  from {
+    opacity: 0;
+    transform: translateY(var(--itools-space-2))
+      scale(var(--itools-motion-dialog-entry-scale));
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 599px) {
+  .metadata > div {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--itools-space-1);
+  }
+
+  .actions {
+    justify-content: flex-end;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .content {
+    animation: none;
+  }
+}

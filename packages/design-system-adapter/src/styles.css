@@ -28,7 +28,16 @@
   --itools-layout-content-max: 80rem;
   --itools-layout-readable-max: 72ch;
   --itools-layout-page-gutter: var(--itools-space-4);
-  --itools-layout-sidebar-width: 17.5rem;
+  --itools-layout-sidebar-width: 18.5rem;
+  --itools-layout-app-bar-height: 4.5rem;
+  --itools-layout-brand-mark-size: 2rem;
+  --itools-layout-navigation-item-min-height: 3.5rem;
+  --itools-layout-navigation-home-min-height: 3.75rem;
+  --itools-layout-navigation-tool-min-height: 3rem;
+  --itools-layout-navigation-icon-size: 1.5rem;
+  --itools-layout-dialog-metadata-label-width: 5rem;
+  --itools-layout-focus-ring-width: 0.125rem;
+  --itools-layout-focus-ring-inset: -0.125rem;
 
   --itools-motion-duration-instant: 0ms;
   --itools-motion-duration-short: 150ms;
@@ -36,6 +45,12 @@
   --itools-motion-duration-long: 400ms;
   --itools-motion-easing-standard: cubic-bezier(0.2, 0, 0, 1);
   --itools-motion-easing-emphasized: cubic-bezier(0.2, 0, 0, 1);
+  --itools-motion-feedback-scale: 0.99;
+  --itools-motion-dialog-entry-scale: 0.985;
+
+  --itools-state-layer-hover-opacity: 8%;
+  --itools-state-layer-focus-opacity: 10%;
+  --itools-state-layer-pressed-opacity: 10%;
 }
 
 @media (min-width: 52.5rem) {
