@@ -48,7 +48,7 @@ describe('stage 2 application preview', () => {
     expect(categoryCount).not.toHaveAttribute('role');
     expect(categoryCount).not.toHaveAttribute('tabindex');
     expect(
-      within(screen.getByRole('banner')).getByRole('button', {
+      within(screen.getByRole('banner')).getByRole('searchbox', {
         name: '搜索工具',
       }),
     ).toBeEnabled();
@@ -185,18 +185,35 @@ describe('stage 2 application preview', () => {
     expect(screen.queryByRole('dialog', { name: '图片信息检查' })).toBeNull();
   });
 
-  it('places the compact expand button at the header end and reuses the accordion in its drawer', async () => {
+  it('keeps the compact app bar focused on search and exposes navigation and actions in the drawer', async () => {
     window.innerWidth = 390;
     const user = userEvent.setup();
     render(<App />);
 
-    const expandButton = screen.getByRole('button', { name: '展开' });
-    expect(expandButton.parentElement?.lastElementChild).toBe(expandButton);
-    expect(expandButton).toHaveAttribute('aria-expanded', 'false');
-    await user.click(expandButton);
+    const appBar = screen.getByRole('banner');
+    const searchField = within(appBar).getByRole('searchbox', {
+      name: '搜索工具',
+    });
+    const navigationButton = within(appBar).getByRole('button', {
+      name: '打开导航抽屉和工具分类',
+    });
+    expect(appBar.children).toHaveLength(2);
+    expect(
+      within(appBar).queryByRole('button', { name: '管理预览' }),
+    ).toBeNull();
+    expect(
+      within(appBar).queryByRole('button', { name: '最近任务' }),
+    ).toBeNull();
+    expect(
+      within(appBar).queryByRole('button', { name: '切换深色模式' }),
+    ).toBeNull();
+    expect(searchField).toHaveAttribute('readonly');
+    expect(navigationButton).toHaveAttribute('aria-expanded', 'false');
+    await user.click(navigationButton);
+    expect(screen.queryByRole('dialog', { name: '搜索工具' })).toBeNull();
     const drawer = await screen.findByRole('dialog', { name: '工具分类' });
 
-    expect(expandButton).toHaveAttribute('aria-expanded', 'true');
+    expect(navigationButton).toHaveAttribute('aria-expanded', 'true');
     expect(
       within(drawer).getByRole('button', { name: '关闭分类导航' }),
     ).toHaveFocus();
@@ -205,6 +222,18 @@ describe('stage 2 application preview', () => {
     ).toBeInTheDocument();
     expect(
       within(drawer).getByRole('button', { name: '首页' }),
+    ).toBeInTheDocument();
+    expect(
+      within(drawer).getByRole('button', { name: '切换深色模式' }),
+    ).toBeInTheDocument();
+    expect(
+      within(drawer).getByRole('button', { name: '管理预览' }),
+    ).toBeInTheDocument();
+    await user.click(
+      within(drawer).getByRole('button', { name: '切换深色模式' }),
+    );
+    expect(
+      screen.getByRole('button', { name: '切换浅色模式' }),
     ).toBeInTheDocument();
     await user.click(
       within(drawer).getByRole('button', { name: '文档与文字' }),
@@ -233,7 +262,7 @@ describe('stage 2 application preview', () => {
       }),
     ).toBeInTheDocument();
 
-    await user.click(expandButton);
+    await user.click(navigationButton);
     let reopenedDrawer = await screen.findByRole('dialog', {
       name: '工具分类',
     });
@@ -242,17 +271,32 @@ describe('stage 2 application preview', () => {
     );
     expect(screen.queryByRole('dialog', { name: '工具分类' })).toBeNull();
 
-    await user.click(expandButton);
+    await user.click(navigationButton);
     await screen.findByRole('dialog', { name: '工具分类' });
     await user.keyboard('{Escape}');
     expect(screen.queryByRole('dialog', { name: '工具分类' })).toBeNull();
 
-    await user.click(expandButton);
+    await user.click(navigationButton);
     reopenedDrawer = await screen.findByRole('dialog', { name: '工具分类' });
     const drawerScrim = reopenedDrawer.parentElement?.firstElementChild;
     expect(drawerScrim).not.toBeNull();
     fireEvent.click(drawerScrim!);
     expect(screen.queryByRole('dialog', { name: '工具分类' })).toBeNull();
+  });
+
+  it('opens the command palette from the shared read-only search field', async () => {
+    window.innerWidth = 390;
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(
+      within(screen.getByRole('banner')).getByRole('searchbox', {
+        name: '搜索工具',
+      }),
+    );
+    expect(
+      await screen.findByRole('dialog', { name: '搜索工具' }),
+    ).toBeInTheDocument();
   });
 
   it('opens the recent-task sample panel and navigates to all task samples', async () => {

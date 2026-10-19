@@ -55,6 +55,10 @@
   margin-top: var(--itools-space-6);
 }
 
+.heroActions > * {
+  width: min(100%, 32rem);
+}
+
 .heroArtwork {
   position: relative;
   display: grid;

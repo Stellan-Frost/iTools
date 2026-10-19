@@ -82,19 +82,11 @@
   margin-inline-start: auto;
 }
 
-.topBarIcon,
-.mobileNavigationButton {
+.topBarIcon {
   width: var(--itools-space-12);
   min-width: var(--itools-space-12);
   height: var(--itools-space-12);
   min-height: var(--itools-space-12);
-}
-
-.searchButton {
-  min-width: 12rem;
-  min-height: var(--itools-space-12);
-  flex: 0 0 auto;
-  white-space: nowrap;
 }
 
 .recentAnchor {
@@ -167,6 +159,14 @@
   letter-spacing: var(--md-sys-typescale-title-medium-tracking);
 }
 
+.drawerActions {
+  display: flex;
+  align-items: center;
+  gap: var(--itools-space-2);
+  padding: var(--itools-space-2) var(--itools-space-4);
+  border-block-end: 1px solid var(--md-sys-color-outline-variant);
+}
+
 @media (max-width: 1199px) {
   .topBar {
     padding-inline: var(--itools-space-4);
@@ -179,38 +179,22 @@
 
 @media (max-width: 839px) {
   .topBar {
-    display: grid;
+    display: flex;
     min-height: auto;
-    grid-template-areas: 'brand search actions navigation';
-    grid-template-columns: auto minmax(0, 1fr) auto auto;
-    column-gap: var(--itools-space-1);
     padding-block: var(--itools-space-2);
   }
 
   .brand {
-    grid-area: brand;
-    justify-self: start;
+    display: none;
   }
 
-  .searchButton {
-    grid-area: search;
-    min-width: 0;
+  .topBar > :nth-child(2) {
     width: 100%;
-    justify-content: flex-start;
-    padding-inline: var(--itools-space-2);
+    max-width: none;
   }
 
   .topActions {
-    grid-area: actions;
-    width: auto;
-    justify-content: flex-end;
-    gap: var(--itools-space-1);
-    margin-inline-start: 0;
-  }
-
-  .mobileNavigationButton {
-    grid-area: navigation;
-    justify-self: end;
+    display: none;
   }
 
   .layout {
@@ -237,21 +221,6 @@
 
   .drawerHeader {
     padding-inline: var(--itools-space-3);
-  }
-}
-
-@media (max-width: 419px) {
-  .topBar {
-    grid-template-areas:
-      'brand search navigation'
-      'actions actions actions';
-    grid-template-columns: auto minmax(0, 1fr) auto;
-    row-gap: var(--itools-space-1);
-  }
-
-  .topActions {
-    width: 100%;
-    justify-content: flex-end;
   }
 }
 

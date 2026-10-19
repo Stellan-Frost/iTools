@@ -9,6 +9,7 @@ import { CategoryCard } from '../../components/catalog/CategoryCard.js';
 import { ToolCard } from '../../components/catalog/ToolCard.js';
 import { AppIcon } from '../../components/app-icon/AppIcon.js';
 import { MetadataChip } from '../../components/page-chrome/MetadataChip.js';
+import { ToolSearchEntry } from '../../components/tool-search-entry/ToolSearchEntry.js';
 import styles from './HomePage.module.css';
 
 interface HomePageProps {
@@ -27,13 +28,7 @@ export function HomePage({ onNavigate, onOpenSearch }: HomePageProps) {
             浏览分类目录与统一的工具页面样本。所有内容都用于展示界面结构，当前不会处理文件或保存任务。
           </p>
           <div className={styles.heroActions}>
-            <Button
-              variant="filled"
-              startIcon={<AppIcon name="search" />}
-              onClick={onOpenSearch}
-            >
-              搜索工具
-            </Button>
+            <ToolSearchEntry onOpenSearch={onOpenSearch} />
             <Button
               variant="text"
               style={{ color: 'var(--md-sys-color-on-primary-container)' }}

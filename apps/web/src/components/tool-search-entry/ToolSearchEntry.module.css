@@ -1,0 +1,17 @@
+.searchEntry {
+  --md-search-bar-width: 100%;
+  --md-search-bar-min-width: 0;
+  min-width: 0;
+  width: 100%;
+  max-width: 34rem;
+  flex: 1 1 20rem;
+  min-height: var(--itools-space-12);
+  border-radius: var(--md-sys-shape-corner-full);
+}
+
+.navigationButton {
+  width: var(--itools-space-12);
+  min-width: var(--itools-space-12);
+  height: var(--itools-space-12);
+  min-height: var(--itools-space-12);
+}
