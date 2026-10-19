@@ -1,7 +1,7 @@
 # 10 · 测试、质量与 CI
 
 > 状态：**本地测试与质量门禁已实现；CI、Playwright、性能预算未实现（阶段 11）**。
-> 当前基线：409 项 Vitest 测试、28 项生产 HTTP 验收，全部通过。数据库测试跑在真实 PostgreSQL 上。
+> 当前基线：527 项 Vitest 测试、28 项生产 HTTP 验收，全部通过。数据库相关测试跑在真实 PostgreSQL 上。
 
 ## 1. 工具链
 
@@ -63,11 +63,14 @@ node scripts/verify-stage-4.mjs
 | asset-store | `infrastructure/indexeddb/*.test.ts` | 24 | 迁移、原子写入、删除联动、配额降级（`fake-indexeddb`） |
 | asset-store | `create-asset-store.test.ts` | 6 | 真实 IDB 组装：读写、引用、URL、清理、归档往返、关闭 |
 | db | `migrate.test.ts` | 8 | 建表、幂等、checksum 拒绝改写、失败整体回滚、顺序依赖 |
-| db | `infrastructure/*.test.ts` | 15 | 连接池、健康探测硬超时、pg 仓储聚合/级联/单事务 |
+| db | `infrastructure/*.test.ts` | 36 | 连接池、健康探测硬超时、pg 仓储（含凭据/会话/版本）、级联与单事务 |
 | db | `catalog/*.test.ts` | 21 | 覆盖合并、排序、逐字段回落、来源标记、Seed 幂等 |
 | web | `api/*.test.ts` | 9 | 客户端解析、错误码映射、URL 编码、Query 选项 |
 | server | `api/api.test.ts` | 13 | 列表/单条/404/503、健康三态、缓存头、OpenAPI |
 | server | `catalog-integration.test.ts` | 4 | 真实 PG 端到端：迁移 → Seed → 合并 → HTTP |
+| server | `admin/auth/*.test.ts` | 75 | 口令、令牌、会话、Cookie、CSRF、限流、守卫、4 条认证路由 |
+| server | `admin/writes/*.test.ts` | 14 | 文案合并、启停、版本、回滚冲突、非法请求 |
+| server | `admin/admin-integration.test.ts` | 8 | 真实 PG：初始化 → 登录 → 编辑 → 回滚 → 登出 → 401 |
 | adapter | 5 个测试文件 | 9 | Dialog、IconButton、Drawer、图标、主题 |
 | web | `app/route.test.ts` | 33 | URL 解析/生成、可用性、404 |
 | web | `app/seo.test.ts` | 3 | noindex、canonical |

@@ -15,6 +15,10 @@ async function createRuntime(config: ServerConfig): Promise<Runtime> {
     ...(config.databaseUrl === undefined
       ? {}
       : { databaseUrl: config.databaseUrl }),
+    ...(config.adminSetupToken === undefined
+      ? {}
+      : { adminSetupToken: config.adminSetupToken }),
+    secureCookies: config.siteOrigin.startsWith('https://'),
   });
   const api = {
     catalog: catalogRuntime.catalog,
@@ -32,6 +36,9 @@ async function createRuntime(config: ServerConfig): Promise<Runtime> {
       siteOrigin: config.siteOrigin,
       getTemplate: dev.getTemplate,
       api,
+      ...(catalogRuntime.admin === undefined
+        ? {}
+        : { admin: catalogRuntime.admin }),
       registerDevMiddleware: async (instance) => {
         // middie 的 decorate 在插件加载后才生效，因此把 use 推迟到 after 回调。
         instance.register(middie);

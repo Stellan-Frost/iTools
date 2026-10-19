@@ -10,6 +10,8 @@ export interface ServerConfig {
   readonly webRoot: string;
   /** 缺省时目录完全来自代码注册表，健康检查报 skipped。 */
   readonly databaseUrl?: string;
+  /** 一次性初始化令牌；缺省时管理后台初始化入口不存在。 */
+  readonly adminSetupToken?: string;
 }
 
 const DEFAULT_PORT = 5173;
@@ -26,6 +28,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): ServerConfig {
   const siteOrigin = readSiteOrigin(env.SITE_ORIGIN);
   const webRoot = readWebRoot(env.WEB_ROOT);
   const databaseUrl = readDatabaseUrl(env.DATABASE_URL);
+  const adminSetupToken = readAdminSetupToken(env.ADMIN_SETUP_TOKEN);
 
   return {
     mode,
@@ -34,7 +37,18 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): ServerConfig {
     siteOrigin,
     webRoot,
     ...(databaseUrl === undefined ? {} : { databaseUrl }),
+    ...(adminSetupToken === undefined ? {} : { adminSetupToken }),
   };
+}
+
+function readAdminSetupToken(raw: string | undefined): string | undefined {
+  if (raw === undefined || raw.trim() === '') return undefined;
+  const value = raw.trim();
+  // 令牌过短等于没有保护，直接拒绝启动而不是静默降级。
+  if (value.length < 24) {
+    throw new Error('ADMIN_SETUP_TOKEN must be at least 24 characters.');
+  }
+  return value;
 }
 
 function readDatabaseUrl(raw: string | undefined): string | undefined {

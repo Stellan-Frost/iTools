@@ -19,6 +19,9 @@ export { createPool } from './infrastructure/pool.js';
 export type { PoolOptions } from './infrastructure/pool.js';
 export { createPgCatalogRepository } from './infrastructure/pg-catalog-repository.js';
 export type { PgCatalogRepositoryOptions } from './infrastructure/pg-catalog-repository.js';
+export { createPgAdminCredentialRepository } from './infrastructure/pg-admin-credentials.js';
+export { createPgAdminSessionRepository } from './infrastructure/pg-admin-sessions.js';
+export { createPgAdminVersionRepository } from './infrastructure/pg-admin-versions.js';
 export { createDatabaseProbe } from './infrastructure/probe.js';
 export type { DatabaseProbeOptions } from './infrastructure/probe.js';
 
@@ -34,3 +37,7 @@ export {
 export type { CreateToolCatalogServiceOptions } from './catalog/tool-catalog-service.js';
 export { seedCatalog } from './catalog/seed-catalog.js';
 export type { SeedCatalogOptions } from './catalog/seed-catalog.js';
+export {
+  findRegistryItem,
+  listRegistryToolIds,
+} from './catalog/registry-info.js';

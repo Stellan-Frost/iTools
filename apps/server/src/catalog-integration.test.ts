@@ -35,7 +35,7 @@ const fakeRenderer: SsrRenderer = {
 };
 
 const pool = createPool({ connectionString: databaseUrl });
-const runtime = createCatalogRuntime({ databaseUrl });
+const runtime = createCatalogRuntime({ databaseUrl, secureCookies: false });
 
 beforeAll(async () => {
   // 独立测试库：重建 schema 后跑迁移与 Seed。

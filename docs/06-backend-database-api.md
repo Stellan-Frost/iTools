@@ -2,7 +2,7 @@
 
 > 状态：**已实现（阶段 7，S2 范围 + M1 语义）**。代码入口：`packages/db`、`apps/server/src/api/**`、`apps/web/src/api/**`。
 > 已实现：PostgreSQL + Drizzle schema、版本化迁移、Seed、只读 `/api/v1`、健康检查、OpenAPI、前端类型安全客户端。
-> 未实现：管理员认证与写接口（阶段 8）、CSP 与限流（阶段 9）、CI（阶段 11）。
+> 管理员认证与写接口已在阶段 8 实现，见 [07](07-admin-console.md)。未实现：后台 UI、CSP 与全局限流策略（阶段 9）、CI（阶段 11）。
 
 ## 1. 关键决策
 

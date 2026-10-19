@@ -1,7 +1,9 @@
 # 07 · 管理后台
 
-> 状态：**仅界面预览（阶段 8 待实施）**。`/{locale}/admin` 可访问，但没有认证、写入、数据库或权限校验；所有开关只存在内存。
-> 阶段 8 的三项决策已定：**不给后台开放分类与图标编辑**（D29）、**元数据版本保留最近 50 版**（D30）、**初始化令牌来自环境变量 + 网页初始化页**（D31）。
+> 状态：**后端与接口已实现（阶段 8 第一部分）；后台界面仍为预览，尚未接线**。
+> 已实现：`admin_credentials` 表、口令哈希、会话、Cookie、CSRF、限流、初始化/登录/登出、元数据编辑、启停、版本列表与回滚（`apps/server/src/admin/**`）。
+> 未实现：初始化页、登录页、后台表单与版本历史 UI（T3-*）。
+> 阶段 8 的三项决策：**不给后台开放分类与图标编辑**（D29）、**元数据版本保留最近 50 版**（D30）、**初始化令牌来自环境变量 + 网页初始化页**（D31）。
 
 ## 权限模型
 - 首期唯一管理员；不开放注册，不建设普通用户账户系统。
@@ -38,3 +40,31 @@
 ## UI
 - 使用全站设计系统；中英文完整。
 - 后台写操作必须显示明确结果和失败原因；破坏性操作需确认。
+
+## 已实现的后端接口
+
+| 方法 | 路径 | 说明 |
+| --- | --- | --- |
+| POST | `/api/v1/admin/setup` | 校验 `ADMIN_SETUP_TOKEN` + 设置口令，成功后自动登录；重复调用 409 |
+| POST | `/api/v1/admin/session` | 登录（固定限流 5 次 / 15 分钟），成功轮换新 token |
+| GET | `/api/v1/admin/session` | 当前会话信息 |
+| DELETE | `/api/v1/admin/session` | 撤销当前会话并清除 Cookie |
+| PATCH | `/api/v1/admin/tools/:toolId/metadata` | 双语文案 + 排序，写版本快照 |
+| PATCH | `/api/v1/admin/tools/:toolId/availability` | 下架 / 恢复注册表默认 |
+| GET | `/api/v1/admin/tools/:toolId/versions` | 版本列表（倒序） |
+| POST | `/api/v1/admin/tools/:toolId/rollback` | 回滚，需携带 `expectedVersionId` 防覆盖 |
+
+实现要点：
+
+- 口令 `scrypt`（N=16384, r=8, p=1）+ 随机盐，`timingSafeEqual` 比较。
+- 会话 token 32 字节随机，库中只存 sha256 哈希；空闲 7 天滑动、绝对 30 天封顶。
+- CSRF 双提交：`itools_admin_csrf` 可读 Cookie + `x-csrf-token` 头，非 GET/HEAD 强制校验。
+- 所有管理响应 `cache-control: no-store`；错误信封 `{ code, message, requestId }`，固定文案不泄露内部信息。
+
+## 已知限制
+
+- 会话 Cookie 的 `Max-Age` 在登录时固定为 7 天，后续请求只做服务端滑动续期，**浏览器端不会自动续期**：持续活跃超过 7 天仍需重新登录。
+- CSRF token 不随会话轮换，生命周期与登录时下发的 Cookie 一致。
+- 限流是进程内固定窗口，多实例部署时各自计数。
+- 元数据写入是「读-改-写」跨多次仓储调用，**没有数据库事务**；并发编辑可能后写覆盖（回滚有 `expectedVersionId` 保护）。
+- 版本快照按「工具 + 语言」记录三条文案；**排序与启停不进入版本历史**（D32）。

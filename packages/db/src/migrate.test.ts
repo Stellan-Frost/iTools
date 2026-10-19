@@ -50,18 +50,19 @@ async function indexNames(pool: Pool): Promise<readonly string[]> {
 }
 
 describe('migrate', () => {
-  it('在新库上创建 4 张表与全部索引', async () => {
+  it('在新库上创建全部表与索引', async () => {
     await withMigratedSchema(async (pool) => {
       const report = await migrate({ pool, migrationsDir: MIGRATIONS_DIR });
 
       expect(report).toEqual({
-        applied: ['0001_initial.sql'],
+        applied: ['0001_initial.sql', '0002_admin_credentials.sql'],
         skipped: [],
       });
 
       const tables = await tableNames(pool);
       expect(tables).toContain('_migrations');
       expect(tables.filter((name) => name !== '_migrations')).toEqual([
+        'admin_credentials',
         'admin_sessions',
         'tool_localizations',
         'tool_metadata_versions',
@@ -71,6 +72,7 @@ describe('migrate', () => {
       const indexes = await indexNames(pool);
       expect(indexes.filter((name) => !name.startsWith('_migrations'))).toEqual(
         [
+          'admin_credentials_pkey',
           'admin_sessions_expires_idx',
           'admin_sessions_pkey',
           'admin_sessions_token_hash_idx',
@@ -138,10 +140,13 @@ describe('migrate', () => {
       const first = await migrate({ pool, migrationsDir: MIGRATIONS_DIR });
       const second = await migrate({ pool, migrationsDir: MIGRATIONS_DIR });
 
-      expect(first.applied).toEqual(['0001_initial.sql']);
+      expect(first.applied).toEqual([
+        '0001_initial.sql',
+        '0002_admin_credentials.sql',
+      ]);
       expect(second).toEqual({
         applied: [],
-        skipped: ['0001_initial.sql'],
+        skipped: ['0001_initial.sql', '0002_admin_credentials.sql'],
       });
     });
   });

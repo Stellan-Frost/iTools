@@ -1,6 +1,6 @@
 # 00 · 架构总览与开发入口
 
-> 状态：**已实现阶段 0–7**（Monorepo、设计系统、SSR 路由、i18n/SEO、三态工具注册表、任务运行时、本地文件资产、数据库与只读 API）。
+> 状态：**已实现阶段 0–7，阶段 8 后端已完成**（Monorepo、设计系统、SSR 路由、i18n/SEO、三态工具注册表、任务运行时、本地文件资产、数据库与 API、管理员认证与写接口）。
 > 目标站点：`itools.wataa.men`。
 > 本文是新 Agent 的唯一入口：先读本文，再按需读 01–15。
 
@@ -16,9 +16,10 @@
 - 全局任务运行时：7 态状态机、FIFO + 资源感知调度、Worker 池、协作取消与超时强杀、结果提交后才算完成。
 - 本地文件资产存储：源/中间/结果三类资产、IndexedDB 原子写入、对象 URL 生命周期、保留策略、配额提示、归档导出导入。
 - 数据库与 API：PostgreSQL + Drizzle、版本化迁移、Seed、只读 `/api/v1/tools`、liveness/readiness、OpenAPI、前端类型安全客户端；注册表权威，数据库只做覆盖。
+- 管理员后端：一次性初始化、会话 Cookie、CSRF、固定限流、双语元数据编辑、启停、版本列表与回滚（后台 UI 尚未接线）。
 - 6 个可见样本工具是 `preview`，另有 1 个 `disabled` 样本（`csv-inspector`，用于 404 验收）；`implemented` 为 0，**没有任何真实工具可执行**。
 
-**明确未实现**：管理员认证与后台写接口、真实工具执行与任务 UI、真实 Worker 脚本与页面接线、PWA、CI、部署。
+**明确未实现**：后台管理 UI（初始化页/登录页/表单）、真实工具执行与任务 UI、真实 Worker 脚本与页面接线、PWA、CI、部署。
 
 ## 2. 工作区与依赖方向
 
@@ -91,7 +92,7 @@ node scripts/verify-stage-4.mjs   # 生产产物 HTTP 验收；需先 build
 pnpm verify                # 以上全链路总门禁
 ```
 
-当前基线：测试 409 项（contracts 9、app-core 49、task-runtime 66、asset-store 131、db 44、adapter 9、web 70、server 31），HTTP 验收 28 项通过。CI 尚未接入。
+当前基线：测试 527 项（contracts 9、app-core 49、task-runtime 66、asset-store 131、db 65、adapter 9、web 70、server 128），HTTP 验收 28 项通过。CI 尚未接入。
 
 ## 4. 代码地图
 
@@ -107,6 +108,7 @@ pnpm verify                # 以上全链路总门禁
 | `apps/web/src/components/page-chrome/**` | 标题、通知、徽标等展示组件 |
 | `apps/server/src/app.ts` | Fastify 路由、SSR 注入、静态资源、缓存头 |
 | `apps/server/src/api/**` | `/api/v1` 只读路由、健康检查、OpenAPI |
+| `apps/server/src/admin/**` | 管理认证（口令/会话/CSRF/限流）与写接口（文案/启停/版本/回滚） |
 | `apps/server/src/catalog-runtime.ts` | 目录运行时：有 `DATABASE_URL` 走数据库，否则回落注册表 |
 | `apps/web/src/api/**` | 类型安全 API 客户端与 TanStack Query 选项 |
 | `apps/server/src/renderer/{dev,prod}.ts` | Vite middleware / 构建产物加载 |
@@ -148,7 +150,7 @@ pnpm verify                # 以上全链路总门禁
 | 04 | 任务运行时与 Worker | 已实现（阶段 5；未接工具与 UI） |
 | 05 | 文件资产与 IndexedDB | 已实现（阶段 6；未接工具与 UI） |
 | 06 | 后端、数据库与 API | 已实现（阶段 7；只读 API，无认证） |
-| 07 | 管理后台 | 仅预览（阶段 8） |
+| 07 | 管理后台 | 后端已实现，UI 仅预览（阶段 8 部分完成） |
 | 08 | 安全与隐私 | 部分（本地边界已遵守，CSP/认证未实现） |
 | 09 | PWA、离线与缓存 | 未实现（阶段 10） |
 | 10 | 测试、CI 与质量 | 本地测试已实现，CI/Playwright 未实现（阶段 11） |
@@ -162,6 +164,6 @@ pnpm verify                # 以上全链路总门禁
 
 按 [14](14-phase-implementation-roadmap.md) 与 [13](13-acceptance-open-decisions.md)：
 
-- 阶段 8 是唯一管理员与后台写接口：一次性初始化、会话 Cookie、CSRF、来源检查、服务端授权、固定速率限制、元数据版本预览与回滚。`admin_sessions` 与 `tool_metadata_versions` 表已就绪，但**尚无任何写接口**。
+- 阶段 8 剩余部分是**后台 UI**：初始化页、登录页、元数据表单、启停/排序、版本历史与回滚，接到已有的 `/api/v1/admin` 接口（T3-1～T3-7）。
 - 工具清单已确认（D24，31 条 / 30 个可执行），但**首个真实工具的排期未定**。接入时按 03 §5 做注册表注入点重构，并同时接 `@itools/task-runtime`（执行）与 `@itools/asset-store`（结果持久化）。
 - 汇率工具第 68/69 题仍暂缓。

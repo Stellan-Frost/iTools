@@ -4,8 +4,10 @@
  * 因此这里没有 `enabled` 布尔值，也没有 category —— 它们只存在于代码注册表。
  */
 import type { Locale } from '@itools/contracts';
+import { sql } from 'drizzle-orm';
 import {
   bigserial,
+  check,
   index,
   integer,
   jsonb,
@@ -71,6 +73,22 @@ export const toolMetadataVersions = pgTable(
   ],
 );
 
+/** 唯一管理员的凭据。单行约束保证「只有一个管理员」（D05）。 */
+export const adminCredentials = pgTable(
+  'admin_credentials',
+  {
+    id: integer('id').primaryKey(),
+    passwordHash: text('password_hash').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [check('admin_credentials_single_row', sql`${table.id} = 1`)],
+);
+
 /** 唯一管理员会话；阶段 8 才写入，这里先固定形状。 */
 export const adminSessions = pgTable(
   'admin_sessions',
@@ -96,6 +114,7 @@ export const adminSessions = pgTable(
 );
 
 export type ToolRow = typeof tools.$inferSelect;
+export type AdminCredentialRow = typeof adminCredentials.$inferSelect;
 export type ToolLocalizationRow = typeof toolLocalizations.$inferSelect;
 export type ToolMetadataVersionRow = typeof toolMetadataVersions.$inferSelect;
 export type AdminSessionRow = typeof adminSessions.$inferSelect;
