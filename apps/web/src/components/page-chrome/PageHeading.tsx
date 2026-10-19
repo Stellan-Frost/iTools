@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { MetadataChip } from './MetadataChip.js';
 import styles from './PageHeading.module.css';
 
 interface PageHeadingProps {
@@ -17,7 +18,7 @@ export function PageHeading({
   return (
     <div className={styles.heading}>
       <div className={styles.copy}>
-        {eyebrow ? <p className={styles.eyebrow}>{eyebrow}</p> : null}
+        {eyebrow ? <MetadataChip label={eyebrow} /> : null}
         <h1>{title}</h1>
         <p className={styles.description}>{description}</p>
       </div>

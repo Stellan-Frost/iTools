@@ -8,6 +8,7 @@ import type { AppRoute } from '../../app/route.js';
 import { CategoryCard } from '../../components/catalog/CategoryCard.js';
 import { ToolCard } from '../../components/catalog/ToolCard.js';
 import { AppIcon } from '../../components/app-icon/AppIcon.js';
+import { MetadataChip } from '../../components/page-chrome/MetadataChip.js';
 import styles from './HomePage.module.css';
 
 interface HomePageProps {
@@ -58,18 +59,9 @@ export function HomePage({ onNavigate, onOpenSearch }: HomePageProps) {
       </section>
 
       <section className={styles.summary} aria-label="预览目录摘要">
-        <div>
-          <strong>{categories.length}</strong>
-          <span>个样本分类</span>
-        </div>
-        <div>
-          <strong>{tools.length}</strong>
-          <span>个样本界面</span>
-        </div>
-        <div>
-          <strong>0</strong>
-          <span>次真实处理</span>
-        </div>
+        <MetadataChip label={`${categories.length} 个样本分类`} />
+        <MetadataChip label={`${tools.length} 个样本界面`} />
+        <MetadataChip label="0 次真实处理" />
       </section>
 
       <section className={styles.section} aria-labelledby="category-heading">
@@ -107,9 +99,7 @@ export function HomePage({ onNavigate, onOpenSearch }: HomePageProps) {
             <p className={styles.sectionKicker}>SAMPLE TOOLBOX</p>
             <h2 id="featured-heading">常用工具界面样本</h2>
           </div>
-          <span className={styles.sampleCaption}>
-            预览数据 · 不代表真实目录
-          </span>
+          <MetadataChip label="预览数据 · 不代表真实目录" />
         </div>
         <div className={styles.toolGrid}>
           {tools.slice(0, 3).map((tool) => {

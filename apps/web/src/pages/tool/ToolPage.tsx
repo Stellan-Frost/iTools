@@ -1,8 +1,9 @@
-import { Button, Chip } from '@itools/design-system-adapter';
+import { Button } from '@itools/design-system-adapter';
 import type { AppRoute } from '../../app/route.js';
 import { categories, getTool } from '../../data/sample-catalog.js';
 import { PageHeading } from '../../components/page-chrome/PageHeading.js';
 import { PreviewNotice } from '../../components/page-chrome/PreviewNotice.js';
+import { MetadataChip } from '../../components/page-chrome/MetadataChip.js';
 import { ToolInputSection } from './ToolInputSection.js';
 import {
   ResultSample,
@@ -40,7 +41,7 @@ export function ToolPage({ toolId, onNavigate }: ToolPageProps) {
         eyebrow={`${category?.name ?? '工具'} · 工具界面预览`}
         title={tool.title}
         description={tool.summary}
-        actions={<Chip label="尚未接入执行" />}
+        actions={<MetadataChip label="尚未接入执行" />}
       />
       <PreviewNotice>
         本页展示统一工具流程样本。输入、任务状态和结果都不会提交或执行。

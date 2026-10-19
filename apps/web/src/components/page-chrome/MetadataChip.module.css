@@ -1,0 +1,17 @@
+.chip.chip {
+  display: inline-flex;
+  max-width: 100%;
+  min-height: 2rem;
+  box-sizing: border-box;
+  align-items: center;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: var(--itools-shape-corner-rectangle);
+  background: var(--md-sys-color-surface-container-low);
+  padding: var(--itools-space-1) var(--itools-space-3);
+  color: var(--md-sys-color-on-surface-variant);
+  font-family: var(--md-sys-typescale-label-large-font);
+  font-size: var(--md-sys-typescale-label-large-size);
+  font-weight: var(--md-sys-typescale-label-large-weight);
+  line-height: var(--md-sys-typescale-label-large-line-height);
+  overflow-wrap: anywhere;
+}

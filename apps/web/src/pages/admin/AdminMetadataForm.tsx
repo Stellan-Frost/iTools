@@ -2,11 +2,11 @@ import { useState, type FormEvent } from 'react';
 import {
   Button,
   Card,
-  Chip,
   TextField,
   useSnackbar,
 } from '@itools/design-system-adapter';
 import { PreviewNotice } from '../../components/page-chrome/PreviewNotice.js';
+import { MetadataChip } from '../../components/page-chrome/MetadataChip.js';
 import styles from './AdminPage.module.css';
 
 export function AdminMetadataForm() {
@@ -41,7 +41,7 @@ export function AdminMetadataForm() {
           <p>METADATA FORM</p>
           <h2 id="metadata-heading">元数据编辑样本</h2>
         </div>
-        <Chip label="图片信息检查" />
+        <MetadataChip label="图片信息检查" />
       </div>
       <Card>
         <form
@@ -82,7 +82,7 @@ export function AdminMetadataForm() {
           />
           <div className={styles.formSummary}>
             <span>所属分类</span>
-            <strong>图像与设计</strong>
+            <MetadataChip label="图像与设计" />
             <span>标识符</span>
             <code>image-inspector</code>
           </div>

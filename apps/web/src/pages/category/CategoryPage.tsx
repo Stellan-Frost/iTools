@@ -8,6 +8,7 @@ import {
 import { ToolCard } from '../../components/catalog/ToolCard.js';
 import { PageHeading } from '../../components/page-chrome/PageHeading.js';
 import { PreviewNotice } from '../../components/page-chrome/PreviewNotice.js';
+import { MetadataChip } from '../../components/page-chrome/MetadataChip.js';
 import styles from './CategoryPage.module.css';
 
 interface CategoryPageProps {
@@ -39,11 +40,7 @@ export function CategoryPage({ categoryId, onNavigate }: CategoryPageProps) {
         eyebrow="工具分类 · 界面预览"
         title={category.name}
         description={category.description}
-        actions={
-          <span className={styles.count}>
-            {categoryTools.length} 个样本工具
-          </span>
-        }
+        actions={<MetadataChip label={`${categoryTools.length} 个样本工具`} />}
       />
       <PreviewNotice>
         以下内容是用于展示目录浏览方式的样本，不代表已接入真实工具。

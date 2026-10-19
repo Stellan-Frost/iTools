@@ -1,6 +1,7 @@
 import { Button, Dialog } from '@itools/design-system-adapter';
 import { getCategory, type ToolDefinition } from '../../data/sample-catalog.js';
 import { AppIcon } from '../app-icon/AppIcon.js';
+import { MetadataChip } from '../page-chrome/MetadataChip.js';
 import styles from './ToolInfoDialog.module.css';
 
 interface ToolInfoDialogProps {
@@ -42,7 +43,7 @@ export function ToolInfoDialog({
           <div>
             <dt>分类</dt>
             <dd>
-              <span>{category?.name ?? '样本分类'}</span>
+              <MetadataChip label={category?.name ?? '样本分类'} />
               {category ? <span>{category.description}</span> : null}
             </dd>
           </div>

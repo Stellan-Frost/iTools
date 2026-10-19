@@ -1,11 +1,11 @@
 import {
   Card,
-  Chip,
   CircularProgressIndicator,
   LinearProgressIndicator,
 } from '@itools/design-system-adapter';
 import type { ToolDefinition } from '../../data/sample-catalog.js';
 import { AppIcon } from '../../components/app-icon/AppIcon.js';
+import { MetadataChip } from '../../components/page-chrome/MetadataChip.js';
 import styles from './ToolPage.module.css';
 
 interface WorkspaceSampleProps {
@@ -29,7 +29,7 @@ export function WorkspaceSample({ tool }: WorkspaceSampleProps) {
               <p className={styles.sampleLabel}>WORKSPACE SAMPLE</p>
               <h3>{tool.workspaceTitle}</h3>
             </div>
-            <Chip label="预览数据" />
+            <MetadataChip label="预览数据" />
           </div>
           <pre
             className={styles.workspacePreview}
@@ -66,7 +66,7 @@ export function TaskStatusSample() {
               <h3>处理任务状态样本</h3>
               <p>演示任务 · 未加入队列</p>
             </div>
-            <Chip label="等待中" />
+            <MetadataChip label="等待中" />
           </div>
           <div className={styles.progressRow}>
             <LinearProgressIndicator
@@ -101,7 +101,7 @@ export function ResultSample() {
             aria-label="结果状态组件样本"
           />
           <div>
-            <Chip label="结果展示样本" />
+            <MetadataChip label="结果展示样本" />
             <h3>尚无处理结果</h3>
             <p>
               真实工具运行和结果保存尚未接入，因此不会在这里生成文件或输出。

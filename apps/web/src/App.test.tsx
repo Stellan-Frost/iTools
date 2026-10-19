@@ -39,6 +39,17 @@ describe('stage 2 application preview', () => {
     expect(screen.getByText(/不会提交或执行/)).toBeInTheDocument();
   });
 
+  it('presents catalog metadata as non-interactive labels', () => {
+    render(<App />);
+
+    const categoryCount = screen.getByText('5 个样本分类');
+
+    expect(categoryCount.tagName).toBe('SPAN');
+    expect(categoryCount).not.toHaveAttribute('role');
+    expect(categoryCount).not.toHaveAttribute('tabindex');
+    expect(screen.getByRole('button', { name: '搜索工具' })).toBeEnabled();
+  });
+
   it('expands multiple desktop categories without navigating', async () => {
     const user = userEvent.setup();
     render(<App />);

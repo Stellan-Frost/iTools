@@ -1,6 +1,7 @@
-import { Button, Card, Chip } from '@itools/design-system-adapter';
+import { Button, Card } from '@itools/design-system-adapter';
 import type { ToolDefinition } from '../../data/sample-catalog.js';
 import { AppIcon } from '../app-icon/AppIcon.js';
+import { MetadataChip } from '../page-chrome/MetadataChip.js';
 import styles from './ToolCard.module.css';
 
 interface ToolCardProps {
@@ -19,7 +20,7 @@ export function ToolCard({ tool, categoryName, onOpen }: ToolCardProps) {
         <div className={styles.copy}>
           <div className={styles.heading}>
             <h3>{tool.title}</h3>
-            <Chip label={categoryName} />
+            <MetadataChip label={categoryName} />
           </div>
           <p>{tool.summary}</p>
           <Button variant="text" onClick={onOpen}>

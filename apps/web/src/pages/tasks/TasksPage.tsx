@@ -1,9 +1,10 @@
-import { Button, Card, Chip } from '@itools/design-system-adapter';
+import { Button, Card } from '@itools/design-system-adapter';
 import type { AppRoute } from '../../app/route.js';
 import { sampleTasks } from '../../data/sample-catalog.js';
 import { AppIcon } from '../../components/app-icon/AppIcon.js';
 import { PageHeading } from '../../components/page-chrome/PageHeading.js';
 import { PreviewNotice } from '../../components/page-chrome/PreviewNotice.js';
+import { MetadataChip } from '../../components/page-chrome/MetadataChip.js';
 import styles from './TasksPage.module.css';
 
 interface TasksPageProps {
@@ -24,7 +25,7 @@ export function TasksPage({ onNavigate }: TasksPageProps) {
       <Card>
         <div className={styles.listHeader}>
           <h2>任务列表</h2>
-          <span>样本 {sampleTasks.length} 条</span>
+          <MetadataChip label={`样本 ${sampleTasks.length} 条`} />
         </div>
         <ul className={styles.taskList}>
           {sampleTasks.map((task) => (
@@ -35,10 +36,11 @@ export function TasksPage({ onNavigate }: TasksPageProps) {
               <div className={styles.taskDetails}>
                 <strong>{task.title}</strong>
                 <span>
-                  {task.category} · {task.timeLabel}
+                  <MetadataChip label={task.category} />
+                  <MetadataChip label={task.timeLabel} />
                 </span>
               </div>
-              <Chip label={task.status} />
+              <MetadataChip label={task.status} />
               <Button
                 variant="text"
                 onClick={() =>
