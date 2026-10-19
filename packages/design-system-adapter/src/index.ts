@@ -25,7 +25,6 @@ export {
   ListItem,
   Menu,
   NavigationBar,
-  NavigationDrawer,
   NavigationDrawerItem,
   NavigationRail,
   NavigationRailItem,
@@ -44,6 +43,7 @@ export {
   useSnackbar,
 } from 'm3-expressive-react';
 export { Dialog } from './components/Dialog.js';
+export { NavigationDrawer } from './components/NavigationDrawer.js';
 
 export type {
   AutocompleteProps,
