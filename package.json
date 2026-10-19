@@ -1,0 +1,28 @@
+{
+  "name": "itools",
+  "private": true,
+  "version": "0.0.0",
+  "packageManager": "pnpm@11.25.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "node scripts/run-turbo.mjs build",
+    "check:boundaries": "node scripts/check-boundaries.mjs",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "eslint packages scripts && pnpm check:boundaries",
+    "test": "node scripts/run-turbo.mjs test",
+    "typecheck": "node scripts/run-turbo.mjs typecheck"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "eslint": "10.13.0",
+    "globals": "17.13.0",
+    "prettier": "3.9.10",
+    "turbo": "2.11.9",
+    "typescript": "6.0.2",
+    "typescript-eslint": "8.71.2",
+    "vitest": "5.0.5"
+  }
+}
