@@ -1,216 +1,58 @@
-# @itools/design-system-adapter
+# `@itools/design-system-adapter`
 
-Thin app adapter for the pinned `m3-expressive-react@1.6.0` Material 3 component library. The adapter owns the fixed app theme and local fonts; the library continues to own the internal component markup, interaction and styling.
+应用唯一的 Material 3 UI 接入层。包装器负责 iTools 主题、少量形状适配和本地字体；组件主体、交互与组件样式由锁定的 `m3-expressive-react@1.6.0` 提供。应用应从此包导入基础 UI，不直接导入主库。
 
-## Setup and usage
+## 接入
 
-Import the package stylesheet exactly once from the app's global entry point. It is the only global style entry and loads the component styles and self-hosted fonts:
+在应用全局入口只引入一次样式：
 
 ```tsx
 // apps/web/src/main.tsx
 import '@itools/design-system-adapter/styles.css';
 ```
 
+最小根级提供器：
+
 ```tsx
 import {
   AppThemeProvider,
-  Button,
-  Card,
-  Chip,
-  Dialog,
-  IconButton,
-  MaterialIcon,
-  NavigationDrawer,
-  NavigationDrawerItem,
   SnackbarProvider,
-  TextField,
-  useSnackbar,
 } from '@itools/design-system-adapter';
 
-function SaveAction() {
-  const { show } = useSnackbar();
-
-  return (
-    <Button
-      variant="filled"
-      onClick={() => void show({ message: 'Saved', duration: 'short' })}
-    >
-      Save
-    </Button>
-  );
-}
-
-export function App() {
-  return (
-    <AppThemeProvider mode="light">
-      <SnackbarProvider>
-        <NavigationDrawer aria-label="Main navigation">
-          <NavigationDrawerItem value="home" label="Home" icon={<MaterialIcon name="home" />} />
-        </NavigationDrawer>
-        <Card>
-          <TextField label="Tool name" />
-          <Chip label="Ready" variant="assist" />
-          <IconButton aria-label="Search"><MaterialIcon name="search" /></IconButton>
-          <SaveAction />
-        </Card>
-        <Dialog open={false} title="Details" />
-      </SnackbarProvider>
-    </AppThemeProvider>
-  );
-}
+<AppThemeProvider mode="light">
+  <SnackbarProvider>{children}</SnackbarProvider>
+</AppThemeProvider>;
 ```
 
-Set `mode` to `'light'` or `'dark'` from the app's own preference state. `AppThemeProvider` always uses seed `#009688`, `SchemeVibrant`, MCU spec version `2025`, `phone` platform, and contrast level `0`.
+`mode` 必须由应用传入 `'light' | 'dark'`。当前 App 初值为 light，状态只存在内存中。
 
-`MaterialIcon` renders a Material Symbols ligature. It is decorative and hidden from assistive technology by default. Pass `aria-label` when the symbol itself conveys meaning. Its `size` is in CSS pixels and defaults to 24.
+## 公开入口
 
-The package entry re-exports the library's Button, IconButton, TextField, Dialog, Card and card actions, navigation drawer and rail, snackbar provider and hook, linear and circular progress indicators, Switch, Chip, and supporting form, list, search, menu, tabs and feedback components. Import these components through this adapter; application code should not import `m3-expressive-react` directly.
+从包根入口 `src/index.ts` 导入组件及其公开 Props 类型。可用项包括：
 
-The adapter's `IconButton` wrapper pins `borderRadius` to `var(--md-sys-shape-corner-full)` through the library's public `style` prop. This keeps the surface circular in default, selected, pressed and focus states, even though the upstream component normally morphs its shape while pressed or toggled. The upstream button keeps its 48px minimum hit area independently of the selected visual `size`.
+- 适配器：`AppThemeProvider` / `AppThemeProviderProps`、`MaterialIcon` / `MaterialIconProps`、`IconButton` / `IconButtonProps`、`Dialog` / `DialogProps`、`NavigationDrawer` / `NavigationDrawerProps`。
+- 主库组件：`Button`、`ButtonGroup`、`IconButton` 包装器、`TextField`、`SearchBar`、`Dialog` 包装器、`Card` 及 actions、`Chip`、`NavigationDrawer` 包装器及 item、`NavigationRail` 及 item、`SnackbarProvider` / `useSnackbar`、线性与环形进度、表单控件、列表、菜单、tabs、tooltip、autocomplete、date picker、bottom sheet、badge、divider、fab 等；对应 Props 类型亦从根入口导出，具体导出名以 `src/index.ts` 为准。
+- 主题工具：`APP_THEME_SEED`、`APP_COLOR_ROLES`、`generateAppColorScheme`、`appColorSchemeToCssVars` 及相关主题类型。
 
-## Color generation
+`IconButton`、`Dialog`、`NavigationDrawer` 包装器以 `forwardRef` 保留对应主库公开 ref 和 Props。IconButton 固定圆形 `borderRadius`；Dialog 固定 48px 圆角；NavigationDrawer 将末端两角设为 32px、起始边保持贴合。包装器透传其余公开 props。`IconButton` 的 48px 最小点击区域由上游组件提供，不随视觉 `size` 缩小。`MaterialIcon` 使用本地 Material Symbols ligature，默认 24px，默认对辅助技术隐藏；若符号本身传递含义可传 `aria-label`。
 
-Colors are generated in `src/theme/colors.ts` with the locked `@material/material-color-utilities@0.4.0` package. The generation input is fixed and explicit so package default changes cannot silently switch the scheme:
+## 主题与 Token
 
-```ts
-new SchemeVibrant(
-  Hct.fromInt(argbFromHex('#009688')),
-  mode === 'dark',
-  0,
-  '2025',
-  'phone',
-);
-```
+`AppThemeProvider` 使用 `#009688`、MCU `SchemeVibrant`、2025 规范、phone 平台和 contrast level 0，生成 53 个 `--md-sys-color-*` 语义角色。适配层覆盖组件库的 CSS 颜色变量；组件库 ThemeProvider/context 仍来自上游 1.6.0，内置颜色模型基于 2021 规范且少四个 2025 dim roles。不要把上游 `useTheme()` 的颜色映射当作 2025 全量角色来源。具体生成逻辑在 `src/theme/colors.ts`，无需在此重复整张颜色表。
 
-Each of the 53 semantic roles becomes `--md-sys-color-{kebab-case-role}` on the provider element. The library provider still supplies its 1.6.0 context and standard component behavior; the adapter's generated role variables override the library's 2021 scheme values, including the four additional 2025 roles `primaryDim`, `secondaryDim`, `tertiaryDim`, and `errorDim`. The table records the emitted values for seed `#009688`.
+| Token 组 | 入口及值                                                                                                             |
+| -------- | -------------------------------------------------------------------------------------------------------------------- |
+| 间距     | `--itools-space-*`：4px 基数，0.25rem 至 4rem，包含 1、2、3、4、5、6、8、10、12、16 级。                             |
+| 断点     | compact 600px、medium 840px、expanded 1200px、large 1600px；CSS media query 使用对应字面值。                         |
+| 布局     | 内容最大宽 80rem、可读宽 72ch、侧栏宽 18.5rem；页边距随 medium/expanded 增长。                                       |
+| 形状     | app rectangle 32px、Dialog 48px；MD3 类型比例 15 个 display/headline/title/body/label 角色由上游提供。               |
+| 动效     | instant 0ms、short 150ms、medium 250ms、long 400ms；state layer hover 8%，focus/pressed 10%。                        |
+| 字体     | Roboto Variable、Noto Sans SC Variable、Material Symbols Rounded 400，均由 Fontsource 打包进应用，无运行时字体 CDN。 |
 
-| Role | Light | Dark |
-| --- | --- | --- |
-| background | `#d3fffd` | `#001111` |
-| onBackground | `#003534` | `#b8f3f1` |
-| surface | `#d3fffd` | `#001111` |
-| surfaceDim | `#87e4e2` | `#001111` |
-| surfaceBright | `#d3fffd` | `#003232` |
-| surfaceContainerLowest | `#ffffff` | `#000000` |
-| surfaceContainerLow | `#bafdfb` | `#001716` |
-| surfaceContainer | `#adf5f3` | `#001e1d` |
-| surfaceContainerHigh | `#a2f0ee` | `#002424` |
-| surfaceContainerHighest | `#96ebe9` | `#002b2b` |
-| onSurface | `#003534` | `#b8f3f1` |
-| surfaceVariant | `#96ebe9` | `#002b2b` |
-| onSurfaceVariant | `#296463` | `#7bb5b4` |
-| outline | `#46807f` | `#457f7e` |
-| outlineVariant | `#7db7b6` | `#0d5050` |
-| inverseSurface | `#001111` | `#e3fffd` |
-| inverseOnSurface | `#6da7a5` | `#215e5d` |
-| shadow | `#000000` | `#000000` |
-| scrim | `#000000` | `#000000` |
-| surfaceTint | `#00675d` | `#b4fff2` |
-| primary | `#00675d` | `#b4fff2` |
-| primaryDim | `#005a51` | `#00fde7` |
-| onPrimary | `#c0fff4` | `#00665c` |
-| primaryContainer | `#00f7e1` | `#00fde7` |
-| onPrimaryContainer | `#005950` | `#005c53` |
-| inversePrimary | `#00fde7` | `#006b61` |
-| primaryFixed | `#00f7e1` | `#00f7e1` |
-| primaryFixedDim | `#00e8d3` | `#00e8d3` |
-| onPrimaryFixed | `#00443d` | `#00443d` |
-| onPrimaryFixedVariant | `#00635a` | `#00635a` |
-| secondary | `#006666` | `#37fbf8` |
-| secondaryDim | `#005959` | `#0eecea` |
-| onSecondary | `#bbfffd` | `#005c5b` |
-| secondaryContainer | `#37fbf8` | `#006a69` |
-| onSecondaryContainer | `#005c5b` | `#dafffd` |
-| secondaryFixed | `#37fbf8` | `#37fbf8` |
-| secondaryFixedDim | `#0eecea` | `#0eecea` |
-| onSecondaryFixed | `#004747` | `#004747` |
-| onSecondaryFixedVariant | `#006666` | `#006666` |
-| tertiary | `#006287` | `#62c9ff` |
-| tertiaryDim | `#005676` | `#1ebdfd` |
-| onTertiary | `#e7f4ff` | `#003f58` |
-| tertiaryContainer | `#1ebdfd` | `#1ebdfd` |
-| onTertiaryContainer | `#00354a` | `#00354a` |
-| tertiaryFixed | `#1ebdfd` | `#1ebdfd` |
-| tertiaryFixedDim | `#00afec` | `#00afec` |
-| onTertiaryFixed | `#001a27` | `#001a27` |
-| onTertiaryFixedVariant | `#003e57` | `#003e57` |
-| error | `#b31b25` | `#ff716c` |
-| errorDim | `#9f0519` | `#d7383b` |
-| onError | `#ffefee` | `#490006` |
-| errorContainer | `#fb5151` | `#9f0519` |
-| onErrorContainer | `#570008` | `#ffa8a3` |
+当前字体包版本为 Roboto 5.3.0、Noto Sans SC 5.3.1、Material Symbols Rounded 5.3.9；字体包及上游组件库/MCU 的 license 与版本元数据随依赖保留。字体许可证为 SIL OFL 1.1，组件库为 MIT，MCU 为 Apache-2.0。Symbols 当前只加载静态 400 字重，不承诺 FILL、GRAD、opsz 可变轴。
 
-Automated contrast checks cover text-on-surface/background and text-on-accent roles in both modes. Primary text pairs are `#c0fff4` on `#00675d` (6.08:1) in light mode and `#00665c` on `#b4fff2` (6.06:1) in dark mode. These results apply to this seed and default contrast level; validate any future color or contrast change independently.
+适配层和应用样式支持 `prefers-reduced-motion: reduce`：适配层时长归零，应用自有的手风琴和 Dialog 动画关闭；移动 drawer 的开合仍由上游组件控制。当前产品没有用户可切换的减少动态效果设置。
 
-## Layout and foundation tokens
+## 升级检查
 
-Spacing tokens use a 4px base scale and rem units so they respond to the user's root font size.
-
-| Token | Value |
-| --- | ---: |
-| `--itools-space-1` | `0.25rem` (4px) |
-| `--itools-space-2` | `0.5rem` (8px) |
-| `--itools-space-3` | `0.75rem` (12px) |
-| `--itools-space-4` | `1rem` (16px) |
-| `--itools-space-5` | `1.25rem` (20px) |
-| `--itools-space-6` | `1.5rem` (24px) |
-| `--itools-space-8` | `2rem` (32px) |
-| `--itools-space-10` | `2.5rem` (40px) |
-| `--itools-space-12` | `3rem` (48px) |
-| `--itools-space-16` | `4rem` (64px) |
-
-| Breakpoint token | CSS media query | M3 window class |
-| --- | --- | --- |
-| `--itools-breakpoint-compact` | `37.5rem` / 600px | compact upper bound |
-| `--itools-breakpoint-medium` | `52.5rem` / 840px | medium upper bound |
-| `--itools-breakpoint-expanded` | `75rem` / 1200px | expanded upper bound |
-| `--itools-breakpoint-large` | `100rem` / 1600px | large upper bound |
-
-CSS custom properties cannot be used as media-query thresholds, so write these same values as literal `rem` values in `@media`. The tokens document the shared breakpoints for app styles and TypeScript consumers.
-
-`--itools-layout-content-max` is `80rem`, `--itools-layout-readable-max` is `72ch`, `--itools-layout-sidebar-width` is `18.5rem`, and `--itools-layout-page-gutter` grows from `1rem` to `1.5rem` at medium and `2rem` at expanded. Use these values in app-owned page layout CSS.
-
-### Shape and typography tokens
-
-`AppThemeProvider` writes `--itools-shape-corner-rectangle: 2rem` (32px) and `--itools-shape-corner-dialog: 3rem` (48px) through the library `ThemeProvider` public `style` prop. The same style maps the fixed MD3 corner tokens (`extra-small` through `extra-extra-large`) to the rectangle token; `none` and `full` stay at their library values. The adapter's `Dialog` wrapper sets `border-radius: var(--itools-shape-corner-dialog)` through the library's public Dialog `style` prop, which the installed implementation applies directly to the actual dialog surface. Dialog content passes through unchanged and inherits the provider's global 32px fixed shape tokens. The adapter's `NavigationDrawer` wrapper applies the rectangle token to its trailing corners through the public `style` prop while its leading edge remains flush. App-owned rectangular surfaces use the 32px app token. Full-radius capsule and circular geometry retain their semantic shape. The integrations use documented public style props; the library's internal component selectors are not overridden.
-
-The library provides the fifteen text roles as `--md-sys-typescale-{group}-{size}` tokens. Text uses only Display, Headline, Title, Body and Label at Large, Medium or Small. The default role sizes are respectively Display 57/45/36px, Headline 32/28/24px, Title 22/16/14px, Body 16/14/12px and Label 14/12/11px. Font family, weight, line height and tracking come from the matching role tokens. Material Symbols use their own icon size.
-Navigation and shell layout tokens are app-owned dimensions, added to keep the persistent accordion, compact header, and detail metadata aligned across desktop and drawer presentations:
-
-| Token | Value | Use |
-| --- | ---: | --- |
-| `--itools-layout-app-bar-height` | `4.5rem` | Desktop top bar and sticky navigation offset |
-| `--itools-layout-brand-mark-size` | `2rem` | App brand mark |
-| `--itools-layout-navigation-item-min-height` | `3.5rem` | Home/category rows and compact drawer trigger; 56px target |
-| `--itools-layout-navigation-home-min-height` | `3.75rem` | Home row emphasis |
-| `--itools-layout-navigation-tool-min-height` | `3rem` | Tool rows; 48px touch target |
-| `--itools-layout-navigation-icon-size` | `1.5rem` | Accordion category and tool icons |
-| `--itools-layout-dialog-metadata-label-width` | `5rem` | Metadata label column before compact stacking |
-| `--itools-layout-focus-ring-width` | `0.125rem` | Visible keyboard focus ring |
-| `--itools-layout-focus-ring-inset` | `-0.125rem` | Keep row focus rings visible inside the clipped accordion list |
-
-`--itools-state-layer-hover-opacity` is `8%`; focus and pressed layers are `10%`. These opacity values blend the semantic `on-surface` role into the current surface and avoid fixed state colors. The accordion uses the existing short/medium motion durations and standard/emphasized easing for row feedback, expansion, and chevron rotation; no separate component duration is needed.
-
-The small press response uses `--itools-motion-feedback-scale` (`0.99`); the dialog content entrance uses `--itools-motion-dialog-entry-scale` (`0.985`) with the existing medium duration. These scales are shared motion parameters so individual surfaces do not introduce unrelated values.
-
-App motion tokens are `--itools-motion-duration-instant` 0ms, short 150ms, medium 250ms, long 400ms, and standard/emphasized easing `cubic-bezier(0.2, 0, 0, 1)`. `prefers-reduced-motion: reduce` sets all adapter durations to 0ms and app-owned accordion/dialog animations are disabled. The underlying library is configured with the standard motion scheme and its own CSS also sets spatial spring durations to zero for reduced motion. The mobile drawer continues to use the library `NavigationDrawer` open/close transition; app-owned drawer content only controls its scroll and heading layout.
-
-## Local fonts, icons and licenses
-
-Fontsource assets are imported from the exact package versions already pinned in the workspace lockfile and are served by the app build. There are no Google Fonts or other runtime font requests.
-
-| Resource | Package version | Loaded file | License / source metadata |
-| --- | --- | --- | --- |
-| Roboto Variable | `@fontsource-variable/roboto@5.3.0` | `wght.css` (variable 100–900) | SIL Open Font License 1.1; Fontsource package metadata |
-| Noto Sans SC Variable | `@fontsource-variable/noto-sans-sc@5.3.1` | `wght.css` (variable 100–900, Unicode subsets) | SIL Open Font License 1.1; Fontsource package metadata |
-| Material Symbols Rounded | `@fontsource/material-symbols-rounded@5.3.9` | `400.css` (Latin, `v378`) | SIL Open Font License 1.1; Fontsource package metadata |
-
-Fontsource's Material Symbols Rounded package provides static weight files rather than a variable font. This adapter loads weight 400 and does not promise the Symbols `FILL`, `GRAD`, or `opsz` axes; use the available ligatures and alternate symbol names when an outlined/selected distinction is needed. The supplied font package license files and version metadata are the licensing record to retain with the lockfile.
-
-The component library is MIT licensed. `@material/material-color-utilities` is Apache-2.0 licensed; its code and scheme output are not copied into this package.
-
-## Known library constraints
-
-- `m3-expressive-react@1.6.0` has a small maintainer and relatively fast release cadence. Keep the exact version pinned and rerun the adapter tests and app visual checks before upgrades.
-- Its built-in theme generator is still based on the 2021 color spec and exposes fewer roles. `AppThemeProvider` uses it only for the library provider/context, then overrides CSS color variables with the generated 2025 scheme. Do not export or rely on the library `useTheme()` color map as if it included the 2025 roles.
-- The library styles are imported here once. Avoid local overrides of its internal component selectors; use semantic tokens and app-owned layout wrappers.
+`m3-expressive-react`、`@material/material-color-utilities` 和字体包均应按锁定版本审查。升级时检查 `src/index.ts` 导出和 Props/ref 兼容性、Provider/context 与颜色角色差异、公开 style prop 在真实 surface 上的效果、字体许可/资源打包；再运行适配层测试、类型与构建门禁，并检查桌面/移动浅深主题、搜索和导航视觉交互。不要通过覆盖上游内部 CSS 类修补组件；优先使用语义 Token 与应用布局包装。

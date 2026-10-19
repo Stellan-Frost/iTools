@@ -1,144 +1,38 @@
-# 18 · 阶段 2 设计系统与全局应用壳
+# 18 · 阶段 2：应用壳与设计系统交接
 
-> 状态：阶段 2 基线、2026-10-19 鸭青主题、壳层视觉迭代与图标顶栏最终复查均已完成。阶段 3 尚未启动，等待用户下一步指示。设计参考为用户指定的 `@material-3`；当前工具无法读取该私有插件内容，因此组件语义、配色和自适应设计以 [Material 3 官方规范](https://m3.material.io/)核对，待插件可访问时再对照复核。阶段 2 只实现可操作界面预览，不声称 SSR、数据库目录、工具计算或管理员认证已完成。
+> 当前代码交接指南，依据 `apps/web` 与 `packages/design-system-adapter`。阶段 2 的视觉和交互验收已完成；本轮文档更新没有重跑测试、构建或浏览器验收。阶段 3 尚未启动。所有页面和目录仍是前端预览，不代表真实工具执行、持久化、认证或后端服务已实现。
 
-## 目标与页面结构
+## 新 Agent 从哪里开始
 
-| 页面 | 主任务 | 阶段 2 预览内容 |
-| --- | --- | --- |
-| 首页 | 找到工具并了解分类 | 搜索入口、五类工具、最近任务入口、展示样本 |
-| 分类页 | 浏览分类下的工具 | 分类标题、列表/卡片与空状态 |
-| 工具页 | 理解统一处理流程 | 标题简介、输入区、主工作区、任务区、结果区、页面末尾的规范/开源致谢 |
-| 管理后台 | 查看目录管理体验 | 单管理员的工具状态、元数据编辑表单与反馈样本；不执行写入 |
+1. 先读本指南和 [适配层说明](../packages/design-system-adapter/README.md)。
+2. 应用入口在 `apps/web/src/main.tsx`，全局样式只从 `@itools/design-system-adapter/styles.css` 引入。
+3. `App.tsx` 持有内存中的 `route`、`themeMode` 和搜索开关；`AppRoute` 是 `home`、`category`、`tool`、`tasks`、`admin` 五种联合类型。刷新会回到首页和浅色主题，没有 URL 路由或持久化。
+4. `components/app-shell/` 管共享壳、紧凑视口检测、分类手风琴和工具详情 Dialog；`components/tool-search-entry/ToolSearchEntry.tsx` 是首页与顶部栏共用的 SearchBar；`components/command-palette/` 实现搜索对话框。
+5. `data/sample-catalog.ts` 是唯一展示目录及任务样本来源。修改预览数据从此处开始；勿把静态样本描述成已执行结果。
 
-桌面（840 px 及以上）使用持久分类侧栏；窄屏（840 px 以下）在顶栏最右侧显示菜单图标，打开复用同一内容的导航抽屉。顶栏品牌只显示品牌图标；搜索入口显示搜索图标与“搜索工具”文字，不显示快捷键提示；最近任务、主题切换、管理预览和窄屏导航均只显示图标，并提供准确的无障碍名称。窄至 420 px 以下时，搜索与菜单留在首行，最近任务、主题和管理图标在第二行靠右排列；420 px 及以上采用单行布局。所有顶栏控件目标尺寸为 48 px。侧栏和抽屉以手风琴同时展示多个已展开分类及其工具行。搜索命令面板需支持点击、Ctrl/Cmd+K 键盘触发、方向键与 Enter；最近任务有轻量面板与“查看全部”预览入口。首页、搜索、最近任务、主题切换和后台入口跨断点保留。所有样本数据在 `apps/web` 中明确标为界面预览，不建立工具注册表或伪造真实处理结果。
+## 当前壳层行为
 
-## 主组件库与依赖选择
+- `AppShell` 在 840px 以下切换为紧凑布局，顶部栏只显示共享 SearchBar。leading 图标只打开分类抽屉；主题切换、管理预览、最近任务入口在抽屉中。840px 及以上显示品牌、SearchBar、最近任务面板、主题和管理预览，分类导航固定在侧栏。
+- `ToolAccordionNavigation` 在桌面侧栏和移动抽屉复用。分类按钮只展开/收起该组，可同时展开多个分类；它本身不跳转到分类页。工具行打开 `ToolInfoDialog`，其中“关闭”留在当前页面，“前往”才进入对应工具页。进入分类或工具路由时，其分类会自动展开。
+- 移动 SearchBar 的菜单位于 leading slot；抽屉内含主题、管理和最近任务（进入任务页）操作。桌面最近任务图标显示面板，面板可打开样本工具或进入任务页。
+- SearchBar 按 Enter 打开命令面板；Ctrl/Cmd+K 全局打开。面板支持名称、简介、分类检索，方向键选择，Enter 打开工具详情，Escape 由 Dialog 关闭并恢复焦点。搜索入口本身只读，不直接输入。
+- 主题状态是 `App` 中的 React state，初值浅色，点击后即时切换；没有用户偏好存储。`AppThemeProvider` 以 `#009688` 生成主题角色。
+- 桌面品牌图标、图标按钮底板为圆形；品牌标记 32px，通用矩形角 32px，工具详情 Dialog 48px，SearchBar full 圆角 9999px。此处是当前实现约定；视觉细节以源码和下方最终截图为准。
+- 源码支持系统 `prefers-reduced-motion: reduce`，会将适配层动效时长归零并关闭应用自有的部分动画。产品目前没有提供用户可切换的“减少动态效果”设置。
 
-`m3-expressive-react@1.6.0` 作为主 React MD3 组件库，锁定精确版本并包在 `@itools/design-system-adapter` 后。它提供主题、按钮、输入、对话框、导航、反馈和进度组件。选择依据是其当前 MD3 组件覆盖与近期维护；低社区采用、单维护者和快速更新是已知依赖风险。阶段 2 必须通过实际构建、交互测试和桌面/移动视觉检查，不依赖版本声明推断质量。
+## 数据和页面边界
 
-`@material/material-color-utilities@0.4.0` 用于固定鸭青主题来源；字体与 Material Symbols Rounded 从 Fontsource 包打包为站点本地资源，不引入运行时字体 CDN。库与字体版本见各包清单及 `pnpm-lock.yaml`。主应用不得直接依赖 `m3-expressive-react`。
+首页、分类页、工具页、任务页与管理页由 `App.tsx` 按内存路由选择。样本目录包含五个分类、六个工具和三条示例任务，定义在 `apps/web/src/data/sample-catalog.ts`。表单、任务状态和结果区用于展示布局与反馈；工具执行、目录保存、管理员认证都不在当前实现范围内。搜索、导航、主题和抽屉状态也都在浏览器内存中。
 
-## 已冻结的包接口与所有权
+## 阶段 2 当前验收证据
 
-| 所有者 | 允许修改 | 必须提供的公开接口 |
-| --- | --- | --- |
-| 设计系统子任务 | `packages/design-system-adapter/src/**`，该包内测试与说明 | `AppThemeProvider`（`mode: 'light' | 'dark'`、`children`），`MaterialIcon`；从主库经单一入口转出实际使用的 `Button`、`IconButton`、`TextField`、`Dialog`、`Card`、`NavigationDrawer`、`NavigationDrawerItem`、`NavigationRail`、`NavigationRailItem`、`SnackbarProvider`、`useSnackbar`、`LinearProgressIndicator`、`CircularProgressIndicator`、`Switch`、`Chip` 等。`./styles.css` 为唯一全局样式入口。 |
-| 应用壳子任务 | `apps/web/src/**`、`apps/web/index.html`、`apps/web/vite.config.ts`、该应用内测试 | 只通过 `@itools/design-system-adapter` 导入基础 UI；实现首页、分类、工具、后台及共享壳的预览，不添加真实后端或工具执行。 |
-| 根 Agent | 根配置、包清单与锁文件、文档、集成、视觉验收 | 处理跨包接口、依赖冲突、测试与最终阶段验收。 |
+以下四张为当前最终移动搜索导航验收截图，位于 `docs/assets/stage-2/`：
 
-子任务不得修改对方的目录、根清单或锁文件。包内 React 组件文件使用 `PascalCase.tsx`，其余文件和目录沿用 `kebab-case`；公开入口统一在 `src/index.ts`。
+| 状态                | 截图                                                                          |
+| ------------------- | ----------------------------------------------------------------------------- |
+| 桌面首页            | [search-desktop-home.png](assets/stage-2/search-desktop-home.png)             |
+| 移动首页            | [search-mobile-home.png](assets/stage-2/search-mobile-home.png)               |
+| 移动深色导航抽屉    | [search-mobile-drawer-dark.png](assets/stage-2/search-mobile-drawer-dark.png) |
+| 移动工具详情 Dialog | [search-mobile-tool-dialog.png](assets/stage-2/search-mobile-tool-dialog.png) |
 
-## 主题 Token 约束
-
-- 固定种子色：`#009688`（鸭青）。浅色/深色采用 Material Color Utilities 的 `SchemeVibrant`（2025 规范、对比度级别 0）生成完整语义角色；每个模式均包含 primary/secondary/tertiary、surface 各层、outline、error、inverse、fixed/dim 等角色。浅深模式 role 值以 `packages/design-system-adapter/README.md` 的 MCU 输出表为准；页面只引用语义变量，不散布色值。
-- 适配层应保留 `--md-sys-color-*` 的角色关系，并集中定义站点间距、断点、最大宽度、形状、字号与动效 Token。`prefers-reduced-motion` 禁用非必要动效。
-- 英文使用 Roboto，中文使用 Noto Sans SC，图标使用本地 Material Symbols Rounded。通过 CSS 字体栈和本地资源加载，不请求第三方字体服务。
-- 禁止局部 CSS 覆盖主库基础组件内部类；应用 CSS 只负责页面布局与组合。
-
-### 布局 Token 接口
-
-| 类别 | 公开变量 | 用途 |
-| --- | --- | --- |
-| 间距 | `--itools-space-{1,2,3,4,5,6,8,10,12,16}` | 分别为 0.25、0.5、0.75、1、1.25、1.5、2、2.5、3、4 rem；页面组合只用这些间距级别。 |
-| 内容宽度 | `--itools-layout-content-max`、`--itools-layout-readable-max` | 分别为 80 rem、72 ch；宽屏内容与正文阅读宽度。 |
-| 形状 | `--md-sys-shape-corner-{none,extra-small,small,medium,large,extra-large,full}` | 页面组合与主库遵守同一形状级别。 |
-| 自适应 | compact 600 px、medium 840 px、expanded 1200 px、large 1600 px | CSS 媒体查询使用这些固定阈值；CSS 自定义属性不能直接用于媒体查询。 |
-
-排版沿用 `--md-sys-typescale-*`，语义色沿用 `--md-sys-color-*`。适配层 README 是各 Token 的实际取值和示例的单一来源；此表冻结应用可用的命名接口。
-
-壳层矩形轮廓统一使用 `--itools-shape-corner-rectangle`，当前项目映射为 32 px。此前鸭青主题验收截图展示的 48 px 外观属于历史版本，不代表当前 Token 值。胶囊和圆形按钮继续使用各自形态；短控件依照其实际尺寸自然限制圆角，避免为匹配较大圆角而增加无意义高度。壳层文字均引用 `--md-sys-typescale-*` 语义角色。
-
-### 导航视觉迭代记录
-
-- 桌面侧栏宽度增至 `18.5rem`，使用持久手风琴层级。分类展开后以空间过渡显示工具列表；箭头同步旋转，工具行提供 state layer、键盘焦点和 48 px 触控高度。多分类可以同时展开。
-- 展开的分类组整体使用 `secondary-container` / `on-secondary-container` 成对角色；强调面从分类标题延续到内含工具列表，悬停、焦点、按压与工具图标仍使用同一语义前景角色。空间展开、列表渐显、逐行进入和箭头旋转保留；减少动态效果设置会关闭这些非必要动效。
-- `page-chrome/MetadataChip` 用于首页目录摘要、分类/工具卡片、标题上下文、任务页、管理目录/元数据、工具页与详情中的静态元数据标签。标签仅用于适合压缩呈现的 metadata，不承诺所有元数据均显示为 chip；正文内容和样本输入继续用可读文本。
-- Favicon 与品牌 Logo 沿用原稿资源（代理复核 SHA-256 与源文件匹配）；功能图标继续使用本地 Material Symbols Rounded 字体，不以品牌图替代功能符号。
-- 顶栏以图标呈现品牌、最近任务、主题、管理预览和窄屏导航，搜索保留图标与“搜索工具”文字。搜索快捷键 Ctrl/Cmd+K 仍有效，但不在顶栏展示键位提示。窄屏菜单图标固定在顶栏右端并打开导航抽屉；抽屉复用同一手风琴。420 px 以下改为紧凑两行，420 px 及以上保持单行，所有控件目标为 48 px。功能入口不丢失。600 px 与 840 px 的适配继续使用共享断点。
-- **本轮移动搜索导航实现：** 共享 `ToolSearchEntry` 使用适配层公开的 M3 `SearchBar`，用于顶栏和首页 hero，保持一致的 full 圆角。只读搜索入口按 Enter 打开现有命令面板，Ctrl/Cmd+K 快捷键保留。移动顶栏只渲染搜索框，分类抽屉入口放在 SearchBar leading slot 内；抽屉承载主题、管理预览和独立最近任务页入口。桌面品牌、搜索、最近任务、主题和管理入口保留。最终视口及交互验收见下方 2026-10-19 最终移动搜索导航验收。
-- 工具详情通过主库 Dialog 展示分类、简介和元数据，并以“关闭”和“前往”作为对应操作。关闭由 Dialog 的标准行为负责，进入动效由内容层级变化表达。
-- 页面组合只使用 `--md-sys-color-*`、`--md-sys-typescale-*`、现有形状/间距/动效 Token；新增导航宽度、行高、图标、焦点环、state-layer opacity 与按压/对话框进入 scale token 记录在适配层 README。分类和对话框动效遵循 `prefers-reduced-motion`；抽屉开合继续由主库 NavigationDrawer 负责。
-- 阶段 2 原截图均保留原版顶栏样式，作为历史验收记录，不代表本轮图标式顶栏。图标顶栏已完成桌面、390 px 与 320 px 的浏览器复查，截图和实测结果见下方最终验收记录。窄屏菜单位于顶栏最右端并打开抽屉；工具详情可关闭，关闭后首页保持不变，重开抽屉会保留分类展开状态。
-
-## 阶段验收
-
-| 验收项 | 状态 | 证据 |
-| --- | --- | --- |
-| Token、组件适配层与使用说明 | 通过 | `packages/design-system-adapter/README.md` 列出 53 个浅/深语义色角色、间距、断点、形状、动效、字体来源和组件示例；`src/index.ts` 为唯一公开入口，`src/styles.css` 为唯一全局样式入口。 |
-| 双端布局与响应式顶栏 | 通过 | 在 1280×900 桌面和 390×844 移动浏览器中复查首页、导航、搜索和工具详情；另在 320 px 与 420 px 宽度检查顶栏适配及横向溢出。截图见最终验收记录。 |
-| 关键控件交互与错误反馈测试 | 通过 | 最终 `pnpm test`：契约 4、适配层 8、应用 8 项，共 20 项通过。应用测试覆盖快捷搜索键盘选择、桌面与窄屏导航、最近任务入口、后台开关/表单/对话框反馈。 |
-| 主题、导航、表单、对话框、任务和结果视觉检查 | 通过 | 浅/深主题、搜索和导航、工具页输入错误、任务进度/空结果、后台对话框及错误反馈均已浏览器检查；修正深色首页次要按钮对比度和收起侧栏横向滚动后复查。浏览器无 error/warn 日志。 |
-| 格式、Lint、类型、测试、构建与依赖边界 | 通过 | 阶段 2 初始基线门禁见原记录；鸭青主题本轮门禁摘要见下方最终验收。 |
-| 是否进入阶段 3 | 等待用户下一步 | 阶段 2 验收已完成；本轮不启动阶段 3。 |
-
-### 2026-10-19 鸭青主题与初始壳层验收（历史记录）
-
-- **视口与布局：通过。** 在 1280×900 检查桌面浅/深主题；在 390×844 检查移动首页、模态导航抽屉和工具详情。600 px 与 840 px 断点无横向溢出；840–999 px 的 hero 使用单列布局。
-- **导航与工具流程：通过。** 桌面侧栏和移动抽屉均能同时展开多个分类；移动展开按钮保留在顶栏最右。选择工具先显示 Dialog，选择“前往”后进入工具页，“关闭”后仍停留在首页。品牌 img 已加载，Favicon href 正确，品牌资源 SHA-256 与原稿一致。
-- **圆角与元数据：历史状态。** 此轮浏览器记录的 hero 与手风琴 group 48 px 圆角已被后续 Token 调整替代；当前值和截图以图标顶栏最终复查为准。Chip 只呈现静态元数据，不伪装成按钮；正文和样本输入保留可读文本。
-- **质量门禁：通过。** `pnpm format:check`、`pnpm lint`、`pnpm typecheck`、`pnpm test`、`pnpm build`、`pnpm peers check` 与 `git diff --check` 全部通过；18 项测试通过（契约 4、适配层 6、应用 8）。主题 19 组语义色对比组合均通过 AA；主按钮对比度为浅色 6.08:1、深色 6.06:1。
-
-本轮视觉截图（历史版本，旧顶栏与 48 px 鸭青圆角）：
-
-| 视口与状态 | 截图 |
-| --- | --- |
-| 桌面首页 · 浅色 · 1280×900 | [teal-desktop-home.png](assets/stage-2/teal-desktop-home.png) |
-| 桌面首页 · 深色 · 1280×900 | [teal-desktop-dark.png](assets/stage-2/teal-desktop-dark.png) |
-| 移动首页 · 390×844 | [teal-mobile-home.png](assets/stage-2/teal-mobile-home.png) |
-| 移动导航抽屉 · 390×844 | [teal-mobile-drawer.png](assets/stage-2/teal-mobile-drawer.png) |
-| 移动工具详情 Dialog · 390×844 | [teal-mobile-dialog.png](assets/stage-2/teal-mobile-dialog.png) |
-
-### 早期图标顶栏与旧搜索按钮记录（历史实现）
-
-以下图标顶栏和旧 Button 搜索控件截图仅记录先前实现，不代表当前搜索栏、移动顶栏或导航验收结果。当前实现与最终截图见下方“2026-10-19 最终移动搜索导航验收”。
-
-- **布局与目标尺寸：通过。** 在 1280×900 桌面和 390×844 移动视口中，顶栏除带搜索图标的“搜索工具”外无其它可见文字。图标按钮和搜索控件目标为 48 px；420 px 起单行，≤419 px 两行。320 px 与 420 px 下均实测 `clientWidth == scrollWidth`，无横向溢出；840 px 起显示桌面导航。
-- **形状：通过。** 全局 hero 与 group 圆角为 32 px；移动 NavigationDrawer 外侧两角为 32 px；ToolInfoDialog 与搜索 Dialog 为 48 px，内部 code 为 32 px。NavigationDrawer 外侧圆角已修正组件库内部固定的 16 px。
-- **搜索与导航：通过。** 顶栏快捷键标记和搜索 Dialog 键盘说明均已移除；Ctrl/Cmd+K 仍可打开搜索。图标菜单仍打开抽屉，工具详情仍可关闭。
-- **质量门禁：通过。** `pnpm build`、`pnpm test`、`pnpm lint`、`pnpm typecheck` 全部通过，共 20 项测试（契约 4、适配层 8、应用 8）；根 Agent 最终 `pnpm format:check`、`git diff --check` 和 `pnpm peers check` 均通过。
-- **阶段状态：完成并等待用户下一步。** 本轮不启动阶段 3。
-
-早期图标顶栏与旧搜索按钮截图（历史）：
-
-| 视口与状态 | 截图 |
-| --- | --- |
-| 桌面图标顶栏 · 1280×900 | [topbar-icons-desktop.png](assets/stage-2/topbar-icons-desktop.png) |
-| 移动图标顶栏 · 390×844 | [topbar-icons-mobile.png](assets/stage-2/topbar-icons-mobile.png) |
-| 移动工具详情 Dialog · 390×844 | [topbar-dialog-mobile.png](assets/stage-2/topbar-dialog-mobile.png) |
-| 移动导航抽屉 · 390×844 | [topbar-drawer-mobile.png](assets/stage-2/topbar-drawer-mobile.png) |
-
-### 2026-10-19 最终移动搜索导航验收
-
-- **视口与入口：通过。** 根 Agent 实测 1280×900 桌面首页、840×900 断点首页、390×844 移动首页/深色抽屉/详情/管理/任务页，以及 320×844 移动管理页；各页 `clientWidth == scrollWidth`，无横向溢出。移动 header 可见直接子组件仅一个 SearchBar，分类导航图标位于 SearchBar 内，无外置更多、品牌、主题、管理或历史入口。
-- **交互：通过。** 点击 leading 导航图标只打开 drawer，不触发搜索。抽屉主题切换即时生效；管理和历史入口关闭 drawer 后跳转，历史进入现有 tasks 页。搜索 Enter 打开 Palette；Escape 关闭并恢复焦点，不会因焦点恢复再次打开。
-- **组件与形状：通过。** 首页和 header 共用 `ToolSearchEntry` / `SearchBar`，computed 圆角均为 9999 px。IconButton 实测 48×48 px 且为圆形；独立图标底板和 ToolInfoDialog 标题图标底板为 40 px 圆形；品牌展示为 32 px 圆形。6 个 SVG 源文件字节未改，SHA-256 与新品牌 ZIP 中对应文件逐一匹配，页面新 Logo 已加载。全局矩形 32 px、Dialog 48 px 圆角保持现状。
-- **质量门禁：通过。** 根 Agent 汇总 `pnpm test` 共 22 项（contracts 4、adapter 9、app 9），`pnpm build`、`pnpm lint`、`pnpm typecheck` 通过；`pnpm format:check`、`git diff --check`、`pnpm peers check` 由根 Agent 汇总通过。
-- **阶段状态：完成并等待用户下一步。** 本轮不启动阶段 3。
-
-最终验收截图：
-
-| 视口与状态 | 截图 |
-| --- | --- |
-| 桌面首页 · 1280×900 | [search-desktop-home.png](assets/stage-2/search-desktop-home.png) |
-| 移动首页 · 390×844 | [search-mobile-home.png](assets/stage-2/search-mobile-home.png) |
-| 深色移动抽屉 · 390×844 | [search-mobile-drawer-dark.png](assets/stage-2/search-mobile-drawer-dark.png) |
-| 移动工具详情 Dialog · 390×844 | [search-mobile-tool-dialog.png](assets/stage-2/search-mobile-tool-dialog.png) |
-
-### 阶段 2 原版视觉检查留档（历史截图）
-
-以下截图记录原洋红主题与此前文字式顶栏，仅用于回溯旧版本，不作为 2026-10-19 鸭青主题、壳层圆角、手风琴容器或当前顶栏的验收证据。当前搜索顶栏视口截图见最终移动搜索导航验收。
-
-| 视口与状态 | 截图 | 观察 |
-| --- | --- | --- |
-| 桌面首页 · 浅色 | [desktop-home-light.png](assets/stage-2/desktop-home-light.png) | 展开侧栏、主视觉、分类网格与工具卡片在 1280×720 下排列正常。 |
-| 桌面后台 · 深色 | [desktop-admin-dark.png](assets/stage-2/desktop-admin-dark.png) | 收起侧栏、目录开关与元数据表单双栏正常，无横向滚动条。 |
-| 窄屏首页 · 浅色与深色 | [mobile-home-light.png](assets/stage-2/mobile-home-light.png)、[mobile-home-dark.png](assets/stage-2/mobile-home-dark.png) | 导航折入抽屉、主视觉单栏、次要按钮可辨读。 |
-| 窄屏工具页 · 浅色 | [mobile-tool-light.png](assets/stage-2/mobile-tool-light.png) | 输入、主工作区、任务、结果与致谢按约定顺序纵向排列。 |
-| 窄屏后台对话框 · 浅色 | [mobile-admin-dialog-light.png](assets/stage-2/mobile-admin-dialog-light.png) | 对话框、表单与取消/校验操作正常；错误文案可见。 |
-| 当前桌面手风琴导航 · 1280×720 | [desktop-accordion-navigation.png](assets/stage-2/desktop-accordion-navigation.png) | 两个分类可同时展开，工具行显示正常。 |
-| 历史移动手风琴抽屉 · 390×844 | [mobile-accordion-drawer.png](assets/stage-2/mobile-accordion-drawer.png) | 旧文字式顶栏截图；抽屉内两个分类可同时展开，重开时保留展开状态。 |
-| 当前移动工具详情 Dialog · 390×844 | [mobile-tool-detail-dialog.png](assets/stage-2/mobile-tool-detail-dialog.png) | 详情适配窄屏；关闭后首页保持不变。 |
-
-浏览器检查还实际操作了分类选择、搜索面板开关、最近任务面板及“查看全部”、工具输入错误和后台表单错误。预览里的任务进度与结果状态均是明确标记的静态样本。当前构建输出包含打包的本地字体资源；字体体积和页面性能预算留到阶段 11 建立真实基线后再评估。
-
+历史浏览器验收记录覆盖 1280×900 桌面、840×900 断点、390×844 移动及 320×844 窄屏；记录包含抽屉开合、搜索键盘交互和视口无横向溢出。历史测试汇总为 22 项（contracts 4、adapter 9、app 9），build、lint、typecheck、format、依赖边界检查及 `git diff --check` 曾通过。这些是先前阶段验收记录，不是本次文档修改后新执行的验证。目录中其余阶段 2 截图均为旧版本留档，不作为当前状态证据。
