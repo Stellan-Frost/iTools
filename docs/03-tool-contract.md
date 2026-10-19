@@ -2,7 +2,7 @@
 
 > 状态：**契约、三态注册表、统一页面骨架已实现；没有任何可执行工具（`implemented = 0`）**。
 > 代码入口：`packages/contracts/src/{tool.ts,tool-registry.ts}`、`packages/app-core/src/registry/**`、`apps/web/src/pages/tool/**`。
-> 阶段 4 的边界：先建立框架与预览规则，真实工具与执行 UI 留到下一轮（需用户确认工具清单）。
+> 阶段 5 已交付任务运行时（04），但**尚未接线**：没有工具执行入口，工具页任务区仍是预览说明。
 
 ## 1. 工具契约（`contracts/tool.ts`，版本 1）
 
@@ -126,7 +126,7 @@ type RegistryEntry =
 5. 补充：契约测试、页面组件测试、SSR HTTP 测试、`check:tools` 负向用例。
 6. 更新 `pnpm-workspace.yaml` 边界白名单（`@itools/tool-*` 已允许依赖 contracts/app-core/adapter）。
 
-阶段 5 引入任务运行时后，`adapter.execute` 必须通过统一调度器，不得在页面直接调用。
+阶段 5 引入任务运行时后，`adapter.execute` 必须通过 `@itools/task-runtime` 的调度器执行，不得在页面直接调用。运行时的 `TaskStartRequest` 只携带 `taskId`、`toolId`、`engine`、`input`，工具包需要提供同引擎的 Worker 入口或 `TaskRunner` 实现。
 
 ## 6. 验收要求（新增工具时）
 

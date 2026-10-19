@@ -5,9 +5,14 @@ import {
   DEFAULT_LOCALE,
   LOCALES,
   ServerEnvironmentSchema,
+  TaskErrorSchema,
+  TaskResourceRequestSchema,
+  TaskSchedulerBudgetSchema,
   TaskStatusSchema,
   ToolManifestSchema,
   TOOL_AVAILABILITIES,
+  WorkerInboundMessageSchema,
+  WorkerOutboundMessageSchema,
   apiSuccessSchema,
   isLocale,
   parseServerEnvironment,
@@ -104,5 +109,77 @@ describe('shared contracts', () => {
 
   it('freezes the tool availability states', () => {
     expect(TOOL_AVAILABILITIES).toEqual(['preview', 'implemented', 'disabled']);
+  });
+
+  it('validates worker protocol messages in both directions', () => {
+    expect(
+      Value.Check(WorkerInboundMessageSchema, {
+        type: 'start',
+        taskId: 'task-1',
+        input: { text: '{}' },
+      }),
+    ).toBe(true);
+    expect(
+      Value.Check(WorkerInboundMessageSchema, {
+        type: 'start',
+        taskId: 'task-1',
+      }),
+    ).toBe(false);
+    expect(
+      Value.Check(WorkerOutboundMessageSchema, {
+        type: 'cancelled',
+        taskId: 'task-1',
+      }),
+    ).toBe(true);
+    // 入站指令不得出现在出站协议里，反之亦然。
+    expect(
+      Value.Check(WorkerOutboundMessageSchema, {
+        type: 'cancel',
+        taskId: 'task-1',
+      }),
+    ).toBe(false);
+    expect(
+      Value.Check(WorkerOutboundMessageSchema, {
+        type: 'complete',
+        taskId: 'task-1',
+        output: null,
+        extra: true,
+      }),
+    ).toBe(false);
+  });
+
+  it('validates task resource requests, errors and scheduler budget', () => {
+    expect(
+      Value.Check(TaskResourceRequestSchema, {
+        estimatedMemoryBytes: 1024,
+        computeClass: 'medium',
+      }),
+    ).toBe(true);
+    expect(
+      Value.Check(TaskResourceRequestSchema, {
+        estimatedMemoryBytes: 1.5,
+        computeClass: 'light',
+      }),
+    ).toBe(false);
+    expect(
+      Value.Check(TaskResourceRequestSchema, {
+        estimatedMemoryBytes: 1024,
+        computeClass: 'extreme',
+      }),
+    ).toBe(false);
+    expect(
+      Value.Check(TaskErrorSchema, {
+        code: 'execution-failed',
+        messageKey: 'tasks:error.execution-failed',
+        retryable: false,
+      }),
+    ).toBe(true);
+    expect(
+      Value.Check(TaskSchedulerBudgetSchema, {
+        maxConcurrentTasks: 0,
+        maxTotalMemoryBytes: 1024,
+        perToolConcurrency: 1,
+      }),
+    ).toBe(false);
   });
 });

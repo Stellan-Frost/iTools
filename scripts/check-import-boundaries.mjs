@@ -13,6 +13,7 @@ const root = fileURLToPath(new URL('..', import.meta.url));
 const ALLOWED = {
   '@itools/contracts': [],
   '@itools/app-core': ['@itools/contracts'],
+  '@itools/task-runtime': ['@itools/contracts'],
   '@itools/design-system-adapter': [],
   '@itools/web': [
     '@itools/contracts',

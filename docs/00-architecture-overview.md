@@ -1,21 +1,22 @@
 # 00 · 架构总览与开发入口
 
-> 状态：**已实现阶段 0–4**（Monorepo、设计系统、SSR 路由、i18n/SEO、三态工具注册表）。
+> 状态：**已实现阶段 0–5**（Monorepo、设计系统、SSR 路由、i18n/SEO、三态工具注册表、任务运行时）。
 > 目标站点：`itools.wataa.men`。
 > 本文是新 Agent 的唯一入口：先读本文，再按需读 01–15。
 
 ## 1. 项目是什么
 
-公开发布的多工具网站：首页、音频、图像、视频、文本、其他分类；工具尽量在浏览器本地处理，不上传用户文件。普通用户免登录；管理员后台、数据库与任务运行时尚未实现。
+公开发布的多工具网站：首页、音频、图像、视频、文本、其他分类；工具尽量在浏览器本地处理，不上传用户文件。普通用户免登录；管理员后台、数据库尚未实现。
 
 **当前可交付的真实能力**
 
 - Fastify SSR + Vite 客户端水合，中英双语路由。
 - 真实 HTTP 404、canonical/hreflang、动态 `sitemap.xml` 与 `robots.txt`。
 - 三态工具注册表：`preview`（可见、只读、noindex）、`implemented`（可执行、可索引）、`disabled`（404）。
+- 全局任务运行时（独立包）：7 态状态机、FIFO + 资源感知调度、Worker 池、协作取消与超时强杀、结果提交后才算完成。
 - 6 个可见样本工具是 `preview`，另有 1 个 `disabled` 样本（`csv-inspector`，用于 404 验收）；`implemented` 为 0，**没有任何真实工具可执行**。
 
-**明确未实现**：数据库、API、管理员认证、任务队列/Worker、IndexedDB/文件资产、真实工具执行、PWA、CI、部署。
+**明确未实现**：数据库、API、管理员认证、IndexedDB/文件资产、真实工具执行与任务 UI、真实 Worker 脚本、PWA、CI、部署。
 
 ## 2. 工作区与依赖方向
 
@@ -24,7 +25,8 @@
 | `apps/web` | React 页面、URL 路由、i18n、SEO head、SSR 渲染函数、客户端水合 | app-core、adapter、contracts |
 | `apps/server` | Fastify 宿主：SSR、静态资源、Sitemap/robots、真实 404 | 仅 contracts |
 | `packages/app-core` | 三态工具注册表、分类、样本任务、i18n 资源与 `createI18n` | contracts |
-| `packages/contracts` | 共享契约：locale、SSR 渲染、工具 manifest、注册表条目、API/任务/资产形状 | 无工作区依赖 |
+| `packages/task-runtime` | 任务状态机、调度器、Worker 池、消息协议（不依赖 React/DOM/Node） | contracts |
+| `packages/contracts` | 共享契约：locale、SSR 渲染、工具 manifest、注册表条目、任务/Worker 协议、API/资产形状 | 无工作区依赖 |
 | `packages/design-system-adapter` | MD3 组件、鸭青主题、字体与全局样式 | 无工作区依赖 |
 
 依赖方向（由 `scripts/check-boundaries.mjs` 约束）：
@@ -33,6 +35,7 @@
 apps/web  →  app-core / design-system-adapter / contracts
 apps/server → contracts
 app-core  → contracts
+task-runtime → contracts
 contracts → （仅 typebox）
 ```
 
@@ -78,7 +81,7 @@ node scripts/verify-stage-4.mjs   # 生产产物 HTTP 验收；需先 build
 pnpm verify                # 以上全链路总门禁
 ```
 
-当前基线：测试 139 项（contracts 6、app-core 49、adapter 9、web 61、server 14），HTTP 验收 28 项通过。CI 尚未接入。
+当前基线：测试 207 项（contracts 8、app-core 49、task-runtime 66、adapter 9、web 61、server 14），HTTP 验收 28 项通过。CI 尚未接入。
 
 ## 4. 代码地图
 
@@ -97,6 +100,9 @@ pnpm verify                # 以上全链路总门禁
 | `packages/app-core/src/registry/**` | 注册表条目、查询、校验、Sitemap 路径 |
 | `packages/app-core/src/catalog/**` | 分类与样本任务 |
 | `packages/app-core/src/i18n/**` | 5 个命名空间的中英资源、`createI18n` |
+| `packages/task-runtime/src/domain/**` | 状态机、资源预算、错误码（纯规则） |
+| `packages/task-runtime/src/application/**` | 调度器、运行时外观、执行器契约、预算默认值 |
+| `packages/task-runtime/src/infrastructure/**` | Worker 池、协议校验、Worker 执行器、定时器接缝 |
 | `packages/contracts/src/**` | 所有跨包类型与 Schema |
 
 ## 5. 核心规则（开发前必读）
@@ -106,8 +112,9 @@ pnpm verify                # 以上全链路总门禁
 3. **路由**：`/{locale}/{category}/{toolId}`；未知语言/分类/工具、停用工具、分类不匹配均为真实 404。详见 02。
 4. **UI**：只用 `@itools/design-system-adapter` 组件，不写裸 HTML 控件；颜色/间距/圆角/动效一律用 Token；不覆盖组件库内部选择器。详见 01、15。
 5. **SSR 安全**：渲染期不访问 `window`/`document`；浏览器 API 只能在 effect 或事件中。`vite.config.ts` 的 `ssr.noExternal` 必须内联 app-core、adapter、`m3-expressive-react`、`@material/material-color-utilities`。
-6. **隐私**：用户文件、结果、任务数据默认只在浏览器本地处理；不得上传或接入未审核的第三方。
-7. **不伪报**：不得把规划写成已实现；未执行的验证必须标注。生产部署、迁移、破坏性操作、公网安全配置变更须用户批准。
+6. **任务执行**：工具执行必须经 `@itools/task-runtime`（状态机 + 调度 + Worker），不得在页面或组件内直接调用 `adapter`；结果提交成功才算完成。详见 04。
+7. **隐私**：用户文件、结果、任务数据默认只在浏览器本地处理；不得上传或接入未审核的第三方。
+8. **不伪报**：不得把规划写成已实现；未执行的验证必须标注。生产部署、迁移、破坏性操作、公网安全配置变更须用户批准。
 
 ## 6. 文档地图
 
@@ -117,7 +124,7 @@ pnpm verify                # 以上全链路总门禁
 | 01 | 设计系统：主题、字体、Token、组件与 UI 约束 | 已实现 |
 | 02 | 路由、i18n 与 SEO | 已实现 |
 | 03 | 工具注册契约与统一页面 | 契约/注册表/页面骨架已实现，执行 UI 未实现 |
-| 04 | 任务运行时与 Worker | 未实现（阶段 5） |
+| 04 | 任务运行时与 Worker | 已实现（阶段 5；未接工具与 UI） |
 | 05 | 文件资产与 IndexedDB | 未实现（阶段 6） |
 | 06 | 后端、数据库与 API | 未实现（阶段 7） |
 | 07 | 管理后台 | 仅预览（阶段 8） |
@@ -134,6 +141,6 @@ pnpm verify                # 以上全链路总门禁
 
 按 [14](14-phase-implementation-roadmap.md) 与 [13](13-acceptance-open-decisions.md)：
 
-- 若先做真实工具：按 03 的“新增工具流程”接入 manifest、Schema、adapter、元数据与 `tools/<id>` 文案，并在 web 端建立 `createToolRegistry([...implemented])` 注入点。
-- 若先做任务运行时：按 04 冻结状态机、队列、资源预算与取消协议。
-- 两者都必须先由用户确认范围；工具清单与汇率工具第 68/69 题仍未决定。
+- 阶段 6 是文件资产与 IndexedDB，**开工前必须先解决 D01**（结构升级清库 vs 任务/结果长期保留），不得静默清库。
+- 工具清单已确认（D24，31 条 / 30 个可执行），但**首个真实工具的排期未定**。接入时按 03 §5 做注册表注入点重构，并让 `adapter.execute` 经 `@itools/task-runtime` 调度，不得在页面直接执行。
+- 汇率工具第 68/69 题仍暂缓。

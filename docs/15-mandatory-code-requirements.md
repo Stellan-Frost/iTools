@@ -9,7 +9,7 @@
 | 格式 | `pnpm format:check`（Prettier） | 是 |
 | Lint | `pnpm lint`（ESLint + 清单边界 + 源码边界 + Token） | 是 |
 | 类型 | `pnpm typecheck`（TS strict） | 是 |
-| 测试 | `pnpm test`（Vitest，139 项） | 是 |
+| 测试 | `pnpm test`（Vitest，207 项） | 是 |
 | 构建 | `pnpm build`（Turbo） | 是 |
 | 注册表 | `pnpm check:tools`（需先 build） | 是 |
 | i18n 键 | `pnpm check:i18n`（需先 build） | 是 |
