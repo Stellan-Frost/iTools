@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <rect id="blade" x="48" y="60" width="38" height="16" rx="8"/>
+    <mask id="pivot">
+      <rect width="96" height="96" fill="#fff"/>
+      <circle cx="48" cy="68" r="5" fill="#000"/>
+    </mask>
+  </defs>
+  <g transform="scale(10.6667)">
+    <g mask="url(#pivot)" fill="#8E9BFF">
+      <use href="#blade" fill-opacity="0.45" transform="rotate(-130 48 68)"/>
+      <use href="#blade" fill-opacity="0.45" transform="rotate(-50 48 68)"/>
+      <use href="#blade" transform="rotate(-90 48 68)"/>
+    </g>
+  </g>
+</svg>

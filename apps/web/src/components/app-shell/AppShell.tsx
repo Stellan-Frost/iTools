@@ -111,9 +111,12 @@ export function AppShell({
           onClick={() => onNavigate({ page: 'home' })}
           aria-label="iTools 首页"
         >
-          <span className={styles.brandMark} aria-hidden="true">
-            i
-          </span>
+          <img
+            className={styles.brandMark}
+            src="/brand-icon/icon-preview.svg"
+            alt=""
+            aria-hidden="true"
+          />
           <span>iTools</span>
         </button>
         <span className={styles.previewTag}>界面预览</span>
