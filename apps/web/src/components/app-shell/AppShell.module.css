@@ -70,6 +70,7 @@
   display: block;
   width: var(--itools-layout-brand-mark-size);
   height: var(--itools-layout-brand-mark-size);
+  border-radius: var(--md-sys-shape-corner-full);
   object-fit: contain;
 }
 
