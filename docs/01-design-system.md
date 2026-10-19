@@ -3,7 +3,7 @@
 ## 规范来源
 - 用户指定的 MD3 参考：[@material-3](plugin://material-3@created-by-me-remote)。设计与实现阶段应以该参考核对组件语义、布局、色彩角色及交互状态。
 - 当前工具无法读取该私有插件的内容；阶段 2 依据 Material 3 官方设计说明与上游组件文档核对，插件内容待可访问时复核。不得将来源声明当作实现证据。
-- 阶段 2 已选定 `m3-expressive-react@1.6.0` 作为主 React MD3 组件库，集中封装在 `packages/design-system-adapter`。该库近期维护活跃，但社区规模小、单维护者风险高；必须锁定版本并通过实际交互与视觉验收。Token 和页面目前仍在实施中，见 `18-stage-2-design-system.md`。
+- 阶段 2 已选定 `m3-expressive-react@1.6.0` 作为主 React MD3 组件库，集中封装在 `packages/design-system-adapter`。该库社区规模小、单维护者风险高，已锁定版本并通过交互与视觉验收。Token、页面及验收记录见 `18-stage-2-design-system.md`。
 
 ## 视觉基线
 - 使用 Material Design 3 组件体系；不得把旧版 MD2 作为当前视觉规范。

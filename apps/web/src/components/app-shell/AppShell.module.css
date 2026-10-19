@@ -3,12 +3,6 @@
   box-sizing: border-box;
 }
 
-:global(body) {
-  min-width: 320px;
-  min-height: 100vh;
-  margin: 0;
-}
-
 .shell {
   min-height: 100dvh;
   background: var(--md-sys-color-surface);
@@ -128,7 +122,7 @@
 }
 
 .railExpanded .desktopNavigation {
-  flex-basis: 17.5rem;
+  flex-basis: var(--itools-layout-sidebar-width);
 }
 
 .railCollapsed .desktopNavigation {
@@ -140,12 +134,14 @@
   top: 4.5rem;
   display: flex;
   height: calc(100dvh - 4.5rem);
-  flex: 0 0 17.5rem;
+  flex: 0 0 var(--itools-layout-sidebar-width);
   align-self: flex-start;
   border-inline-end: 1px solid var(--md-sys-color-outline-variant);
   background: var(--md-sys-color-surface-container-low);
+  overflow-x: hidden;
   overflow-y: auto;
-  transition: flex-basis 220ms ease;
+  transition: flex-basis var(--itools-motion-duration-medium)
+    var(--itools-motion-easing-standard);
 }
 
 .desktopNavigation > * {

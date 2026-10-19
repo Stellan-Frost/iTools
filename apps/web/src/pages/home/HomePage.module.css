@@ -101,7 +101,7 @@
 
 .artworkOrb {
   position: absolute;
-  top: 1.25rem;
+  top: var(--itools-space-5);
   right: 1.5rem;
   width: 8rem;
   aspect-ratio: 1;
@@ -246,7 +246,7 @@
   .hero {
     min-height: auto;
     border-radius: var(--md-sys-shape-corner-large);
-    padding: 1.25rem;
+    padding: var(--itools-space-5);
   }
 
   .hero h1 {

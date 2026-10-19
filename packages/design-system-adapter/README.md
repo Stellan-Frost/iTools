@@ -150,8 +150,10 @@ Spacing tokens use a 4px base scale and rem units so they respond to the user's 
 | `--itools-space-2` | `0.5rem` (8px) |
 | `--itools-space-3` | `0.75rem` (12px) |
 | `--itools-space-4` | `1rem` (16px) |
+| `--itools-space-5` | `1.25rem` (20px) |
 | `--itools-space-6` | `1.5rem` (24px) |
 | `--itools-space-8` | `2rem` (32px) |
+| `--itools-space-10` | `2.5rem` (40px) |
 | `--itools-space-12` | `3rem` (48px) |
 | `--itools-space-16` | `4rem` (64px) |
 

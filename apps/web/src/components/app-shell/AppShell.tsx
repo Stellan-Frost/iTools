@@ -174,7 +174,7 @@ export function AppShell({
                 </div>
               }
             >
-              <NavigationItems type="rail" />
+              <NavigationItems type="rail" isRailExpanded={isRailExpanded} />
             </NavigationRail>
           </aside>
         ) : null}

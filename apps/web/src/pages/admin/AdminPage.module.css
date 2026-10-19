@@ -100,7 +100,7 @@
 .metadataForm {
   display: grid;
   gap: var(--itools-space-4);
-  padding: 1.25rem;
+  padding: var(--itools-space-5);
 }
 
 .formSummary {
@@ -128,7 +128,7 @@
 }
 
 .feedbackSection {
-  margin-top: 2.5rem;
+  margin-top: var(--itools-space-10);
 }
 
 .feedbackGrid {

@@ -1,7 +1,7 @@
 # iTools 全局开发文档
 
-> 版本：Architecture Baseline Draft 1.0  
-> 状态：根据全局框架访谈整理，待根 Agent 审核；不是已部署或已验证的系统。
+> 版本：Architecture Baseline 1.0
+> 状态：阶段 2 已验收；整体系统仍在建设中，尚未部署生产。
 
 ## 使用规则
 1. 本目录是全局架构基线；代码仓库中的本目录应作为唯一权威来源。
@@ -32,7 +32,7 @@
 - `18-stage-2-design-system.md`：阶段 2 组件适配接口、页面预览范围、主题来源与验收记录
 
 ## 当前开发状态
-阶段 1 已完成并通过独立克隆验证：pnpm 工作区和 `@itools/contracts` 基础包可重复安装、检查、测试和构建。应用、数据库、工具与设计系统尚未实现。建设状态和实际验收证据见 `docs/17-stage-1-workspace.md`。
+阶段 2 已完成：在阶段 1 工作区与共享契约上，新增 MD3 设计系统适配层及可操作的首页、分类、工具、最近任务和后台界面预览。预览只使用本地样本数据，不包含真实工具处理、数据库、管理员认证、SSR 或国际化。建设状态和实际验收证据见 `docs/18-stage-2-design-system.md`；阶段 1 记录见 `docs/17-stage-1-workspace.md`。
 
 ## 本地准备
 需要 Node.js 22 或更新版本，以及 pnpm 11.25.0。
@@ -44,9 +44,10 @@ pnpm lint
 pnpm typecheck
 pnpm test
 pnpm build
+pnpm dev
 ```
 
-这些命令当前验证工作区与共享契约，不代表全站功能已完成。
+`pnpm dev` 在本地启动阶段 2 界面预览；其他命令验证目前已有的工作区、契约、适配层和应用壳，不代表全站功能已完成。
 
 ## 强制要求
 - 所有 Agent 必须先阅读 `15-mandatory-code-requirements.md`，不得自行更换技术栈或扩大产品范围。

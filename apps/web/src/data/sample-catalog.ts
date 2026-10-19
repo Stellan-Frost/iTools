@@ -1,6 +1,7 @@
 export interface ToolCategory {
   id: string;
   name: string;
+  shortName: string;
   description: string;
   icon: string;
 }
@@ -30,30 +31,35 @@ export const categories: ToolCategory[] = [
   {
     id: 'image',
     name: '图像与设计',
+    shortName: '图像',
     description: '图片整理、尺寸检查与视觉素材预览。',
     icon: 'image',
   },
   {
     id: 'documents',
     name: '文档与文字',
+    shortName: '文档',
     description: '文本、文档和内容检查工具。',
     icon: 'article',
   },
   {
     id: 'data',
     name: '数据与转换',
+    shortName: '数据',
     description: '结构化数据查看和格式转换。',
     icon: 'table_chart',
   },
   {
     id: 'developer',
     name: '开发辅助',
+    shortName: '开发',
     description: '面向日常开发的小型辅助工具。',
     icon: 'code',
   },
   {
     id: 'utilities',
     name: '实用工具',
+    shortName: '实用',
     description: '时间、标识和常见信息换算。',
     icon: 'widgets',
   },

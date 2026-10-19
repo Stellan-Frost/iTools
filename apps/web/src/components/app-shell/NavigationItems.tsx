@@ -7,9 +7,13 @@ import { AppIcon } from '../app-icon/AppIcon.js';
 
 interface NavigationItemsProps {
   type: 'drawer' | 'rail';
+  isRailExpanded?: boolean;
 }
 
-export function NavigationItems({ type }: NavigationItemsProps) {
+export function NavigationItems({
+  type,
+  isRailExpanded = true,
+}: NavigationItemsProps) {
   return (
     <>
       {type === 'rail' ? (
@@ -32,7 +36,8 @@ export function NavigationItems({ type }: NavigationItemsProps) {
             value={category.id}
             icon={<AppIcon name={category.icon} />}
             selectedIcon={<AppIcon name={category.icon} />}
-            label={category.name}
+            label={isRailExpanded ? category.name : category.shortName}
+            aria-label={category.name}
           />
         ) : (
           <NavigationDrawerItem

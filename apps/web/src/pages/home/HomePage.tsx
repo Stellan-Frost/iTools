@@ -35,6 +35,7 @@ export function HomePage({ onNavigate, onOpenSearch }: HomePageProps) {
             </Button>
             <Button
               variant="text"
+              style={{ color: 'var(--md-sys-color-on-primary-container)' }}
               onClick={() =>
                 onNavigate({ page: 'category', categoryId: 'image' })
               }
