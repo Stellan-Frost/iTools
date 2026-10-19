@@ -304,6 +304,11 @@
   color: var(--md-sys-color-on-secondary-container);
 }
 
+.categoryGroup[data-expanded='true']
+  .toolItem:not([aria-current='page']):not([aria-selected='true']) {
+  color: var(--md-sys-color-on-secondary-container);
+}
+
 .categoryGroup[data-expanded='true'] .toolItem[aria-current='page']:hover,
 .categoryGroup[data-expanded='true'] .toolItem[aria-selected='true']:hover {
   background: color-mix(
