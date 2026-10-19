@@ -67,7 +67,7 @@
   align-items: flex-start;
   gap: var(--itools-space-2);
   margin: 0;
-  border-radius: var(--md-sys-shape-corner-medium);
+  border-radius: var(--itools-shape-corner-rectangle);
   background: var(--md-sys-color-tertiary-container);
   color: var(--md-sys-color-on-tertiary-container);
   padding: var(--itools-space-3);
@@ -106,7 +106,7 @@
 .workspacePreview {
   overflow-x: auto;
   margin: var(--itools-space-4) 0 0;
-  border-radius: var(--md-sys-shape-corner-medium);
+  border-radius: var(--itools-shape-corner-rectangle);
   background: var(--md-sys-color-surface-container-high);
   color: var(--md-sys-color-on-surface);
   padding: var(--itools-space-4);
@@ -163,7 +163,7 @@
   flex: 0 0 2.75rem;
   aspect-ratio: 1;
   place-items: center;
-  border-radius: var(--md-sys-shape-corner-medium);
+  border-radius: var(--itools-shape-corner-rectangle);
   background: var(--md-sys-color-secondary-container);
   color: var(--md-sys-color-on-secondary-container);
   font-size: 1.5rem;

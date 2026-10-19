@@ -2,7 +2,7 @@
   display: flex;
   align-items: flex-start;
   gap: var(--itools-space-3);
-  border-radius: var(--md-sys-shape-corner-medium);
+  border-radius: var(--itools-shape-corner-rectangle);
   padding: var(--itools-space-3) var(--itools-space-4);
 }
 

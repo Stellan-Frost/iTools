@@ -53,7 +53,7 @@
 
 .empty {
   margin: 0;
-  border-radius: var(--md-sys-shape-corner-medium);
+  border-radius: var(--itools-shape-corner-rectangle);
   background: var(--md-sys-color-surface-container);
   padding: var(--itools-space-4);
 }

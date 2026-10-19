@@ -16,7 +16,7 @@
 
 .empty {
   margin-top: var(--itools-space-8);
-  border-radius: var(--md-sys-shape-corner-large);
+  border-radius: var(--itools-shape-corner-rectangle);
   background: var(--md-sys-color-surface-container-low);
   padding: var(--itools-space-6);
 }

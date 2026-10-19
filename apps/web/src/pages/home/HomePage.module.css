@@ -11,7 +11,7 @@
   align-items: center;
   gap: var(--itools-space-8);
   overflow: hidden;
-  border-radius: var(--md-sys-shape-corner-extra-large);
+  border-radius: var(--itools-shape-corner-rectangle);
   background: var(--md-sys-color-primary-container);
   color: var(--md-sys-color-on-primary-container);
   padding: var(--itools-space-8);
@@ -70,7 +70,7 @@
   align-content: center;
   gap: var(--itools-space-3);
   border: 1px solid var(--md-sys-color-outline-variant);
-  border-radius: var(--md-sys-shape-corner-large);
+  border-radius: var(--itools-shape-corner-rectangle);
   background: var(--md-sys-color-surface-container-low);
   padding: var(--itools-space-4);
   transform: rotate(-6deg);
@@ -81,7 +81,7 @@
   width: 3rem;
   aspect-ratio: 1;
   place-items: center;
-  border-radius: var(--md-sys-shape-corner-medium);
+  border-radius: var(--itools-shape-corner-rectangle);
   background: var(--md-sys-color-secondary-container);
   color: var(--md-sys-color-on-secondary-container);
   font-size: 1.75rem;
@@ -122,29 +122,10 @@
 }
 
 .summary {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  display: flex;
+  flex-wrap: wrap;
   gap: var(--itools-space-4);
   margin-block: var(--itools-space-6) var(--itools-space-12);
-}
-
-.summary > div {
-  display: flex;
-  align-items: baseline;
-  gap: var(--itools-space-2);
-  border-bottom: 1px solid var(--md-sys-color-outline-variant);
-  padding: var(--itools-space-3) 0;
-}
-
-.summary strong {
-  color: var(--md-sys-color-primary);
-  font-family: var(--md-sys-typescale-headline-medium-font);
-  font-size: var(--md-sys-typescale-headline-medium-size);
-  font-weight: var(--md-sys-typescale-headline-medium-weight);
-}
-
-.summary span {
-  color: var(--md-sys-color-on-surface-variant);
 }
 
 .section,
@@ -245,7 +226,7 @@
 @media (max-width: 599px) {
   .hero {
     min-height: auto;
-    border-radius: var(--md-sys-shape-corner-large);
+    border-radius: var(--itools-shape-corner-rectangle);
     padding: var(--itools-space-5);
   }
 
@@ -257,16 +238,6 @@
   .summary {
     gap: var(--itools-space-2);
     margin-block: var(--itools-space-4) var(--itools-space-8);
-  }
-
-  .summary > div {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: var(--itools-space-1);
-  }
-
-  .summary strong {
-    font-size: var(--md-sys-typescale-title-large-size);
   }
 
   .categoryGrid,

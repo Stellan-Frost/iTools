@@ -11,7 +11,7 @@
   flex: 0 0 2.75rem;
   aspect-ratio: 1;
   place-items: center;
-  border-radius: var(--md-sys-shape-corner-medium);
+  border-radius: var(--itools-shape-corner-rectangle);
   background: var(--md-sys-color-secondary-container);
   color: var(--md-sys-color-on-secondary-container);
   font-size: 1.375rem;

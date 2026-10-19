@@ -12,7 +12,7 @@
 
 ## 文档索引
 - `00-architecture-overview.md`：系统边界、技术栈、模块依赖、决策原则
-- `01-design-system.md`：MD3 设计系统、洋红主题、字体、图标、动效和布局
+- `01-design-system.md`：MD3 设计系统、鸭青主题、字体、图标、动效和布局
 - `02-app-routing-i18n-seo.md`：SSR、路由、双语、目录查询、SEO 与 404
 - `03-tool-contract.md`：工具注册、TypeScript 契约、页面骨架与接入流程
 - `04-task-worker-runtime.md`：任务状态机、FIFO 调度、Worker、取消和资源预算

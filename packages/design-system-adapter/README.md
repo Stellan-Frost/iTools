@@ -60,7 +60,7 @@ export function App() {
 }
 ```
 
-Set `mode` to `'light'` or `'dark'` from the app's own preference state. `AppThemeProvider` always uses seed `#E5007D`, `SchemeVibrant`, MCU spec version `2025`, `phone` platform, and contrast level `0`.
+Set `mode` to `'light'` or `'dark'` from the app's own preference state. `AppThemeProvider` always uses seed `#009688`, `SchemeVibrant`, MCU spec version `2025`, `phone` platform, and contrast level `0`.
 
 `MaterialIcon` renders a Material Symbols ligature. It is decorative and hidden from assistive technology by default. Pass `aria-label` when the symbol itself conveys meaning. Its `size` is in CSS pixels and defaults to 24.
 
@@ -72,7 +72,7 @@ Colors are generated in `src/theme/colors.ts` with the locked `@material/materia
 
 ```ts
 new SchemeVibrant(
-  Hct.fromInt(argbFromHex('#E5007D')),
+  Hct.fromInt(argbFromHex('#009688')),
   mode === 'dark',
   0,
   '2025',
@@ -80,65 +80,65 @@ new SchemeVibrant(
 );
 ```
 
-Each of the 53 semantic roles becomes `--md-sys-color-{kebab-case-role}` on the provider element. The library provider still supplies its 1.6.0 context and standard component behavior; the adapter's generated role variables override the library's 2021 scheme values, including the four additional 2025 roles `primaryDim`, `secondaryDim`, `tertiaryDim`, and `errorDim`. The table records the emitted values for seed `#E5007D`.
+Each of the 53 semantic roles becomes `--md-sys-color-{kebab-case-role}` on the provider element. The library provider still supplies its 1.6.0 context and standard component behavior; the adapter's generated role variables override the library's 2021 scheme values, including the four additional 2025 roles `primaryDim`, `secondaryDim`, `tertiaryDim`, and `errorDim`. The table records the emitted values for seed `#009688`.
 
 | Role | Light | Dark |
 | --- | --- | --- |
-| background | `#fff4f7` | `#210218` |
-| onBackground | `#48223a` | `#ffdced` |
-| surface | `#fff4f7` | `#210218` |
-| surfaceDim | `#ffc3e4` | `#210218` |
-| surfaceBright | `#fff4f7` | `#4d173c` |
+| background | `#d3fffd` | `#001111` |
+| onBackground | `#003534` | `#b8f3f1` |
+| surface | `#d3fffd` | `#001111` |
+| surfaceDim | `#87e4e2` | `#001111` |
+| surfaceBright | `#d3fffd` | `#003232` |
 | surfaceContainerLowest | `#ffffff` | `#000000` |
-| surfaceContainerLow | `#ffecf3` | `#29051e` |
-| surfaceContainer | `#ffe0ef` | `#320926` |
-| surfaceContainerHigh | `#ffd8eb` | `#3b0d2d` |
-| surfaceContainerHighest | `#ffd0e8` | `#441234` |
-| onSurface | `#48223a` | `#ffdced` |
-| surfaceVariant | `#ffd0e8` | `#441234` |
-| onSurfaceVariant | `#7a4e68` | `#d19bb9` |
-| outline | `#986884` | `#976783` |
-| outlineVariant | `#d39dbb` | `#643a54` |
-| inverseSurface | `#210218` | `#fff8f8` |
-| inverseOnSurface | `#c28eab` | `#734761` |
+| surfaceContainerLow | `#bafdfb` | `#001716` |
+| surfaceContainer | `#adf5f3` | `#001e1d` |
+| surfaceContainerHigh | `#a2f0ee` | `#002424` |
+| surfaceContainerHighest | `#96ebe9` | `#002b2b` |
+| onSurface | `#003534` | `#b8f3f1` |
+| surfaceVariant | `#96ebe9` | `#002b2b` |
+| onSurfaceVariant | `#296463` | `#7bb5b4` |
+| outline | `#46807f` | `#457f7e` |
+| outlineVariant | `#7db7b6` | `#0d5050` |
+| inverseSurface | `#001111` | `#e3fffd` |
+| inverseOnSurface | `#6da7a5` | `#215e5d` |
 | shadow | `#000000` | `#000000` |
 | scrim | `#000000` | `#000000` |
-| surfaceTint | `#ad1c60` | `#ff88b2` |
-| primary | `#ad1c60` | `#ff88b2` |
-| primaryDim | `#9c0854` | `#ff69a3` |
-| onPrimary | `#ffeff1` | `#610032` |
-| primaryContainer | `#ff6fa6` | `#ff6fa6` |
-| onPrimaryContainer | `#4c0025` | `#4c0025` |
-| inversePrimary | `#fa5c9c` | `#b22164` |
-| primaryFixed | `#ff6fa6` | `#ff6fa6` |
-| primaryFixedDim | `#f65a99` | `#f65a99` |
-| onPrimaryFixed | `#000000` | `#000000` |
-| onPrimaryFixedVariant | `#5d002f` | `#5d002f` |
-| secondary | `#963778` | `#fe8ed4` |
-| secondaryDim | `#872b6b` | `#ee81c6` |
-| onSecondary | `#ffeef5` | `#62054c` |
-| secondaryContainer | `#ffbfe2` | `#7c2161` |
-| onSecondaryContainer | `#7d2162` | `#ffbde2` |
-| secondaryFixed | `#ffbfe2` | `#ffbfe2` |
-| secondaryFixedDim | `#ffa9dc` | `#ffa9dc` |
-| onSecondaryFixed | `#65084d` | `#65084d` |
-| onSecondaryFixedVariant | `#882c6c` | `#882c6c` |
-| tertiary | `#524db6` | `#a29eff` |
-| tertiaryDim | `#4641a9` | `#9692fe` |
-| onTertiary | `#f5f1ff` | `#1e1183` |
-| tertiaryContainer | `#aba7ff` | `#938ffc` |
-| onTertiaryContainer | `#251b89` | `#11006e` |
-| tertiaryFixed | `#aba7ff` | `#aba7ff` |
-| tertiaryFixedDim | `#9c98ff` | `#9c98ff` |
-| onTertiaryFixed | `#0d005e` | `#0d005e` |
-| onTertiaryFixedVariant | `#2f2792` | `#2f2792` |
-| error | `#b41340` | `#ff6e84` |
-| errorDim | `#a20036` | `#d73357` |
-| onError | `#ffefef` | `#490013` |
-| errorContainer | `#f74b6d` | `#a70138` |
-| onErrorContainer | `#510017` | `#ffb2b9` |
+| surfaceTint | `#00675d` | `#b4fff2` |
+| primary | `#00675d` | `#b4fff2` |
+| primaryDim | `#005a51` | `#00fde7` |
+| onPrimary | `#c0fff4` | `#00665c` |
+| primaryContainer | `#00f7e1` | `#00fde7` |
+| onPrimaryContainer | `#005950` | `#005c53` |
+| inversePrimary | `#00fde7` | `#006b61` |
+| primaryFixed | `#00f7e1` | `#00f7e1` |
+| primaryFixedDim | `#00e8d3` | `#00e8d3` |
+| onPrimaryFixed | `#00443d` | `#00443d` |
+| onPrimaryFixedVariant | `#00635a` | `#00635a` |
+| secondary | `#006666` | `#37fbf8` |
+| secondaryDim | `#005959` | `#0eecea` |
+| onSecondary | `#bbfffd` | `#005c5b` |
+| secondaryContainer | `#37fbf8` | `#006a69` |
+| onSecondaryContainer | `#005c5b` | `#dafffd` |
+| secondaryFixed | `#37fbf8` | `#37fbf8` |
+| secondaryFixedDim | `#0eecea` | `#0eecea` |
+| onSecondaryFixed | `#004747` | `#004747` |
+| onSecondaryFixedVariant | `#006666` | `#006666` |
+| tertiary | `#006287` | `#62c9ff` |
+| tertiaryDim | `#005676` | `#1ebdfd` |
+| onTertiary | `#e7f4ff` | `#003f58` |
+| tertiaryContainer | `#1ebdfd` | `#1ebdfd` |
+| onTertiaryContainer | `#00354a` | `#00354a` |
+| tertiaryFixed | `#1ebdfd` | `#1ebdfd` |
+| tertiaryFixedDim | `#00afec` | `#00afec` |
+| onTertiaryFixed | `#001a27` | `#001a27` |
+| onTertiaryFixedVariant | `#003e57` | `#003e57` |
+| error | `#b31b25` | `#ff716c` |
+| errorDim | `#9f0519` | `#d7383b` |
+| onError | `#ffefee` | `#490006` |
+| errorContainer | `#fb5151` | `#9f0519` |
+| onErrorContainer | `#570008` | `#ffa8a3` |
 
-Automated contrast checks cover text-on-surface/background and text-on-accent roles in both modes. The lowest tested pair is `onErrorContainer` on `errorContainer`: 4.54:1 in light mode and 4.56:1 in dark mode. These results apply to this seed and default contrast level; validate any future color or contrast change independently.
+Automated contrast checks cover text-on-surface/background and text-on-accent roles in both modes. Primary text pairs are `#c0fff4` on `#00675d` (6.08:1) in light mode and `#00665c` on `#b4fff2` (6.06:1) in dark mode. These results apply to this seed and default contrast level; validate any future color or contrast change independently.
 
 ## Layout and foundation tokens
 
@@ -166,8 +166,13 @@ Spacing tokens use a 4px base scale and rem units so they respond to the user's 
 
 CSS custom properties cannot be used as media-query thresholds, so write these same values as literal `rem` values in `@media`. The tokens document the shared breakpoints for app styles and TypeScript consumers.
 
-`--itools-layout-content-max` is `80rem`, `--itools-layout-readable-max` is `72ch`, `--itools-layout-sidebar-width` is `18.5rem`, and `--itools-layout-page-gutter` grows from `1rem` to `1.5rem` at medium and `2rem` at expanded. Use these values in app-owned page layout CSS. The component library's established shape tokens remain authoritative: `--md-sys-shape-corner-none` 0px, extra-small 4px, small 8px, medium 12px, large 16px, large-increased 20px, extra-large 28px, extra-large-increased 32px, extra-extra-large 48px, full 9999px. Typography roles use the library's `--md-sys-typescale-*` tokens and Roboto/Noto Sans SC font family values.
+`--itools-layout-content-max` is `80rem`, `--itools-layout-readable-max` is `72ch`, `--itools-layout-sidebar-width` is `18.5rem`, and `--itools-layout-page-gutter` grows from `1rem` to `1.5rem` at medium and `2rem` at expanded. Use these values in app-owned page layout CSS.
 
+### Shape and typography tokens
+
+`AppThemeProvider` writes `--itools-shape-corner-rectangle: 3rem` (48px) through the library `ThemeProvider` public `style` prop. The same style maps the fixed MD3 corner tokens (`extra-small` through `extra-extra-large`) to that app token; `none` and `full` stay at their library values. App-owned rectangular surfaces also use the app token. Full-radius capsule and circular geometry retain their semantic shape. The installed library exposes no dedicated shape configuration prop; its documented public style prop is the supported CSS custom property entry point. The library's internal component selectors are not overridden.
+
+The library provides the fifteen text roles as `--md-sys-typescale-{group}-{size}` tokens. Text uses only Display, Headline, Title, Body and Label at Large, Medium or Small. The default role sizes are respectively Display 57/45/36px, Headline 32/28/24px, Title 22/16/14px, Body 16/14/12px and Label 14/12/11px. Font family, weight, line height and tracking come from the matching role tokens. Material Symbols use their own icon size.
 Navigation and shell layout tokens are app-owned dimensions, added to keep the persistent accordion, compact header, and detail metadata aligned across desktop and drawer presentations:
 
 | Token | Value | Use |

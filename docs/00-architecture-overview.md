@@ -15,7 +15,7 @@
 - 质量：ESLint + Prettier + TypeScript Strict。
 - CI：GitHub Actions。
 - 部署：Linux + Docker Compose；反向代理负责 HTTPS；Cloudflare/CDN/WAF 代理公网入口。
-- UI：Material Design 3 体系；主品牌洋红、Material Symbols Rounded 本地托管优先。
+- UI：Material Design 3 体系；主品牌鸭青（源色 `#009688`）、Material Symbols Rounded 本地托管优先。
 
 ## 系统边界
 - 浏览器：工具算法、文件处理、任务运行、IndexedDB、结果下载、PWA。

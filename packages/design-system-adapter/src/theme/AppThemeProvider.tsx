@@ -18,6 +18,20 @@ export function AppThemeProvider({ mode, children }: AppThemeProviderProps) {
     () => appColorSchemeToCssVars(generateAppColorScheme(mode)),
     [mode],
   );
+  const shapeVars = {
+    '--itools-shape-corner-rectangle': '3rem',
+    '--md-sys-shape-corner-extra-small': 'var(--itools-shape-corner-rectangle)',
+    '--md-sys-shape-corner-small': 'var(--itools-shape-corner-rectangle)',
+    '--md-sys-shape-corner-medium': 'var(--itools-shape-corner-rectangle)',
+    '--md-sys-shape-corner-large': 'var(--itools-shape-corner-rectangle)',
+    '--md-sys-shape-corner-large-increased':
+      'var(--itools-shape-corner-rectangle)',
+    '--md-sys-shape-corner-extra-large': 'var(--itools-shape-corner-rectangle)',
+    '--md-sys-shape-corner-extra-large-increased':
+      'var(--itools-shape-corner-rectangle)',
+    '--md-sys-shape-corner-extra-extra-large':
+      'var(--itools-shape-corner-rectangle)',
+  } as CSSProperties;
 
   return (
     <ThemeProvider
@@ -26,7 +40,7 @@ export function AppThemeProvider({ mode, children }: AppThemeProviderProps) {
       variant="vibrant"
       contrastLevel={0}
       motionScheme="standard"
-      style={colorVars as CSSProperties}
+      style={{ ...colorVars, ...shapeVars }}
     >
       {children}
     </ThemeProvider>

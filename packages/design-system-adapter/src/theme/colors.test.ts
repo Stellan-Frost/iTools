@@ -56,8 +56,8 @@ describe('Material 3 2025 app color scheme', () => {
       expect(
         Object.values(colors).every((color) => /^#[0-9a-f]{6}$/.test(color)),
       ).toBe(true);
-      expect(colors.primary).toBe(mode === 'light' ? '#ad1c60' : '#ff88b2');
-      expect(colors.primaryDim).toBe(mode === 'light' ? '#9c0854' : '#ff69a3');
+      expect(colors.primary).toBe(mode === 'light' ? '#00675d' : '#b4fff2');
+      expect(colors.primaryDim).toBe(mode === 'light' ? '#005a51' : '#00fde7');
       expect(colors.surfaceContainerLowest).toBe(
         mode === 'light' ? '#ffffff' : '#000000',
       );

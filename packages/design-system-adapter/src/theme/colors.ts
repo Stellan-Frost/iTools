@@ -6,7 +6,7 @@ import {
   type DynamicColor,
 } from '@material/material-color-utilities';
 
-export const APP_THEME_SEED = '#E5007D';
+export const APP_THEME_SEED = '#009688';
 
 /** All 53 semantic system color roles in the Material 3 2025 color spec. */
 export const APP_COLOR_ROLES = [

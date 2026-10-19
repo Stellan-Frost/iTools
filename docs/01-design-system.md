@@ -7,12 +7,12 @@
 
 ## 视觉基线
 - 使用 Material Design 3 组件体系；不得把旧版 MD2 作为当前视觉规范。
-- 品牌方向：鲜明活跃的洋红。由 Agent 使用 MD3 配色工具选定固定种子色，生成浅色/深色完整色调方案，并提交语义色值表后再实施。
+- 品牌方向：鸭青，固定种子色 `#009688`。使用 MD3 2025 `SchemeVibrant` 生成浅色/深色完整语义角色；不得把源色直接硬编码到各角色，以保留前景与容器的对比关系。
 - 语义色：primary、secondary、tertiary、background、surface/surface-container、on-surface、error、success/warning 等状态色。
 - 表面层级通过 MD3 语义表面色区分；阴影主要用于菜单、对话框等浮层。
-- 字体：界面英文 Roboto；中文 Noto Sans SC；代码使用专用等宽字体。统一字号、字重、行高。
+- 字体：界面英文 Roboto；中文 Noto Sans SC；代码使用专用等宽字体。所有文本使用 MD3 Display、Headline、Title、Body、Label 五类各 Large/Medium/Small 共十五个 typescale 角色及其字号、字重、行高、字距 Token；不得另设任意字号。Material Symbols 字形尺寸属于图标 Token，不是文本字号。
 - 图标：Material Symbols Rounded，优先本地托管。
-- 形状：柔和圆润，卡片、按钮、输入框和对话框采用较大圆角。
+- 形状：用户指定所有固定矩形 corner Token 统一映射到最大固定值 48px（`--itools-shape-corner-rectangle`）；`none`、`full` 及圆形几何保持各自语义。该映射由公开 ThemeProvider `style` CSS custom properties 提供，圆角矩形组件统一应用；胶囊形 Chip/Button 继续使用 `full`。
 - 信息密度：宽松展示型，允许复杂工具页面有更多滚动。
 - 动效：丰富但有秩序；为页面、菜单、对话框、卡片、任务进度和结果展示定义统一时长、缓动、层级与取消规则。尊重 `prefers-reduced-motion`，避免不必要的持续动效。
 - 响应式：统一断点、网格、最大内容宽度与间距；复杂工作区随可用空间重排，不维护独立移动页面。

@@ -12,7 +12,7 @@
   width: 3rem;
   aspect-ratio: 1;
   place-items: center;
-  border-radius: var(--md-sys-shape-corner-medium);
+  border-radius: var(--itools-shape-corner-rectangle);
   background: var(--md-sys-color-primary-container);
   color: var(--md-sys-color-on-primary-container);
   font-size: 1.5rem;
