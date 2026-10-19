@@ -100,7 +100,7 @@ export default tseslint.config(
                 '@itools/design-system-adapter',
                 '@itools/web',
               ],
-              message: 'apps/server 只能依赖 @itools/contracts。',
+              message: 'apps/server 只能依赖 @itools/contracts 与 @itools/db。',
             },
           ],
         },

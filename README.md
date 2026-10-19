@@ -1,71 +1,19 @@
 # iTools
 
-iTools 是一个本地运行的 Web 工具站项目。阶段 0–9 已完成：Monorepo、MD3 设计系统、Fastify SSR、`/zh-CN` 与 `/en` 路由、双语页面、真实 404、Sitemap/robots、三态工具注册表（`preview / implemented / disabled`）、任务运行时（状态机、调度器、Worker 池、取消协议）、本地文件资产存储（IndexedDB、对象 URL、保留清理、归档导入导出），数据库与只读 API（PostgreSQL、迁移、Seed、`/api/v1`、OpenAPI），以及管理员后台（初始化、登录、会话、CSRF、限流、元数据编辑、启停、版本回滚），以及安全响应头/CSP、限流、脱敏日志与审计门禁。
+多工具网站（MD3 设计体系，工具在浏览器本地处理）。阶段 0–9 已完成；PWA、CI 与部署未开始。
 
-当前 6 个可见样本是 `preview`，另有 1 个 `disabled` 样本；`implemented` 为 0：**没有可执行工具**。任务运行时与资产存储已实现但未接入任何工具或页面；PWA、CI 与部署未实现。
+**全部技术文档只有一套：`docs/00`–`15`。** 请从 [docs/00 · 架构总览与开发入口](docs/00-architecture-overview.md) 开始阅读——启动、命令、代码地图、任务流程与红线都在那里。
 
-## 从这里开始
-
-新 Agent 请按顺序读：
-
-1. [00 · 架构总览与开发入口](docs/00-architecture-overview.md)：包结构、运行命令、代码地图、核心规则。
-2. [14 · 路线图](docs/14-phase-implementation-roadmap.md) 与 [13 · 验收与决策](docs/13-acceptance-open-decisions.md)：当前阶段、未决事项、下一步门槛。
-3. 按任务读对应模块文档（01–12）。
-4. [15 · 强制代码要求](docs/15-mandatory-code-requirements.md)：所有改动必须满足。
-
-## 本地运行
-
-环境要求：Node.js ≥ 22；pnpm 11.25.0。
+| 常用入口 | 文档 |
+| --- | --- |
+| 开发入口 / 启动 / 红线 | [00](docs/00-architecture-overview.md) |
+| MD3 设计系统规范 | [01](docs/01-design-system.md) |
+| 阶段路线图 | [14](docs/14-phase-implementation-roadmap.md) |
+| 决策记录（D01–D36） | [13](docs/13-acceptance-open-decisions.md) |
+| 强制代码规范 | [15](docs/15-mandatory-code-requirements.md) |
 
 ```sh
 pnpm install
-pnpm dev
+pnpm dev       # http://127.0.0.1:$PORT（.env 当前 PORT=3000），/ → /zh-CN
+pnpm verify    # 提交前必须全绿
 ```
-
-`pnpm dev` 会先构建 `contracts`、`app-core`、`design-system-adapter`，再启动 Fastify + Vite middleware，默认 `http://127.0.0.1:5173`；`/` 会 302 到 `/zh-CN`。
-
-生产模式：
-
-```sh
-pnpm build
-cd apps/server && NODE_ENV=production node dist/index.js
-```
-
-## 验证
-
-```sh
-pnpm verify                       # 总门禁：format → lint → typecheck → test → build → 注册表 → i18n → HTTP
-
-# 或分步执行
-pnpm format:check
-pnpm lint
-pnpm typecheck
-pnpm test
-pnpm build
-pnpm check:tools                  # 需先构建 app-core
-pnpm check:i18n                   # 需先构建 app-core
-node scripts/verify-stage-4.mjs   # 需先 build
-```
-
-当前基线：584 项测试通过，28 项 HTTP 验收通过。CI 与 Playwright 尚未接入。
-
-## 本地数据库
-
-开发库使用便携版 PostgreSQL 17（`C:/itools-pg`，不注册系统服务），启动方式与迁移/Seed 命令见 [11 · 部署与运维](docs/11-deployment-operations-recovery.md)。`pnpm dev` 与 `pnpm test` 会自动加载 `.env`；没有 `DATABASE_URL` 时服务照常启动，目录回落到代码注册表。
-
-## 文档
-
-`docs/00`–`15` 是唯一的项目文档集，已按“新 Agent 可直接开工”重构；阶段过程稿与旧截图已删除。
-
-- [01 设计系统](docs/01-design-system.md)
-- [02 路由、i18n 与 SEO](docs/02-app-routing-i18n-seo.md)
-- [03 工具注册契约与页面](docs/03-tool-contract.md)
-- [04 任务运行时](docs/04-task-worker-runtime.md)
-- [05 文件资产与 IndexedDB](docs/05-file-assets-local-storage.md)
-- [06 后端、数据库与 API](docs/06-backend-database-api.md)
-- [07 管理后台](docs/07-admin-console.md)
-- [08 安全与隐私](docs/08-security-privacy.md)
-- [09 PWA 与缓存](docs/09-pwa-cache-update.md)
-- [10 测试与质量](docs/10-testing-ci-quality.md)
-- [11 部署与恢复](docs/11-deployment-operations-recovery.md)
-- [12 Agent 协作](docs/12-agent-collaboration.md)

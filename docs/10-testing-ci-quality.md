@@ -1,116 +1,152 @@
-# 10 · 测试、质量与 CI
+# 10 · 测试与质量门禁
 
-> 状态：**本地测试与质量门禁已实现；CI、Playwright、性能预算未实现（阶段 11）**。
-> 当前基线：584 项 Vitest 测试、28 项生产 HTTP 验收，全部通过。数据库相关测试跑在真实 PostgreSQL 上。
+> 定位：说明本地质量门禁每条命令在挡什么、584 项测试分布在哪、如何新增单测/集成/HTTP 验收、如何做负向探针，以及 CI、Playwright、性能预算的真实缺口。
+> 状态：本地测试与门禁已实现（阶段 1–9 持续累积）；**CI、Playwright、覆盖率阈值、性能/包体预算未实现（阶段 11）**。
+> 代码入口：`scripts/{check-boundaries,check-import-boundaries,check-design-tokens,check-no-network,check-external-resources,check-tool-registry,check-i18n-keys}.mjs`、`scripts/verify-stage-4.mjs`、`apps/web/vite.config.ts`、`packages/design-system-adapter/vitest.config.ts`、`packages/db/src/test-support/test-database.ts`。
 
-## 1. 工具链
+## 1. 当前事实
 
-| 工具 | 当前状态 | 用途 |
+基线（2026-10-19）：**584 项 Vitest 全部通过，HTTP 验收 28/28**。测试必须连接真实 PostgreSQL 的部分由 `TEST_DATABASE_URL` 提供，缺变量时直接失败而不是跳过。
+
+| 包 | 测试文件（关键） | 数量 |
 | --- | --- | --- |
-| Vitest 5 | 已接入 | 单元/集成/组件测试 |
-| Testing Library + jsdom | 已接入 | Web 组件与页面 |
-| TypeScript `strict` | 已接入 | 类型检查 |
-| ESLint 10 + Prettier | 已接入 | 代码风格与静态检查 |
-| Turborepo | 已接入 | 任务编排与缓存 |
-| Playwright | **未接入** | 浏览器 E2E、水合、响应式检查（阶段 11） |
-| GitHub Actions | **未接入** | PR 门禁（阶段 11） |
-| 依赖漏洞扫描 | **未接入** | 阶段 11 |
+| `packages/contracts` | `contracts.test.ts`（任务、manifest、API 错误、环境、locale、可用性、Worker 协议、预算、归档） | 9 |
+| `packages/app-core` | `catalog/catalog.test.ts`、`registry/registry.test.ts`、`i18n/i18n.test.ts` | 49 |
+| `packages/task-runtime` | `domain/*.test.ts`、`application/*.test.ts`、`infrastructure/worker/*.test.ts` | 66 |
+| `packages/asset-store` | `domain/*`、`application/*`、`infrastructure/indexeddb/*`、`create-asset-store.test.ts` | 131 |
+| `packages/db` | `migrate.test.ts`、`infrastructure/*.test.ts`、`catalog/*.test.ts` | 65 |
+| `packages/design-system-adapter` | `Dialog` / `IconButton` / `NavigationDrawer` / `MaterialIcon` / `AppThemeProvider` / `colors` | 9 |
+| `apps/web` | `app/route`、`app/seo`、`pages/pages`、`App`、`api/*`、`pages/admin/admin` | 96 |
+| `apps/server` | `app`、`api/*`、`security/headers`、`logging/request-log`、`admin/**`、`catalog-integration`、`cli/reset-password-core` | 159 |
+| **合计** | — | **584** |
 
-## 2. 本地门禁
+工具链：Vitest 5.0.5（各包 `vitest run`）、`@testing-library/react` 16 + jsdom 30（web 组件）、`fake-indexeddb` 6.2.6（asset-store）、TypeScript 6.0.2 `strict`、ESLint 10 + Prettier 3.9、Turborepo 2.11。
+
+| 缺口 | 现状 |
+| --- | --- |
+| Playwright / 真实浏览器 E2E | 未接入；无水合、CSP 实际执行、SW、IndexedDB 真实行为验证 |
+| GitHub Actions / 任意 CI | 未接入；门禁只在本地手工执行 |
+| 覆盖率阈值 | 未配置，`vitest` 未开启 coverage |
+| 性能与包体预算 | 未测基线、无阈值 |
+| 依赖漏洞阻断 | 有 `pnpm check:audit`，但不在 `verify` 链，不阻断合并（D04 未决） |
+
+## 2. 代码地图
+
+| 路径 | 职责 |
+| --- | --- |
+| `package.json` 的 `verify` | 总门禁：format:check → lint → typecheck → test → build → check:external → check:tools → check:i18n → verify-stage-4 |
+| `scripts/run-turbo.mjs` | 统一以 `TURBO_TELEMETRY_DISABLED=1` 调用 turbo，保证输出与退出码透传 |
+| `scripts/check-boundaries.mjs` | 只读 `package.json`，校验工作区包允许的 `@itools/*` 依赖 |
+| `scripts/check-import-boundaries.mjs` | 解析源码 import/动态 import，校验依赖方向、禁止包名自引用、禁止相对导入越出包边界 |
+| `scripts/check-design-tokens.mjs` | 扫描 `apps/web/src`：禁止十六进制/rgb/hsl 颜色、`!important`、`.tsx` 内联 `style={{}}` |
+| `scripts/check-no-network.mjs` | 扫描 `asset-store`、`task-runtime` 生产源码，命中 `fetch`/XHR/WebSocket/EventSource/sendBeacon 即失败 |
+| `scripts/check-external-resources.mjs` | 扫描 `apps/web/dist/client` 的 HTML/CSS，禁止外部 `src`/`href`/`url()` |
+| `scripts/check-tool-registry.mjs` | 读取 app-core 构建产物，校验注册表、翻译、样本任务引用 |
+| `scripts/check-i18n-keys.mjs` | 读取 app-core 构建产物的资源，断言每个叶子键在 `apps/web/src` 有引用 |
+| `scripts/verify-stage-4.mjs` | 生产模式起真实服务（端口 5198）跑 28 项 HTTP 验收，见 §1 与 §5 |
+| `apps/web/vite.config.ts` | web 的 Vitest 配置：`environment: 'jsdom'`、`setupFiles`、`css: true`、`restoreMocks`、内联 adapter/MCU |
+| `packages/design-system-adapter/vitest.config.ts` | 仅内联 `@material/material-color-utilities`（其 ESM 内部导入无扩展名） |
+| `packages/db/src/test-support/test-database.ts` | `assertTestDatabase`、`resetTestDatabase`、`withTestDatabase`、`withIsolatedSchema` |
+| `packages/*/tsconfig.build.json` | 构建时排除 `src/**/*.test.ts(x)`；task-runtime / asset-store / db 额外排除 `src/test-support/**`，测试替身不进 dist |
+
+测试替身位置：`packages/task-runtime/src/test-support/{fake-timer,fake-worker,fake-task-runner}.ts`、`packages/asset-store/src/test-support/{in-memory-repository,fake-object-url}.ts`、`packages/db/src/test-support/{in-memory-catalog-repository,test-database}.ts`、`apps/server/src/admin/test-support/*`。
+
+## 3. 必须遵守的规则
+
+1. 新测试必须放在被测模块旁，命名 `<module>.test.ts(x)`；E2E 才放 `e2e/`（阶段 11 建目录），当前无 E2E 目录。
+2. 测试替身只能放 `src/test-support/`，且该路径必须被 `tsconfig.build.json` 排除。检查：`ls packages/*/dist | grep test-support` 应无输出。
+3. 服务端/契约断言在 node 环境跑；只有 `apps/web` 用 jsdom。禁止在 jsdom 里断言 SSR 字符串或 HTTP 状态码。
+4. 数据库测试只读 `TEST_DATABASE_URL`；db 包的库名必须以 `_test` 结尾（`assertTestDatabase`），否则直接抛错。
+5. 服务端集成测试（`catalog-integration.test.ts`、`admin/admin-integration.test.ts`）会重建 schema，**必须**人工保证 `TEST_DATABASE_URL` 指向 `_test` 库；它们不复用 db 包的守卫。
+6. 不得用真实时钟/真实 Worker/真实浏览器存储替代测试替身：task-runtime 用 `fake-timer`/`fake-worker`，asset-store IDB 用 `fake-indexeddb`。
+7. 禁止 `any`、`@ts-ignore`、`eslint-disable`、`.skip`、注释掉断言来“修好”测试；ESLint 会挡前两项，后两项由评审兜底。
+8. 改路由/SEO 必须同时更新 `route.test.ts`、`seo.test.ts` 与 `verify-stage-4.mjs`；只改其一则门禁不完整。
+9. 改 i18n 必须中英同步；`i18n.test.ts` 断言 `common` 键集与非空，`check:i18n` 断言“所有键有引用”。
+10. 新增失败用例必须能在移除修复后失败（负向探针，见 §6.4）；只写“正向通过”的测试视为无效。
+11. 测试数量变化必须同步本文件 §1、[13](13-acceptance-open-decisions.md) 与 [00](00-architecture-overview.md) 的基线；不得保留过期数字。
+12. 任何未执行的门禁必须在报告中标注“未执行”，不得写成通过。
+
+## 4. 禁止事项
+
+| ❌ 错误做法 | ✅ 正确做法 |
+| --- | --- |
+| 把 fake repository 放进 `src/application/` 供测试 import | 放 `src/test-support/`，并由 `tsconfig.build.json` 排除 |
+| 让 `TEST_DATABASE_URL` 指向开发库 `itools` | 必须指向 `itools_test`；db 包会直接拒绝运行 |
+| 用 `setTimeout(200)` 等待异步任务 | 注入 `fake-timer`，按虚拟时间推进 |
+| 断言 `db.listItems()` 返回条数而不断言字段 | 断言身份、分类、可用性、排序与来源标记 |
+| 用 `expect(true).toBe(true)` 占位或 `it.skip` 掉失败用例 | 删除无效用例或修复实现；skip 必须在报告中说明原因 |
+| 在 jsdom 中挂载整页来验证 404 状态码 | 用 `createApp().inject()` 或 `verify-stage-4.mjs` 验证真实 HTTP |
+| 改缓存头只改代码不更新 `app.test.ts` | 同步断言与 `docs/02 §1.6`，跑 `verify-stage-4.mjs` |
+| 依赖本机全局安装的 psql/Playwright | 只用 `package.json` 锁定的依赖与 `C:/itools-pg/bin` 显式路径 |
+
+## 5. 如何验证
 
 ```sh
-pnpm verify                        # 总门禁：format → lint → typecheck → test → build → 注册表 → i18n → HTTP
+pnpm format:check      # Prettier；期望 "All matched files use Prettier code style!"
+pnpm lint              # ESLint + 边界 + 源码 import + Token + 隐私；期望全通过且无警告
+pnpm typecheck         # Turbo 12 个任务；期望 12/12 successful
+pnpm test              # 期望 584 passed（8 个包）
+pnpm build             # 期望 8/8 successful（client + SSR + server + 6 包）
+pnpm check:external    # 期望：外部资源审计通过：{n} 个 HTML/CSS 文件无外部引用。
+pnpm check:tools       # 期望：注册表：共 7 条（preview 6、implemented 0、disabled 1），样本任务 3 条。
+pnpm check:i18n        # 期望：i18n 检查通过：所有资源键都有引用。
+node scripts/verify-stage-4.mjs   # 期望：全部 28 项通过
+pnpm verify            # 以上全链路；任一步失败即整体失败
 ```
 
-分步执行：
+单元/集成子集：
 
 ```sh
-pnpm format:check
-pnpm lint                  # ESLint（严格规则）+ 清单边界 + 源码边界 + Token 检查
-pnpm typecheck             # Turbo，依赖包先 build
-pnpm test                  # Turbo
-pnpm build
-pnpm check:tools           # 需先构建 app-core
-pnpm check:i18n            # 需先构建 app-core
-node scripts/verify-stage-4.mjs
+pnpm --filter @itools/web test -- app/route        # 33 passed
+pnpm --filter @itools/db test -- migrate           # 8 passed，需 TEST_DATABASE_URL
+pnpm test:db                                       # 只跑 db 包
+node --env-file-if-exists=.env scripts/run-turbo.mjs test --filter=@itools/server
 ```
 
-事实：
+失败时的判读：`TEST_DATABASE_URL` 缺失会抛“数据库测试无法运行”；库名不以 `_test` 结尾会抛“拒绝在数据库 … 上执行测试重置”；`check:i18n` 失败会逐条列出未引用键。
 
-- `check:tools`、`check:i18n` 与 HTTP 验收脚本依赖构建产物，**不在 `pnpm lint` 链**；`pnpm verify` 已按正确顺序串联。
-- `pnpm lint` 现在包含：ESLint 严格规则、`check-boundaries`（清单）、`check-imports`（源码 import）、`check-tokens`（硬编码颜色/内联样式）、`check:privacy`（本地包禁止网络调用）。
-- `pnpm verify` 在 build 之后额外执行 `check:external`（构建产物不得引用外部资源）；`check:audit` 依赖网络，暂不进门禁。
-- 隐私门禁：`scripts/check-no-network.mjs` 扫描 `asset-store` 与 `task-runtime` 的生产源码，出现 `fetch` / `XMLHttpRequest` / `WebSocket` / `EventSource` / `sendBeacon` 即失败；新增本地处理包必须加入该脚本的白名单并说明理由。
-- ESLint 会阻断：`any`、裸 HTML 控件、直接使用 `m3-expressive-react`、深层导入、server 越界依赖、生产文件超过 400 行、`console.log`、未使用变量。
-- `scripts/verify-stage-3.mjs` 已删除，只保留 `verify-stage-4.mjs`。
-- `@itools/task-runtime` 的测试替身放在 `src/test-support/`，由 `tsconfig.build.json` 排除，**不会进入 dist**；运行时测试不依赖真实定时器、真实 Worker 或系统时钟。
-- `@itools/asset-store` 同样把内存仓储与伪 URL/配额放在 `src/test-support/` 并从构建排除；IndexedDB 测试使用 `fake-indexeddb`（devDependency），**未在真实浏览器验证**。
-- 数据库测试需要 `TEST_DATABASE_URL`：`pnpm test` 通过 `node --env-file-if-exists=.env` 加载本地配置；`turbo.json` 的 `test` 任务已声明 `env: ["TEST_DATABASE_URL"]`，否则 Turbo 严格模式会丢弃该变量。
-- 测试库安全闸门：库名必须以 `_test` 结尾，否则测试支持层直接拒绝运行；测试会重建该库的 `public` schema，**绝不允许指向开发库或生产库**。
+## 6. 常见任务（step-by-step）
 
-## 3. 测试分布
+### 6.1 新增一个纯函数单测
 
-| 包 | 文件 | 数量 | 覆盖 |
-| --- | --- | --- | --- |
-| contracts | `contracts.test.ts` | 9 | 任务状态、工具 manifest、API 错误、环境、locale、可用性、Worker 协议、资源预算、资产归档 |
-| app-core | `catalog/catalog.test.ts` | 6 | 分类、样本任务、双语 |
-| app-core | `registry/registry.test.ts` | 30 | 默认注册表、可见性、Sitemap、搜索、fixture 注入、执行契约、10 类校验 |
-| app-core | `i18n/i18n.test.ts` | 13 | 命名空间、翻译、键一致性、extraResources |
-| task-runtime | `domain/*.test.ts` | 16 | 状态机合法/非法转换、终态、资源预算三重限制 |
-| task-runtime | `application/*.test.ts` | 26 | 队列顺序、三重预算、成功/失败/取消/队列满/销毁、运行时订阅与事件 |
-| task-runtime | `infrastructure/worker/*.test.ts` | 24 | 协议校验、Worker 池复用与排队、启动/完成/错误/取消/超时/崩溃 |
-| asset-store | `domain/*.test.ts` | 56 | 草稿校验、引用完整性、保留策略、归档编解码 |
-| asset-store | `application/*.test.ts` | 45 | 对象 URL 引用计数、资产服务、结果提交、归档导入回滚 |
-| asset-store | `infrastructure/indexeddb/*.test.ts` | 24 | 迁移、原子写入、删除联动、配额降级（`fake-indexeddb`） |
-| asset-store | `create-asset-store.test.ts` | 6 | 真实 IDB 组装：读写、引用、URL、清理、归档往返、关闭 |
-| db | `migrate.test.ts` | 8 | 建表、幂等、checksum 拒绝改写、失败整体回滚、顺序依赖 |
-| db | `infrastructure/*.test.ts` | 36 | 连接池、健康探测硬超时、pg 仓储（含凭据/会话/版本）、级联与单事务 |
-| db | `catalog/*.test.ts` | 21 | 覆盖合并、排序、逐字段回落、来源标记、Seed 幂等 |
-| web | `api/*.test.ts` | 9 | 客户端解析、错误码映射、URL 编码、Query 选项 |
-| server | `api/api.test.ts` | 13 | 列表/单条/404/503、健康三态、缓存头、OpenAPI |
-| server | `catalog-integration.test.ts` | 4 | 真实 PG 端到端：迁移 → Seed → 合并 → HTTP |
-| server | `admin/auth/*.test.ts` | 75 | 口令、令牌、会话、Cookie、CSRF、限流、守卫、4 条认证路由 |
-| server | `admin/writes/*.test.ts` | 14 | 文案合并、启停、版本、回滚冲突、非法请求 |
-| server | `admin/admin-integration.test.ts` | 8 | 真实 PG：初始化 → 登录 → 编辑 → 回滚 → 登出 → 401 |
-| server | `cli/reset-password-core.test.ts` | 5 | 弱口令拒绝、未初始化、重置后新旧口令校验、撤销计数 |
-| web | `api/admin-*.test.ts` | 17 | 管理客户端：CSRF 头、错误码、编码、查询选项 |
-| web | `pages/admin/admin.test.tsx` | 9 | 初始化/登录/401 回退、只提交改动字段、下架确认、回滚冲突 |
-| server | `security/headers.test.ts` | 8 | CSP 指令、开发/生产差异、HSTS 开关、头不覆盖 |
-| server | `app-security.test.ts` | 4 | 302/404/503 全覆盖、生产 CSP 不放行内联脚本 |
-| server | `admin/auth/guard-origin.test.ts` | 5 | 缺失/跨源 Origin 拒绝、读请求放行、未配置时保持旧行为 |
-| server | `logging/request-log.test.ts` | 8 | 字段结构、查询串/Cookie/Authorization/body 不落日志 |
-| server | `api/rate-limit.test.ts` | 1 | 第 121 次请求返回 429 + retry-after |
-| adapter | 5 个测试文件 | 9 | Dialog、IconButton、Drawer、图标、主题 |
-| web | `app/route.test.ts` | 33 | URL 解析/生成、可用性、404 |
-| web | `app/seo.test.ts` | 3 | noindex、canonical |
-| web | `pages/pages.test.tsx` | 15 | 六页面中英、预览态、无 CJK |
-| web | `App.test.tsx` | 10 | 壳层交互、搜索、抽屉、语言切换、预览标识 |
-| server | `app.test.ts` | 14 | 重定向、308、404、注入、Sitemap、robots、缓存头、静态资源 |
+1. 在模块旁建 `xxx.test.ts`，`import { describe, expect, it } from 'vitest'`。
+2. 只测公开行为，不 mock 同包内部函数；时间/随机数通过参数注入。
+3. 跑 `pnpm --filter @itools/<pkg> test -- xxx`，再全量 `pnpm test` 确认总数更新。
 
-## 4. 新增测试要求
+### 6.2 新增数据库集成测试
 
-- 改路由/SEO：必须更新 `route.test.ts`、`seo.test.ts` 与 HTTP 验收脚本。
-- 改 i18n：中英键必须同步；`i18n.test.ts` 会检查键集合与空值。
-- 改注册表：必须覆盖 `check:tools` 的负向用例与 Sitemap 规则。
-- 改 UI 组件：更新组件测试；不要用 `any`、`@ts-ignore` 或跳过断言来“修好”测试。
-- 新增工具：契约测试、页面测试、SSR HTTP 测试独立运行，不得依赖其它工具。
-- 改资产/存储：必须补充 `asset-store` 的领域或仓储测试；IndexedDB 用例使用 `fake-indexeddb`，不得依赖真实浏览器；**不得用真实用户数据作为测试夹具**。
+1. 在 `packages/db/src/**` 建 `*.test.ts`，用 `withIsolatedSchema('tc_<feature>', async (pool) => {...})` 建独立 schema。
+2. schema 名只允许 `[a-z_][a-z0-9_]*`；测试结束由 helper 关闭连接池。
+3. 需要“空库全量重建”语义时用 `withTestDatabase`（会 drop `public` schema，仅限 `_test` 库）。
+4. 跑 `pnpm test:db`；确认未触碰 `itools` 开发库。
 
-## 5. 阶段 11 的 CI 门禁（目标）
+### 6.3 新增一条 HTTP 验收
 
-1. 格式、Lint、类型检查。
-2. 单元/集成测试。
-3. Playwright 关键流程与水合检查。
-4. 构建、包边界、注册表校验（`check:tools`）。
-5. OpenAPI 生成与契约差异（阶段 7 后）。
-6. 注册表/Seed/数据库一致性（阶段 7 后）。
-7. 依赖漏洞扫描：严重且可利用漏洞阻断合并；一般告警由负责人判断。
-8. CSP/安全响应头与隐私网络审计。
-9. 真实 HTTP 404 与 Sitemap 检查。
-10. 性能与包体预算：先测基线，再由根 Agent 提议阈值交用户确认；当前未测。
+1. 在 `scripts/verify-stage-4.mjs` 的 `try` 块内加 `check('名称', 条件, '细节')`。
+2. 需要新路径时用 `request(path)`（`redirect: 'manual'`），不要跟随重定向。
+3. 同步更新 `docs/02` 的路径/缓存表与 [13](13-acceptance-open-decisions.md) 的 28 项计数。
+4. 跑 `pnpm build && node scripts/verify-stage-4.mjs`，确认最后一行是“全部 N 项通过”。
 
-## 6. 测试数据与隔离
+### 6.4 负向探针（证明门禁真的会挡）
 
-- 测试不得连接生产数据库或修改生产配置（当前无数据库）。
-- 组件测试使用 jsdom；SSR 相关断言必须在 node 环境下运行或通过 HTTP 验收。
-- 失败必须如实报告；不允许把未执行项写成通过。
+1. 建临时文件 `apps/web/src/__probe__.tsx`，写入 `<button>点我</button>` 与 `const c = '#ff0000';`。
+2. 跑 `pnpm lint`：期望 ESLint 报“禁止裸 HTML 控件”，`check:tokens` 报“禁止硬编码十六进制颜色”，退出码非 0。
+3. 再建 `apps/server/src/__probe__.ts`，`import { toolRegistry } from '@itools/app-core';`，跑 `pnpm check:imports`：期望报“@itools/server 不得依赖 @itools/app-core”。
+4. 建 `packages/task-runtime/src/__probe__.ts` 写 `fetch('/x')`，跑 `pnpm check:privacy`：期望报“出现 fetch()”。
+5. **删除全部探针文件**后重跑 `pnpm verify`，确认恢复通过；探针不得提交。
+
+### 6.5 接入 CI（阶段 11 待做）
+
+1. 新 workflow 依序跑 `pnpm install --frozen-lockfile` → `format:check` → `lint` → `typecheck` → `test` → `build` → `check:tools` → `check:i18n` → `verify-stage-4.mjs`。
+2. 起 PostgreSQL service（库名 `itools_test`）并注入 `TEST_DATABASE_URL`；`turbo.json` 已声明 `test.env`，否则 Turbo 严格模式会丢弃该变量。
+3. 再加 Playwright job 与 `pnpm check:audit`；漏洞分级按 D04 定规则，严重且可利用才阻断。
+
+## 7. 已知限制与相关决策
+
+- 无 CI：所有门禁依赖开发者本地执行，无法阻止绕过；这是当前最大质量风险（阶段 11）。
+- 无 Playwright：水合、CSP 实际执行、SW 生命周期、真实 IndexedDB/Worker 行为均未验证；`fake-indexeddb` 通过不等于浏览器通过。
+- 服务端集成测试重建 `public` schema 且不校验 `_test` 后缀，安全性完全依赖 `TEST_DATABASE_URL` 的取值；调用前务必确认连接串。
+- `check:i18n` 只查“键有引用”，不查键集合；键集断言只覆盖 `common`。
+- 无覆盖率统计与阈值、无重复代码检测（doc/15 要求 CI 加入，属阶段 11）。
+- 性能与包体预算未测；当前壳层约 6.3 MB（详见 [09](09-pwa-cache-update.md)），阈值须先测基线再由用户确认。
+- 相关决策：D04（漏洞分级）、D06（验收顺序）、D15（SSR noExternal）、D35（进程内限流）。全文见 [13](13-acceptance-open-decisions.md)。
