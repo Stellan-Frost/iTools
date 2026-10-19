@@ -2,10 +2,13 @@ import { describe, expect, it } from 'vitest';
 import Value from 'typebox/value';
 import {
   ApiErrorSchema,
+  DEFAULT_LOCALE,
+  LOCALES,
   ServerEnvironmentSchema,
   TaskStatusSchema,
   ToolManifestSchema,
   apiSuccessSchema,
+  isLocale,
   parseServerEnvironment,
 } from './index.js';
 import Type from 'typebox';
@@ -87,5 +90,14 @@ describe('shared contracts', () => {
     expect(() => parseServerEnvironment({ ...environment, PORT: '0' })).toThrow(
       'Invalid server environment configuration',
     );
+  });
+
+  it('freezes the supported locale set and default locale', () => {
+    expect(LOCALES).toEqual(['zh-CN', 'en']);
+    expect(DEFAULT_LOCALE).toBe('zh-CN');
+    expect(isLocale('zh-CN')).toBe(true);
+    expect(isLocale('en')).toBe(true);
+    expect(isLocale('zh-cn')).toBe(false);
+    expect(isLocale('fr')).toBe(false);
   });
 });

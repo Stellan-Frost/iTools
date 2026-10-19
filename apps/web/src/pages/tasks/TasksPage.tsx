@@ -1,56 +1,69 @@
 import { Button, Card } from '@itools/design-system-adapter';
-import type { AppRoute } from '../../app/route.js';
-import { sampleTasks } from '../../data/sample-catalog.js';
+import { SAMPLE_TASKS, findTool, getCategory } from '@itools/app-core';
+import { useTranslation } from 'react-i18next';
 import { AppIcon } from '../../components/app-icon/AppIcon.js';
 import { PageHeading } from '../../components/page-chrome/PageHeading.js';
 import { PreviewNotice } from '../../components/page-chrome/PreviewNotice.js';
 import { MetadataChip } from '../../components/page-chrome/MetadataChip.js';
+import { useAppNavigation } from '../../app/navigation.js';
 import styles from './TasksPage.module.css';
 
-interface TasksPageProps {
-  onNavigate: (route: AppRoute) => void;
-}
+export function TasksPage() {
+  const { locale, navigate } = useAppNavigation();
+  const { t } = useTranslation(['tasks', 'common']);
 
-export function TasksPage({ onNavigate }: TasksPageProps) {
   return (
     <div className={styles.page}>
       <PageHeading
-        eyebrow="任务管理 · 界面预览"
-        title="最近任务样本"
-        description="查看任务列表、状态标签和回到工具的入口。当前没有实际运行记录。"
+        eyebrow={t('tasks:eyebrow')}
+        title={t('tasks:title')}
+        description={t('tasks:description')}
       />
-      <PreviewNotice>
-        下列任务是静态样本，用于展示任务管理页面，不是用户真实历史。
-      </PreviewNotice>
+      <PreviewNotice>{t('tasks:notice')}</PreviewNotice>
       <Card>
         <div className={styles.listHeader}>
-          <h2>任务列表</h2>
-          <MetadataChip label={`样本 ${sampleTasks.length} 条`} />
+          <h2>{t('tasks:listTitle')}</h2>
+          <MetadataChip
+            label={t('tasks:count', { total: SAMPLE_TASKS.length })}
+          />
         </div>
         <ul className={styles.taskList}>
-          {sampleTasks.map((task) => (
-            <li key={task.id}>
-              <div className={styles.taskIcon}>
-                <AppIcon name="task_alt" />
-              </div>
-              <div className={styles.taskDetails}>
-                <strong>{task.title}</strong>
-                <span>
-                  <MetadataChip label={task.category} />
-                  <MetadataChip label={task.timeLabel} />
-                </span>
-              </div>
-              <MetadataChip label={task.status} />
-              <Button
-                variant="text"
-                onClick={() =>
-                  onNavigate({ page: 'tool', toolId: task.toolId })
-                }
-              >
-                打开预览
-              </Button>
-            </li>
-          ))}
+          {SAMPLE_TASKS.map((task) => {
+            const tool = findTool(task.toolId);
+            const category = tool ? getCategory(tool.categoryId) : undefined;
+
+            return (
+              <li key={task.id}>
+                <div className={styles.taskIcon}>
+                  <AppIcon name="task_alt" />
+                </div>
+                <div className={styles.taskDetails}>
+                  <strong>
+                    {tool ? tool.name[locale] : t('tasks:fallbackTool')}
+                  </strong>
+                  <span>
+                    <MetadataChip
+                      label={
+                        category
+                          ? category.name[locale]
+                          : t('tasks:fallbackCategory')
+                      }
+                    />
+                    <MetadataChip label={task.timeLabel[locale]} />
+                  </span>
+                </div>
+                <MetadataChip label={task.status[locale]} />
+                <Button
+                  variant="text"
+                  onClick={() =>
+                    navigate({ page: 'tool', toolId: task.toolId })
+                  }
+                >
+                  {t('common:actions.openPreview')}
+                </Button>
+              </li>
+            );
+          })}
         </ul>
       </Card>
     </div>

@@ -1,77 +1,81 @@
 # 19 · 新 Agent 快速接手
 
-> 状态：截至 2026-10-19，阶段 2 预览已有验收记录；阶段 3 尚未开始，须等待用户确认下一步及 D06 验收顺序。本指南用于恢复工作上下文，不构成启动新功能的授权。
+> 状态：截至 2026-10-19，阶段 0–3 均有验收记录；阶段 3（路由/SSR/i18n/SEO）已完成可独立验收部分。阶段 4 尚未开始，启动前须由用户确认范围与接口。本文用于恢复工作上下文，不构成启动新功能的授权。
 
 ## 阅读顺序
 
 1. 根目录 [README.md](../README.md)：仓库索引与项目状态。
 2. 本指南：现状、边界和接手规则。
-3. 根据任务阅读 `docs/00`–`15` 中相关的架构要求、产品决定和阶段计划。它们是规划基线；若与现代码看起来不同，先判断是尚未实施还是实际冲突。
-4. 阅读对应模块 README 和源码，再查看 [当前审计](16-stage-0-audit.md)、[工作区与契约](17-stage-1-workspace.md)、[阶段 2 设计与验收](18-stage-2-design-system.md)。历史决策和代码变化用 Git 历史追溯。
+3. [阶段 3 冻结](20-stage-3-routing-ssr-i18n-seo.md) 与 [阶段 3 验收](21-stage-3-acceptance.md)：当前架构、冻结接口、证据与已知限制。
+4. 根据任务阅读 `docs/00`–`15` 的架构要求、产品决定和阶段计划；它们是规划基线，不是已实现能力。
+5. 阅读对应包 README 与源码，再用 Git 历史追溯决策。
 
 不要把规划文档中的目标能力当作当前功能。若权威决策来源或验收口径不清，记录为未决并交由根 Agent/用户裁定。
 
 ## 当前状态
 
-- 工作区内有三个包：`packages/contracts`、`packages/design-system-adapter`、`apps/web`。
-- 阶段 0 最初是纯文档审计；阶段 1 建立 workspace 与共享契约；阶段 2 建立 MD3 适配层和浏览器界面预览。
-- web 当前使用内存路由/主题状态与静态样例目录、任务、结果和管理数据。
-- 没有 SSR、数据库、真实工具执行、任务运行时、持久化、认证、PWA、CI 或部署实现。
-- 阶段 2 既有记录为 22 项测试通过（contracts 4、adapter 9、web 9）；build、lint、typecheck、format、peer 检查也有既有通过记录。它们不是本轮重跑。最终验收截图 4 张见 `docs/assets/stage-2/`，阶段说明见 `docs/18-stage-2-design-system.md`。
+- 工作区有五个包：`apps/web`、`apps/server`、`packages/app-core`、`packages/contracts`、`packages/design-system-adapter`。
+- 已实现：Fastify SSR 与静态托管、`/{locale}` 路由、中英双语、真实 404、SSR SEO head、动态 `sitemap.xml` / `robots.txt`、语言切换。
+- 目录仍来自 `@itools/app-core` 的代码注册表（5 分类、6 个启用工具 + 1 个停用样本）；没有数据库、真实工具执行、任务运行时、IndexedDB、认证、PWA、CI 或部署。
+- 任务页与管理页仍是界面样本；刷新会重置内存状态。
+- 最近一次全量验证：`format:check`、`lint`、`typecheck`、`test`（108 项）、`build` 通过；生产产物 HTTP 验收 31/31 通过。证据见 [阶段 3 验收](21-stage-3-acceptance.md)。
 
 ## 入口与职责
 
-| 入口                                            | 职责                                                | 工作边界                         |
-| ----------------------------------------------- | --------------------------------------------------- | -------------------------------- |
-| `apps/web/src/main.tsx`                         | 浏览器入口，导入适配层全局样式并挂载 React。        | 当前为 `createRoot` 客户端渲染。 |
-| `apps/web/src/App.tsx`                          | 应用壳、当前页选择、内存主题和搜索开关。            | 不是完整 URL 路由或持久化状态。  |
-| `apps/web/src/app/route.ts`                     | 前端展示用 `AppRoute` 联合类型。                    | 不处理 SSR、真实 404 或 URL。    |
-| `apps/web/src/data/sample-catalog.ts`           | 预览用样例目录数据。                                | 不是真实注册表或数据库 Seed。    |
-| `packages/design-system-adapter/src/index.ts`   | 适配器公开组件入口。                                | Web 基础 UI 经此包导入。         |
-| `packages/design-system-adapter/src/styles.css` | 适配器全局样式入口。                                | 从 Web `main.tsx` 导入一次。     |
-| `packages/contracts/src/index.ts`               | API、资产、环境、任务、工具契约公开入口。           | 形状和类型，不包含运行时服务。   |
-| `scripts/check-boundaries.mjs`                  | 校验 workspace manifest 中 `@itools/*` 依赖白名单。 | 不扫描源码 import。              |
-| `scripts/run-turbo.mjs`                         | 运行本地 Turbo，并关闭遥测。                        | 根 build/test/typecheck 使用。   |
+| 入口 | 职责 | 工作边界 |
+| --- | --- | --- |
+| `apps/server/src/index.ts` | 服务端启动、dev/prod 渲染器组装、优雅关闭。 | 不承载页面或目录逻辑。 |
+| `apps/server/src/app.ts` | Fastify 路由、SSR 注入、静态资源、Sitemap/robots、缓存头。 | 只依赖 `SsrRenderer` 契约，不导入 web/app-core。 |
+| `apps/server/src/renderer/dev.ts` | Vite middleware + `ssrLoadModule`。 | 开发专用。 |
+| `apps/server/src/renderer/prod.ts` | 加载 `dist/server/entry-server.js` 与 `dist/client/index.html`。 | 生产专用。 |
+| `apps/web/src/entry-server.tsx` | `render()`、`listSitemapUrls()` 与语言常量。 | SSR 唯一渲染入口。 |
+| `apps/web/src/entry-client.tsx` | `hydrateRoot` 与初始 locale/route。 | 浏览器唯一入口。 |
+| `apps/web/src/app/route.ts` | URL 解析与规范路径生成。 | 内存状态已移除，URL 是唯一来源。 |
+| `apps/web/src/app/navigation.tsx` | `AppNavigation` 上下文（navigate / switchLocale / openSearch）。 | 页面不得直接操作 `history`。 |
+| `apps/web/src/app/seo.ts` | title/description/canonical/hreflang/noindex。 | 渲染器负责转义。 |
+| `packages/app-core/src/catalog/**` | 分类、工具、样本任务、查询/搜索/Sitemap 路径。 | 不依赖 React/DOM。 |
+| `packages/app-core/src/i18n/**` | 5 个命名空间的中英资源与 `createI18n`。 | 资源聚合入口 `resources/index.ts` 由根 Agent 维护。 |
+| `packages/contracts/src/{locale,ssr}.ts` | 语言集合与 SSR 渲染契约。 | 纯类型/守卫，不含运行时服务。 |
+| `scripts/verify-stage-3.mjs` | 生产产物 HTTP 验收。 | 需先 `pnpm build`。 |
 
 ## 常用命令
 
-从仓库根目录按需要执行；新增依赖或准备验证时先查看根 `package.json`、锁文件与包脚本。
+从仓库根目录执行：
 
 ```sh
 pnpm install --frozen-lockfile
-pnpm --filter @itools/design-system-adapter build
-pnpm dev
+pnpm dev                 # 先构建 contracts/app-core/adapter，再启动 Fastify + Vite middleware
 pnpm format:check
 pnpm lint
 pnpm typecheck
 pnpm test
 pnpm build
-pnpm peers check
-pnpm check:boundaries
+node scripts/verify-stage-3.mjs
 ```
 
-全新克隆后先安装依赖并构建 design-system-adapter，再启动 `pnpm dev`。adapter 的 exports 指向 `dist`，而根 `dev` 脚本直接启动 Vite，不会先构建依赖。根 `lint` 同时运行 ESLint 与 workspace manifest 边界检查；后者不验证所有源码导入。`pnpm peers check` 是 pnpm 内建命令，不在 `package.json` scripts；既有记录曾通过。以上是操作说明，不表示本指南编写期间执行过这些命令。
+- `pnpm dev` 默认监听 `127.0.0.1:5173`；`/` 会 302 到 `/zh-CN`。
+- 生产模式：`pnpm build` 后在 `apps/server` 目录运行 `NODE_ENV=production node dist/index.js`。环境变量：`HOST`、`PORT`、`SITE_ORIGIN`、`WEB_ROOT`。
+- 服务端 dev 脚本使用 `node --watch-path=./src`；**不要把监听范围扩到全仓库**，Vite 写入 `node_modules/.vite` 会导致无限重启。
+- 全新克隆先 `pnpm install`（`pnpm-workspace.yaml` 已允许 esbuild 构建脚本），再 `pnpm build`。
 
 ## 未决事项与下一阶段门槛
 
-阶段 3 仍待用户确认启动。开始实施之前：
+阶段 4（工具注册表与统一工具页）尚未启动。开始前：
 
-1. 先冻结阶段 3 所需的目录查询、任务、资产和数据库适配接口，并明确每个接口的归属与依赖。
-2. 解决 D06 的验收顺序冲突。阶段 3/4 的数据库启用状态、Seed/数据库一致性和结果持久化验收依赖阶段 5–7 的能力；原审计提出将可独立验证部分前置、完整集成验收移至阶段 7 后，但这只是建议，尚未获用户确认。将确认后的顺序写回路线图和验收文档后再执行。
-3. 按相关阶段处理其他未决项：D01（IndexedDB 结构迁移/清理与长期保留）、D02（缓存清除后下载失败恢复）、D03（CDN 缓存与停用工具/真实 404）、D04（安全告警门禁分级）、D05（唯一管理员仍需实现）、D07（缺失的历史 `10-subagent` 来源记录）。D01 在阶段 6 触及破坏性数据处理前必须解决。
-
-阶段 3 SSR 评估至少要覆盖当前实现带来的迁移问题：`apps/web/src/main.tsx` 使用 `createRoot`，不是 `hydrateRoot`；`App.tsx` 内的 `AppRoute` 仅为内存状态，没有 URL 同步；`use-compact-viewport.ts` 读取 `window`/`matchMedia`，需明确服务端渲染与 hydration 策略；`m3-expressive-react` 的 SSR 兼容性需要通过实际验证。当前源码未见 `fetch`、`localStorage` 或 `indexedDB` 使用。这些是待评估事项，不是预先确定的实现方案。
-
-性能阈值、工具清单、缓存 TTL 等须由对应阶段调研或测量；汇率工具第 68、69 题继续暂缓。不要在不相关工作中静默替用户决定这些事项。
+1. 确认阶段 4 范围：代码注册表、能力声明、输入/输出 Schema、Worker adapter、错误映射与文案键。
+2. 冻结工具注册表接口，并说明与 `@itools/app-core/catalog` 的关系（阶段 3 目录是展示元数据，阶段 4 需要能力与执行契约）。
+3. 工具清单、汇率工具第 68/69 题仍未确定；不得在不相关工作中替用户决定。
+4. D01（IndexedDB 清库与长期保留）仍须在阶段 6 前解决；D02/D03/D04/D05 按对应阶段处理。
+5. 阶段 3 遗留：浏览器级水合测试（阶段 11 Playwright）、包体优化与性能预算（阶段 11）、CDN 缓存实测（部署阶段）。
 
 ## Agent 协作与文件所有权
 
 - 根 Agent 负责规划、跨模块接口裁决、集成、验收和冲突处理；实施 Agent 只在明确派发的文件范围内工作。派发内容需写明目标、禁止事项、文件所有权、依赖/冻结接口和验收标准。
-- 共享工作目录中不可假设自己独占代码库；先看 `git status` 和当前 diff，不覆盖或撤销他人修改。不同 Agent 不并行改同一契约，除非根 Agent已协调。
-- 当前协作约定由根 Agent（GPT-6 Sol）负责规划、接口裁决、集成和验收，实施 Agent（GPT-6 Luna）负责获派范围内的实现与对应检查。模型选择及推理强度按当前任务的明确指示或协作约定执行；需要调整时由根 Agent协调，不自行覆盖约定。
+- 共享工作目录中不可假设自己独占代码库；先看 `git status` 和当前 diff，不覆盖或撤销他人修改。不同 Agent 不并行改同一契约，除非根 Agent 已协调。
+- 当前协作约定由根 Agent（Deepseek-V4.1-Flash High）负责规划、接口裁决、集成和验收，实施 Agent（Deepseek-V4.1-Flash High）负责获派范围内的实现与对应检查。模型选择及推理强度按当前任务的明确指示或协作约定执行。
 - Agent 可在获派范围内实现、修复、写文档并运行要求的检查；不得伪报未执行的验证。生产部署、生产迁移、破坏性数据操作和公网安全配置变更遵循 `docs/12`、`docs/15` 的审批边界。
 - 契约、产品范围或阶段顺序若需变更，先记录原因、影响、迁移、验证和回滚方案，交根 Agent/用户审阅；未确认前不把提案写成决定。
 
 ## 接手后第一步
 
-从用户当前任务开始，只做其明确范围内的工作。若任务要求进入阶段 3，先完成上文的确认和接口冻结门槛；用户未确认前，不启动阶段 3 或添加真实功能。
+从用户当前任务开始，只做其明确范围内的工作。若任务要求进入阶段 4，先完成上文的确认与接口冻结，用户未确认前不新增真实工具或改动阶段 3 契约。

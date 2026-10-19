@@ -1,4 +1,5 @@
 import { IconButton, SearchBar } from '@itools/design-system-adapter';
+import { useTranslation } from 'react-i18next';
 import { AppIcon } from '../app-icon/AppIcon.js';
 import styles from './ToolSearchEntry.module.css';
 
@@ -14,20 +15,23 @@ export function ToolSearchEntry({
   onOpenNavigation,
   navigationExpanded,
 }: ToolSearchEntryProps) {
+  const { t } = useTranslation(['common', 'navigation']);
+  const searchLabel = t('common:search.openLabel');
+
   return (
     <SearchBar
       className={styles.searchEntry}
-      placeholder="搜索工具"
+      placeholder={searchLabel}
       onClick={onOpenSearch}
       onSearch={onOpenSearch}
-      inputProps={{ 'aria-label': '搜索工具', readOnly: true }}
+      inputProps={{ 'aria-label': searchLabel, readOnly: true }}
       startIcon={
         onOpenNavigation ? (
           <IconButton
             className={styles.navigationButton}
             style={{ borderRadius: 'var(--md-sys-shape-corner-full)' }}
             icon={<AppIcon name="menu" />}
-            aria-label="打开导航抽屉和工具分类"
+            aria-label={t('navigation:openNavigation')}
             aria-expanded={navigationExpanded}
             aria-controls="mobile-navigation-drawer"
             onClick={(event) => {

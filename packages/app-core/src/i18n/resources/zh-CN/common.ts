@@ -1,0 +1,56 @@
+export const common = {
+  appName: 'iTools',
+  skipToContent: '跳到主要内容',
+  brandHomeLabel: 'iTools 首页',
+  theme: {
+    toggleToDark: '切换深色模式',
+    toggleToLight: '切换浅色模式',
+    darkMode: '深色模式',
+    lightMode: '浅色模式',
+  },
+  adminPreview: '管理预览',
+  recentTasks: '最近任务',
+  actions: {
+    close: '关闭',
+    backHome: '返回首页',
+    openPreview: '打开预览',
+    goToTool: '前往',
+  },
+  search: {
+    openLabel: '搜索工具',
+    dialogTitle: '搜索工具',
+    placeholder: '按名称、说明或分类搜索',
+    resultsLabel: '工具搜索结果',
+    resultCount: '{{count}} 项',
+    empty: '没有匹配的工具。试试分类名称或工具名称。',
+    sampleLabel: '工具',
+    previewSuffix: '界面预览',
+  },
+  language: {
+    label: '语言',
+    zhCN: '简体中文',
+    en: 'English',
+    switchLanguage: '切换语言',
+  },
+  notFound: {
+    eyebrow: '404',
+    title: '页面不存在',
+    description: '这个地址没有对应的页面，可能已移动或尚未启用。',
+  },
+  previewNotice: {
+    title: '界面预览',
+    body: '当前页面展示界面结构，尚未接入真实处理。',
+  },
+  meta: {
+    homeTitle: 'iTools · 把日常小工具放在一个清楚的地方',
+    homeDescription:
+      '浏览 iTools 的工具分类与统一工具页面，所有处理都在浏览器本地完成。',
+    tasksTitle: '最近任务 · iTools',
+    tasksDescription: '查看最近任务的列表、状态与回到工具的入口。',
+    adminTitle: '目录管理 · iTools',
+    adminDescription: '管理工具启用状态与展示元数据。',
+    notFoundTitle: '页面不存在 · iTools',
+    notFoundDescription: '请求的页面不存在，可能已移动或未启用。',
+    titleSuffix: 'iTools',
+  },
+};

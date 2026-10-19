@@ -1,0 +1,18 @@
+export const navigation = {
+  home: 'Home',
+  categoriesLabel: 'Tool categories',
+  desktopLabel: 'Desktop category navigation',
+  browseCategories: 'Browse categories',
+  closeNavigation: 'Close category navigation',
+  openNavigation: 'Open navigation drawer and tool categories',
+  appActions: 'App actions',
+  categoryTools: 'Tools in {{category}}',
+  emptyCategory: 'No sample tools yet',
+  toolDialogEyebrow: 'Tool sample · UI preview',
+  toolCategoryLabel: 'Category',
+  toolInputLabel: 'Sample input',
+  recentTasksTitle: 'Recent task samples',
+  closeRecentTasks: 'Close recent tasks panel',
+  tasksSampleNote: 'Sample data · no real tasks connected',
+  viewAllTasks: 'View all samples',
+};

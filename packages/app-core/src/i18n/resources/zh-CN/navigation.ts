@@ -1,0 +1,18 @@
+export const navigation = {
+  home: '首页',
+  categoriesLabel: '工具分类',
+  desktopLabel: '桌面分类导航',
+  browseCategories: '浏览分类',
+  closeNavigation: '关闭分类导航',
+  openNavigation: '打开导航抽屉和工具分类',
+  appActions: '应用操作',
+  categoryTools: '{{category}}中的工具',
+  emptyCategory: '暂无样本工具',
+  toolDialogEyebrow: '工具样本 · 界面预览',
+  toolCategoryLabel: '分类',
+  toolInputLabel: '输入样本',
+  recentTasksTitle: '最近任务样本',
+  closeRecentTasks: '关闭最近任务面板',
+  tasksSampleNote: '样本数据 · 未连接真实任务',
+  viewAllTasks: '查看全部样本',
+};

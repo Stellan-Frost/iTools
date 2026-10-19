@@ -1,34 +1,25 @@
 import { useEffect, useMemo, useState, type KeyboardEvent } from 'react';
 import { Button, Dialog, TextField } from '@itools/design-system-adapter';
-import { categories, tools, getCategory } from '../../data/sample-catalog.js';
+import { getCategory, searchEnabledTools } from '@itools/app-core';
+import { useTranslation } from 'react-i18next';
+import { useAppNavigation } from '../../app/navigation.js';
 import { AppIcon } from '../app-icon/AppIcon.js';
 import styles from './CommandPalette.module.css';
 
 interface CommandPaletteProps {
   open: boolean;
   onClose: () => void;
-  onOpenTool: (toolId: string) => void;
 }
 
-export function CommandPalette({
-  open,
-  onClose,
-  onOpenTool,
-}: CommandPaletteProps) {
+export function CommandPalette({ open, onClose }: CommandPaletteProps) {
+  const { t } = useTranslation('common');
+  const { locale, navigate } = useAppNavigation();
   const [query, setQuery] = useState('');
   const [activeIndex, setActiveIndex] = useState(0);
-  const results = useMemo(() => {
-    const search = query.trim().toLocaleLowerCase();
-    return tools.filter((tool) => {
-      const category = getCategory(tool.categoryId)?.name ?? '';
-      return (
-        !search ||
-        `${tool.title} ${tool.summary} ${category}`
-          .toLocaleLowerCase()
-          .includes(search)
-      );
-    });
-  }, [query]);
+  const results = useMemo(
+    () => searchEnabledTools(query, locale),
+    [query, locale],
+  );
 
   useEffect(() => {
     if (open) {
@@ -44,7 +35,7 @@ export function CommandPalette({
   function selectActiveResult() {
     const selectedTool = results[activeIndex];
     if (!selectedTool) return;
-    onOpenTool(selectedTool.id);
+    navigate({ page: 'tool', toolId: selectedTool.id });
     onClose();
   }
 
@@ -77,13 +68,13 @@ export function CommandPalette({
       aria-hidden={!open}
       inert={!open}
       onClose={onClose}
-      title="搜索工具"
+      title={t('search.dialogTitle')}
     >
       <div className={styles.content}>
         <TextField
           id="tool-search"
-          label="搜索工具"
-          placeholder="按名称、说明或分类搜索"
+          label={t('search.openLabel')}
+          placeholder={t('search.placeholder')}
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           inputRef={(element) => {
@@ -102,20 +93,18 @@ export function CommandPalette({
           startIcon={<AppIcon name="search" />}
         />
         <div className={styles.resultHeader}>
-          <span>工具样本</span>
-          <span>{results.length} 项</span>
+          <span>{t('search.sampleLabel')}</span>
+          <span>{t('search.resultCount', { count: results.length })}</span>
         </div>
         {results.length > 0 ? (
           <ul
             className={styles.results}
             id="tool-search-results"
             role="listbox"
-            aria-label="工具搜索结果"
+            aria-label={t('search.resultsLabel')}
           >
             {results.map((tool, index) => {
-              const category = categories.find(
-                (entry) => entry.id === tool.categoryId,
-              );
+              const category = getCategory(tool.categoryId);
               const isActive = activeIndex === index;
               return (
                 <li key={tool.id}>
@@ -128,14 +117,16 @@ export function CommandPalette({
                     startIcon={<AppIcon name={tool.icon} />}
                     onMouseEnter={() => setActiveIndex(index)}
                     onClick={() => {
-                      onOpenTool(tool.id);
+                      navigate({ page: 'tool', toolId: tool.id });
                       onClose();
                     }}
                   >
                     <span className={styles.resultCopy}>
-                      <span className={styles.resultTitle}>{tool.title}</span>
+                      <span className={styles.resultTitle}>
+                        {tool.name[locale]}
+                      </span>
                       <span className={styles.resultMeta}>
-                        {category?.name} · 界面预览
+                        {category?.name[locale]} · {t('search.previewSuffix')}
                       </span>
                     </span>
                   </Button>
@@ -145,7 +136,7 @@ export function CommandPalette({
           </ul>
         ) : (
           <p className={styles.empty} role="status">
-            没有匹配的样本工具。试试“文档”或“JSON”。
+            {t('search.empty')}
           </p>
         )}
       </div>

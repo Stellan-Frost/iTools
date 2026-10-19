@@ -1,7 +1,9 @@
 import { Card, Switch } from '@itools/design-system-adapter';
-import { categories, tools } from '../../data/sample-catalog.js';
+import { getCategory, listTools } from '@itools/app-core';
+import { useTranslation } from 'react-i18next';
 import { AppIcon } from '../../components/app-icon/AppIcon.js';
 import { MetadataChip } from '../../components/page-chrome/MetadataChip.js';
+import { useAppNavigation } from '../../app/navigation.js';
 import styles from './AdminPage.module.css';
 
 interface AdminCatalogSectionProps {
@@ -13,6 +15,10 @@ export function AdminCatalogSection({
   enabledTools,
   onToggleTool,
 }: AdminCatalogSectionProps) {
+  const { locale } = useAppNavigation();
+  const { t } = useTranslation('admin');
+  const tools = listTools();
+
   return (
     <section
       className={styles.catalogSection}
@@ -20,33 +26,40 @@ export function AdminCatalogSection({
     >
       <div className={styles.sectionHeading}>
         <div>
-          <p>CATALOG PREVIEW</p>
-          <h2 id="catalog-heading">工具目录样本</h2>
+          <p>{t('catalog.kicker')}</p>
+          <h2 id="catalog-heading">{t('catalog.title')}</h2>
         </div>
-        <MetadataChip label={`${tools.length} 项`} />
+        <MetadataChip label={t('catalog.count', { total: tools.length })} />
       </div>
       <Card>
         <ul className={styles.catalogList}>
-          {tools.slice(0, 4).map((tool) => {
-            const category = categories.find(
-              (entry) => entry.id === tool.categoryId,
-            );
-            const active = enabledTools[tool.id] ?? false;
+          {tools.map((tool) => {
+            const category = getCategory(tool.categoryId);
+            const active = enabledTools[tool.id] ?? tool.enabled;
+
             return (
               <li key={tool.id} className={styles.catalogRow}>
                 <span className={styles.toolIcon}>
                   <AppIcon name={tool.icon} />
                 </span>
                 <span className={styles.toolDetails}>
-                  <strong>{tool.title}</strong>
+                  <strong>{tool.name[locale]}</strong>
                   <span>
-                    <MetadataChip label={category?.name ?? '样本分类'} />
-                    <MetadataChip label={active ? '启用样本' : '停用样本'} />
+                    <MetadataChip
+                      label={category ? category.name[locale] : tool.categoryId}
+                    />
+                    <MetadataChip
+                      label={
+                        active ? t('catalog.enabled') : t('catalog.disabled')
+                      }
+                    />
                   </span>
                 </span>
                 <Switch
                   selected={active}
-                  aria-label={`切换${tool.title}样本状态`}
+                  aria-label={t('catalog.toggleLabel', {
+                    name: tool.name[locale],
+                  })}
                   onChange={(_event, selected) => {
                     onToggleTool(tool.id, selected);
                   }}
@@ -56,9 +69,7 @@ export function AdminCatalogSection({
           })}
         </ul>
       </Card>
-      <p className={styles.helper}>
-        状态开关只用于查看交互状态，目录数据不会持久化。
-      </p>
+      <p className={styles.helper}>{t('catalog.helper')}</p>
     </section>
   );
 }

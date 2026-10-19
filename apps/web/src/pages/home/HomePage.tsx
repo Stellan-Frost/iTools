@@ -1,42 +1,46 @@
 import { Button, Card } from '@itools/design-system-adapter';
 import {
-  categories,
-  getToolsForCategory,
-  tools,
-} from '../../data/sample-catalog.js';
-import type { AppRoute } from '../../app/route.js';
+  CATEGORIES,
+  getCategory,
+  listEnabledTools,
+  listEnabledToolsByCategory,
+} from '@itools/app-core';
+import { useTranslation } from 'react-i18next';
 import { CategoryCard } from '../../components/catalog/CategoryCard.js';
 import { ToolCard } from '../../components/catalog/ToolCard.js';
 import { AppIcon } from '../../components/app-icon/AppIcon.js';
 import { MetadataChip } from '../../components/page-chrome/MetadataChip.js';
 import { ToolSearchEntry } from '../../components/tool-search-entry/ToolSearchEntry.js';
+import { useAppNavigation } from '../../app/navigation.js';
 import styles from './HomePage.module.css';
 
-interface HomePageProps {
-  onNavigate: (route: AppRoute) => void;
-  onOpenSearch: () => void;
-}
+export function HomePage() {
+  const { locale, navigate, openSearch } = useAppNavigation();
+  const { t } = useTranslation(['catalog', 'common']);
 
-export function HomePage({ onNavigate, onOpenSearch }: HomePageProps) {
+  const enabledTools = listEnabledTools();
+  const firstCategory =
+    CATEGORIES.find(
+      (category) => listEnabledToolsByCategory(category.id).length > 0,
+    ) ?? CATEGORIES[0]!;
+
   return (
     <div className={styles.page}>
       <section className={styles.hero} aria-labelledby="home-title">
         <div className={styles.heroCopy}>
-          <p className={styles.eyebrow}>iTools · 清晰、轻快的工具入口</p>
-          <h1 id="home-title">把日常小工具，放在一个清楚的地方。</h1>
-          <p className={styles.intro}>
-            浏览分类目录与统一的工具页面样本。所有内容都用于展示界面结构，当前不会处理文件或保存任务。
-          </p>
+          <p className={styles.eyebrow}>{t('catalog:home.eyebrow')}</p>
+          <h1 id="home-title">{t('catalog:home.title')}</h1>
+          <p className={styles.intro}>{t('catalog:home.intro')}</p>
           <div className={styles.heroActions}>
-            <ToolSearchEntry onOpenSearch={onOpenSearch} />
+            <ToolSearchEntry onOpenSearch={openSearch} />
             <Button
               variant="text"
               style={{ color: 'var(--md-sys-color-on-primary-container)' }}
               onClick={() =>
-                onNavigate({ page: 'category', categoryId: 'image' })
+                navigate({ page: 'category', categoryId: firstCategory.id })
               }
             >
-              从分类开始
+              {t('catalog:actions.startFromCategory')}
             </Button>
           </div>
         </div>
@@ -49,39 +53,52 @@ export function HomePage({ onNavigate, onOpenSearch }: HomePageProps) {
             <span className={styles.artworkLineShort} />
           </div>
           <div className={styles.artworkOrb} />
-          <div className={styles.artworkNote}>LOCAL · PREVIEW</div>
+          <div className={styles.artworkNote}>
+            {t('catalog:home.artworkNote')}
+          </div>
         </div>
       </section>
 
-      <section className={styles.summary} aria-label="预览目录摘要">
-        <MetadataChip label={`${categories.length} 个样本分类`} />
-        <MetadataChip label={`${tools.length} 个样本界面`} />
-        <MetadataChip label="0 次真实处理" />
+      <section
+        className={styles.summary}
+        aria-label={t('catalog:home.summaryLabel')}
+      >
+        <MetadataChip
+          label={t('catalog:home.categoryCount', {
+            total: CATEGORIES.length,
+          })}
+        />
+        <MetadataChip
+          label={t('catalog:home.toolCount', { total: enabledTools.length })}
+        />
+        <MetadataChip label={t('catalog:home.realRuns')} />
       </section>
 
       <section className={styles.section} aria-labelledby="category-heading">
         <div className={styles.sectionHeading}>
           <div>
-            <p className={styles.sectionKicker}>BROWSE</p>
-            <h2 id="category-heading">按分类浏览</h2>
+            <p className={styles.sectionKicker}>
+              {t('catalog:home.browseKicker')}
+            </p>
+            <h2 id="category-heading">{t('catalog:home.categoryTitle')}</h2>
           </div>
           <Button
             variant="text"
             onClick={() =>
-              onNavigate({ page: 'category', categoryId: categories[0]!.id })
+              navigate({ page: 'category', categoryId: firstCategory.id })
             }
           >
-            查看分类样本
+            {t('catalog:home.categoryAction')}
           </Button>
         </div>
         <div className={styles.categoryGrid}>
-          {categories.map((category) => (
+          {CATEGORIES.map((category) => (
             <CategoryCard
               key={category.id}
               category={category}
-              toolCount={getToolsForCategory(category.id).length}
+              toolCount={listEnabledToolsByCategory(category.id).length}
               onOpen={() =>
-                onNavigate({ page: 'category', categoryId: category.id })
+                navigate({ page: 'category', categoryId: category.id })
               }
             />
           ))}
@@ -91,22 +108,24 @@ export function HomePage({ onNavigate, onOpenSearch }: HomePageProps) {
       <section className={styles.featured} aria-labelledby="featured-heading">
         <div className={styles.sectionHeading}>
           <div>
-            <p className={styles.sectionKicker}>SAMPLE TOOLBOX</p>
-            <h2 id="featured-heading">常用工具界面样本</h2>
+            <p className={styles.sectionKicker}>
+              {t('catalog:home.featuredKicker')}
+            </p>
+            <h2 id="featured-heading">{t('catalog:home.featuredTitle')}</h2>
           </div>
-          <MetadataChip label="预览数据 · 不代表真实目录" />
+          <MetadataChip label={t('catalog:home.featuredCaption')} />
         </div>
         <div className={styles.toolGrid}>
-          {tools.slice(0, 3).map((tool) => {
-            const category = categories.find(
-              (entry) => entry.id === tool.categoryId,
-            );
+          {enabledTools.map((tool) => {
+            const category = getCategory(tool.categoryId);
             return (
               <ToolCard
                 key={tool.id}
                 tool={tool}
-                categoryName={category?.name ?? '样本分类'}
-                onOpen={() => onNavigate({ page: 'tool', toolId: tool.id })}
+                categoryName={
+                  category ? category.name[locale] : tool.categoryId
+                }
+                onOpen={() => navigate({ page: 'tool', toolId: tool.id })}
               />
             );
           })}
@@ -117,10 +136,8 @@ export function HomePage({ onNavigate, onOpenSearch }: HomePageProps) {
         <aside className={styles.privacyNote}>
           <AppIcon name="shield_lock" />
           <div>
-            <h2>本地界面预览</h2>
-            <p>
-              示例输入、任务和结果仅用于查看页面布局；没有数据库、真实工具处理或管理员认证。
-            </p>
+            <h2>{t('catalog:home.privacyTitle')}</h2>
+            <p>{t('catalog:home.privacyBody')}</p>
           </div>
         </aside>
       </Card>

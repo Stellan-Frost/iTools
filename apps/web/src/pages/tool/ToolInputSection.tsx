@@ -5,32 +5,38 @@ import {
   TextField,
   useSnackbar,
 } from '@itools/design-system-adapter';
-import type { ToolDefinition } from '../../data/sample-catalog.js';
+import type { CatalogTool } from '@itools/app-core';
+import { useTranslation } from 'react-i18next';
 import { AppIcon } from '../../components/app-icon/AppIcon.js';
+import { useAppNavigation } from '../../app/navigation.js';
 import styles from './ToolPage.module.css';
 
 interface ToolInputSectionProps {
-  tool: ToolDefinition;
+  tool: CatalogTool;
 }
 
 export function ToolInputSection({ tool }: ToolInputSectionProps) {
+  const { locale } = useAppNavigation();
+  const { t } = useTranslation('catalog');
   const [input, setInput] = useState('');
   const [inputError, setInputError] = useState('');
   const [feedback, setFeedback] = useState('');
   const { show } = useSnackbar();
 
+  const sampleInput = tool.preview.sampleInput[locale];
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!input.trim()) {
-      setInputError('请填写样本内容后查看表单反馈。');
+      setInputError(t('tool.input.emptyError'));
       setFeedback('');
       return;
     }
 
     setInputError('');
-    setFeedback('表单校验通过。这是交互反馈样本，没有创建任务或处理数据。');
+    setFeedback(t('tool.input.success'));
     await show({
-      message: '校验通过 · 当前为界面预览，没有执行工具。',
+      message: t('tool.input.snackbar'),
       duration: 'short',
     });
   }
@@ -40,15 +46,15 @@ export function ToolInputSection({ tool }: ToolInputSectionProps) {
       <div className={styles.sectionHeading}>
         <span className={styles.step}>01</span>
         <div>
-          <h2 id="tool-input-heading">输入</h2>
-          <p>提供输入区域和可恢复的字段校验反馈。</p>
+          <h2 id="tool-input-heading">{t('tool.input.title')}</h2>
+          <p>{t('tool.input.description')}</p>
         </div>
       </div>
       <Card>
         <form className={styles.inputForm} onSubmit={handleSubmit} noValidate>
           <TextField
             id="tool-sample-input"
-            label={tool.inputLabel}
+            label={tool.preview.inputLabel[locale]}
             value={input}
             onChange={(event) => {
               setInput(event.target.value);
@@ -56,7 +62,9 @@ export function ToolInputSection({ tool }: ToolInputSectionProps) {
             }}
             error={Boolean(inputError)}
             errorText={inputError || undefined}
-            supportingText={`示例内容：${tool.sampleInput.split('\n')[0]}`}
+            supportingText={t('tool.input.samplePrefix', {
+              sample: sampleInput.split('\n')[0],
+            })}
             multiline={
               tool.id === 'markdown-preview' || tool.id === 'json-viewer'
             }
@@ -73,17 +81,17 @@ export function ToolInputSection({ tool }: ToolInputSectionProps) {
               variant="filled"
               startIcon={<AppIcon name="check" />}
             >
-              查看校验反馈样本
+              {t('tool.input.submit')}
             </Button>
             <Button
               variant="text"
               onClick={() => {
-                setInput(tool.sampleInput);
+                setInput(sampleInput);
                 setInputError('');
                 setFeedback('');
               }}
             >
-              填入示例文本
+              {t('tool.input.fillSample')}
             </Button>
           </div>
           {feedback ? (

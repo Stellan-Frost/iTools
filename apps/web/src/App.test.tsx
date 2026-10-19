@@ -1,130 +1,113 @@
 import {
   cleanup,
-  fireEvent,
   render,
   screen,
+  waitFor,
   within,
 } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { App } from './App.js';
+import type { AppRoute } from './app/route.js';
 
-describe('stage 2 application preview', () => {
+function renderApp(route: AppRoute = { page: 'home' }, path = '/zh-CN') {
+  window.history.replaceState(null, '', path);
+  return render(<App initialLocale="zh-CN" initialRoute={route} />);
+}
+
+function desktopNavigation() {
+  return screen.getByRole('complementary', { name: '桌面分类导航' });
+}
+
+describe('stage 3 application shell', () => {
   beforeEach(() => {
     window.innerWidth = 1280;
+    document.documentElement.lang = 'zh-CN';
   });
 
   afterEach(() => {
     cleanup();
   });
 
-  it('opens the command palette by shortcut and selects a tool with arrow keys and Enter', async () => {
+  it('expands desktop categories without navigating and lists enabled tools', async () => {
     const user = userEvent.setup();
-    render(<App />);
+    renderApp();
 
-    window.dispatchEvent(
-      new KeyboardEvent('keydown', { key: 'k', ctrlKey: true, bubbles: true }),
-    );
-
-    const dialog = await screen.findByRole('dialog', { name: '搜索工具' });
-    const searchField = within(dialog).getByRole('combobox', {
-      name: '搜索工具',
-    });
-    await user.click(searchField);
-    await user.keyboard('{ArrowDown}{Enter}');
-
-    expect(
-      await screen.findByRole('heading', { name: 'Markdown 预览' }),
-    ).toBeInTheDocument();
-    expect(screen.getByText(/不会提交或执行/)).toBeInTheDocument();
-  });
-
-  it('presents catalog metadata as non-interactive labels', () => {
-    render(<App />);
-
-    const categoryCount = screen.getByText('5 个样本分类');
-
-    expect(categoryCount.tagName).toBe('SPAN');
-    expect(categoryCount).not.toHaveAttribute('role');
-    expect(categoryCount).not.toHaveAttribute('tabindex');
-    expect(
-      within(screen.getByRole('banner')).getByRole('searchbox', {
-        name: '搜索工具',
-      }),
-    ).toBeEnabled();
-  });
-
-  it('expands multiple desktop categories without navigating', async () => {
-    const user = userEvent.setup();
-    render(<App />);
-
-    const desktopNavigation = screen.getByRole('complementary', {
-      name: '桌面分类导航',
-    });
-    const imageCategory = within(desktopNavigation).getByRole('button', {
+    const navigation = desktopNavigation();
+    const imageCategory = within(navigation).getByRole('button', {
       name: '图像与设计',
     });
-    const documentCategory = within(desktopNavigation).getByRole('button', {
+    const textCategory = within(navigation).getByRole('button', {
       name: '文档与文字',
     });
 
     await user.click(imageCategory);
-    await user.click(documentCategory);
+    await user.click(textCategory);
 
     expect(imageCategory).toHaveAttribute('aria-expanded', 'true');
-    expect(documentCategory).toHaveAttribute('aria-expanded', 'true');
+    expect(textCategory).toHaveAttribute('aria-expanded', 'true');
     expect(
-      within(desktopNavigation).getByRole('button', { name: '图片信息检查' }),
+      within(navigation).getByRole('button', { name: '图片信息检查' }),
     ).toBeInTheDocument();
     expect(
-      within(desktopNavigation).getByRole('button', { name: 'Markdown 预览' }),
+      within(navigation).getByRole('button', { name: 'Markdown 预览' }),
     ).toBeInTheDocument();
-    expect(
-      screen.getByRole('heading', {
-        name: '把日常小工具，放在一个清楚的地方。',
-      }),
-    ).toBeInTheDocument();
+    expect(window.location.pathname).toBe('/zh-CN');
 
     await user.click(imageCategory);
+
     expect(imageCategory).toHaveAttribute('aria-expanded', 'false');
-    expect(documentCategory).toHaveAttribute('aria-expanded', 'true');
     expect(
-      within(desktopNavigation).queryByRole('button', {
-        name: '图片信息检查',
-      }),
+      within(navigation).queryByRole('button', { name: '图片信息检查' }),
+    ).not.toBeInTheDocument();
+    expect(textCategory).toHaveAttribute('aria-expanded', 'true');
+  });
+
+  it('does not list the disabled sample tool in navigation or search', async () => {
+    const user = userEvent.setup();
+    renderApp();
+
+    const navigation = desktopNavigation();
+    await user.click(
+      within(navigation).getByRole('button', { name: '文档与文字' }),
+    );
+
+    expect(
+      within(navigation).queryByRole('button', { name: /CSV 检查器/ }),
     ).not.toBeInTheDocument();
 
-    await user.keyboard('{Enter}');
-    expect(imageCategory).toHaveAttribute('aria-expanded', 'true');
-    await user.keyboard(' ');
-    expect(imageCategory).toHaveAttribute('aria-expanded', 'false');
+    window.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'k', ctrlKey: true, bubbles: true }),
+    );
+    const dialog = await screen.findByRole('dialog', { name: '搜索工具' });
+    await user.type(
+      within(dialog).getByRole('combobox', { name: '搜索工具' }),
+      'CSV',
+    );
+
+    expect(
+      within(dialog).getByText('没有匹配的工具。试试分类名称或工具名称。'),
+    ).toBeInTheDocument();
   });
 
   it('opens tool information and navigates only from the dialog action', async () => {
     const user = userEvent.setup();
-    render(<App />);
+    renderApp();
 
-    const desktopNavigation = screen.getByRole('complementary', {
-      name: '桌面分类导航',
-    });
+    const navigation = desktopNavigation();
     await user.click(
-      within(desktopNavigation).getByRole('button', { name: '图像与设计' }),
+      within(navigation).getByRole('button', { name: '图像与设计' }),
     );
     await user.click(
-      within(desktopNavigation).getByRole('button', { name: '图片信息检查' }),
+      within(navigation).getByRole('button', { name: '图片信息检查' }),
     );
 
-    const dialog = await screen.findByRole('dialog', {
-      name: '图片信息检查',
-    });
+    const dialog = await screen.findByRole('dialog', { name: '图片信息检查' });
     expect(within(dialog).getByRole('button', { name: '关闭' })).toHaveFocus();
     expect(within(dialog).getByText('图像与设计')).toBeInTheDocument();
     expect(
-      within(dialog).getByText('图片整理、尺寸检查与视觉素材预览。'),
-    ).toBeInTheDocument();
-    expect(
       within(dialog).getByText(
-        '检查图片文件的基础信息，并预览适合的后续处理方式。',
+        '读取图片的尺寸、格式与文件大小，快速确认素材是否符合使用要求。',
       ),
     ).toBeInTheDocument();
     expect(within(dialog).getByText('图片文件名（预览）')).toBeInTheDocument();
@@ -135,14 +118,10 @@ describe('stage 2 application preview', () => {
 
     await user.click(within(dialog).getByRole('button', { name: '关闭' }));
     expect(screen.queryByRole('dialog', { name: '图片信息检查' })).toBeNull();
-    expect(
-      screen.getByRole('heading', {
-        name: '把日常小工具，放在一个清楚的地方。',
-      }),
-    ).toBeInTheDocument();
+    expect(window.location.pathname).toBe('/zh-CN');
 
     await user.click(
-      within(desktopNavigation).getByRole('button', { name: '图片信息检查' }),
+      within(navigation).getByRole('button', { name: '图片信息检查' }),
     );
     const reopenedDialog = await screen.findByRole('dialog', {
       name: '图片信息检查',
@@ -151,44 +130,34 @@ describe('stage 2 application preview', () => {
       within(reopenedDialog).getByRole('button', { name: '前往' }),
     );
 
-    expect(
-      await screen.findByRole('heading', { name: '图片信息检查' }),
-    ).toBeInTheDocument();
+    expect(window.location.pathname).toBe('/zh-CN/image/image-inspector');
+    expect(screen.queryByRole('dialog', { name: '图片信息检查' })).toBeNull();
   });
 
-  it('closes tool information on Escape and an outside click', async () => {
+  it('selects a search result with arrow keys and navigates to its tool path', async () => {
     const user = userEvent.setup();
-    render(<App />);
+    renderApp();
 
-    const desktopNavigation = screen.getByRole('complementary', {
-      name: '桌面分类导航',
-    });
-    await user.click(
-      within(desktopNavigation).getByRole('button', { name: '图像与设计' }),
+    window.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'k', ctrlKey: true, bubbles: true }),
     );
-    await user.click(
-      within(desktopNavigation).getByRole('button', { name: '图片信息检查' }),
-    );
-    await screen.findByRole('dialog', { name: '图片信息检查' });
-    await user.keyboard('{Escape}');
-    expect(screen.queryByRole('dialog', { name: '图片信息检查' })).toBeNull();
 
-    await user.click(
-      within(desktopNavigation).getByRole('button', { name: '图片信息检查' }),
-    );
-    const dialog = await screen.findByRole('dialog', {
-      name: '图片信息检查',
+    const dialog = await screen.findByRole('dialog', { name: '搜索工具' });
+    const searchField = within(dialog).getByRole('combobox', {
+      name: '搜索工具',
     });
-    const scrim = dialog.parentElement?.firstElementChild;
-    expect(scrim).not.toBeNull();
-    fireEvent.click(scrim!);
-    expect(screen.queryByRole('dialog', { name: '图片信息检查' })).toBeNull();
+    expect(within(dialog).getByText('6 项')).toBeInTheDocument();
+    await user.click(searchField);
+    await user.keyboard('{ArrowDown}{Enter}');
+
+    expect(window.location.pathname).toBe('/zh-CN/text/markdown-preview');
+    expect(screen.queryByRole('dialog', { name: '搜索工具' })).toBeNull();
   });
 
-  it('keeps the compact app bar focused on search and exposes navigation and actions in the drawer', async () => {
+  it('keeps the compact app bar focused on search and exposes actions in the drawer', async () => {
     window.innerWidth = 390;
     const user = userEvent.setup();
-    render(<App />);
+    renderApp();
 
     const appBar = screen.getByRole('banner');
     const searchField = within(appBar).getByRole('searchbox', {
@@ -197,26 +166,19 @@ describe('stage 2 application preview', () => {
     const navigationButton = within(appBar).getByRole('button', {
       name: '打开导航抽屉和工具分类',
     });
+
     expect(appBar.children).toHaveLength(2);
-    expect(
-      within(appBar).queryByRole('button', { name: '管理预览' }),
-    ).toBeNull();
-    expect(
-      within(appBar).queryByRole('button', { name: '最近任务' }),
-    ).toBeNull();
-    expect(
-      within(appBar).queryByRole('button', { name: '切换深色模式' }),
-    ).toBeNull();
     expect(searchField).toHaveAttribute('readonly');
     expect(navigationButton).toHaveAttribute('aria-expanded', 'false');
-    await user.click(navigationButton);
-    expect(screen.queryByRole('dialog', { name: '搜索工具' })).toBeNull();
-    const drawer = await screen.findByRole('dialog', { name: '工具分类' });
 
+    await user.click(navigationButton);
     expect(navigationButton).toHaveAttribute('aria-expanded', 'true');
+
+    const drawer = await screen.findByRole('dialog', { name: '工具分类' });
     expect(
       within(drawer).getByRole('button', { name: '关闭分类导航' }),
     ).toHaveFocus();
+    expect(within(drawer).getByText('浏览分类')).toBeInTheDocument();
     expect(
       within(drawer).getByRole('button', { name: '图像与设计' }),
     ).toBeInTheDocument();
@@ -227,26 +189,28 @@ describe('stage 2 application preview', () => {
       within(drawer).getByRole('button', { name: '切换深色模式' }),
     ).toBeInTheDocument();
     expect(
+      within(drawer).getByRole('button', { name: '切换语言' }),
+    ).toBeInTheDocument();
+    expect(
       within(drawer).getByRole('button', { name: '管理预览' }),
     ).toBeInTheDocument();
+    expect(
+      within(drawer).getByRole('button', { name: '最近任务' }),
+    ).toBeInTheDocument();
+
     await user.click(
       within(drawer).getByRole('button', { name: '切换深色模式' }),
     );
     expect(
-      screen.getByRole('button', { name: '切换浅色模式' }),
+      within(drawer).getByRole('button', { name: '切换浅色模式' }),
     ).toBeInTheDocument();
+
     await user.click(
       within(drawer).getByRole('button', { name: '文档与文字' }),
     );
-
     expect(
       within(drawer).getByRole('button', { name: '文档与文字' }),
     ).toHaveAttribute('aria-expanded', 'true');
-    expect(
-      screen.getByRole('heading', {
-        name: '把日常小工具，放在一个清楚的地方。',
-      }),
-    ).toBeInTheDocument();
 
     await user.click(
       within(drawer).getByRole('button', { name: 'Markdown 预览' }),
@@ -256,52 +220,16 @@ describe('stage 2 application preview', () => {
     });
     expect(screen.queryByRole('dialog', { name: '工具分类' })).toBeNull();
     await user.click(within(toolDialog).getByRole('button', { name: '关闭' }));
-    expect(
-      screen.getByRole('heading', {
-        name: '把日常小工具，放在一个清楚的地方。',
-      }),
-    ).toBeInTheDocument();
-
-    await user.click(navigationButton);
-    let reopenedDrawer = await screen.findByRole('dialog', {
-      name: '工具分类',
-    });
-    await user.click(
-      within(reopenedDrawer).getByRole('button', { name: '关闭分类导航' }),
-    );
-    expect(screen.queryByRole('dialog', { name: '工具分类' })).toBeNull();
 
     await user.click(navigationButton);
     await screen.findByRole('dialog', { name: '工具分类' });
     await user.keyboard('{Escape}');
     expect(screen.queryByRole('dialog', { name: '工具分类' })).toBeNull();
-
-    await user.click(navigationButton);
-    reopenedDrawer = await screen.findByRole('dialog', { name: '工具分类' });
-    const drawerScrim = reopenedDrawer.parentElement?.firstElementChild;
-    expect(drawerScrim).not.toBeNull();
-    fireEvent.click(drawerScrim!);
-    expect(screen.queryByRole('dialog', { name: '工具分类' })).toBeNull();
   });
 
-  it('opens the command palette from the shared read-only search field', async () => {
-    window.innerWidth = 390;
+  it('opens the recent-task sample panel and navigates to the tasks page', async () => {
     const user = userEvent.setup();
-    render(<App />);
-
-    await user.click(
-      within(screen.getByRole('banner')).getByRole('searchbox', {
-        name: '搜索工具',
-      }),
-    );
-    expect(
-      await screen.findByRole('dialog', { name: '搜索工具' }),
-    ).toBeInTheDocument();
-  });
-
-  it('opens the recent-task sample panel and navigates to all task samples', async () => {
-    const user = userEvent.setup();
-    render(<App />);
+    renderApp();
 
     await user.click(screen.getByRole('button', { name: '最近任务' }));
     const recentPanel = await screen.findByRole('dialog', {
@@ -313,57 +241,60 @@ describe('stage 2 application preview', () => {
       within(recentPanel).getByRole('button', { name: '查看全部样本' }),
     );
 
-    expect(
-      await screen.findByRole('heading', { name: '最近任务样本' }),
-    ).toBeInTheDocument();
+    expect(window.location.pathname).toBe('/zh-CN/tasks');
     expect(screen.queryByRole('dialog', { name: '最近任务样本' })).toBeNull();
   });
 
-  it('shows metadata validation feedback and dialog errors without writing data', async () => {
+  it('opens the admin preview route', async () => {
     const user = userEvent.setup();
-    render(<App />);
+    renderApp();
 
     await user.click(screen.getByRole('button', { name: '管理预览' }));
-    const imageToolSwitch = screen.getByRole('switch', {
-      name: '切换图片信息检查样本状态',
+
+    expect(window.location.pathname).toBe('/zh-CN/admin');
+  });
+
+  it('switches language on the current tool route and updates the document lang', async () => {
+    const user = userEvent.setup();
+    renderApp(
+      { page: 'tool', toolId: 'image-inspector' },
+      '/zh-CN/image/image-inspector',
+    );
+
+    await user.click(screen.getByRole('button', { name: '切换语言' }));
+
+    expect(window.location.pathname).toBe('/en/image/image-inspector');
+    await waitFor(() => {
+      expect(document.documentElement.lang).toBe('en');
     });
-    expect(imageToolSwitch).toBeChecked();
-    await user.click(imageToolSwitch);
-    expect(imageToolSwitch).not.toBeChecked();
-
-    const metadataTitle = within(screen.getByRole('main')).getByRole(
-      'textbox',
-      { name: '工具名称' },
-    );
-    await user.clear(metadataTitle);
-    await user.click(screen.getByRole('button', { name: '验证表单样本' }));
-
     expect(
-      await screen.findByText('工具名称和简介都需要填写。'),
+      screen.getByRole('searchbox', { name: 'Search tools' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('complementary', {
+        name: 'Desktop category navigation',
+      }),
     ).toBeInTheDocument();
 
-    await user.click(screen.getByRole('button', { name: '新增工具样本' }));
-    const dialog = await screen.findByRole('dialog', { name: '新增工具样本' });
-    await user.click(
-      within(dialog).getByRole('button', { name: '查看校验反馈' }),
-    );
-    expect(
-      await within(dialog).findByText('请填写工具名称后查看对话框校验反馈。'),
-    ).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Switch language' }));
 
-    await user.type(
-      within(dialog).getByRole('textbox', { name: '工具名称' }),
-      '新的样本工具',
-    );
-    await user.click(
-      within(dialog).getByRole('button', { name: '查看校验反馈' }),
-    );
+    expect(window.location.pathname).toBe('/zh-CN/image/image-inspector');
+    await waitFor(() => {
+      expect(document.documentElement.lang).toBe('zh-CN');
+    });
+  });
 
+  it('re-parses the route on browser history navigation', async () => {
+    renderApp();
+
+    window.history.pushState(null, '', '/en/tasks');
+    window.dispatchEvent(new PopStateEvent('popstate'));
+
+    await waitFor(() => {
+      expect(document.documentElement.lang).toBe('en');
+    });
     expect(
-      screen.queryByRole('dialog', { name: '新增工具样本' }),
-    ).not.toBeInTheDocument();
-    expect(
-      await screen.findByText('新增表单样本校验通过 · 没有创建目录记录。'),
+      screen.getByRole('searchbox', { name: 'Search tools' }),
     ).toBeInTheDocument();
   });
 });

@@ -1,0 +1,24 @@
+{
+  "name": "@itools/server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch-path=./src --import tsx src/index.ts",
+    "start": "node dist/index.js",
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@fastify/middie": "9.3.5",
+    "@fastify/static": "10.1.6",
+    "@itools/contracts": "workspace:*",
+    "fastify": "5.12.7"
+  },
+  "devDependencies": {
+    "@types/node": "26.6.5",
+    "tsx": "4.23.15",
+    "vite": "8.3.4"
+  }
+}

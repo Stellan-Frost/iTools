@@ -5,10 +5,12 @@ import {
   TextField,
   useSnackbar,
 } from '@itools/design-system-adapter';
+import { useTranslation } from 'react-i18next';
 import { AppIcon } from '../../components/app-icon/AppIcon.js';
 import styles from './AdminPage.module.css';
 
 export function CreateToolDialog() {
+  const { t } = useTranslation('admin');
   const [isOpen, setIsOpen] = useState(false);
   const [toolName, setToolName] = useState('');
   const [error, setError] = useState('');
@@ -16,7 +18,7 @@ export function CreateToolDialog() {
 
   function validatePreview() {
     if (!toolName.trim()) {
-      setError('请填写工具名称后查看对话框校验反馈。');
+      setError(t('create.nameError'));
       return;
     }
 
@@ -24,7 +26,7 @@ export function CreateToolDialog() {
     setIsOpen(false);
     setToolName('');
     void show({
-      message: '新增表单样本校验通过 · 没有创建目录记录。',
+      message: t('create.snackbar'),
       duration: 'short',
     });
   }
@@ -36,7 +38,7 @@ export function CreateToolDialog() {
         startIcon={<AppIcon name="add" />}
         onClick={() => setIsOpen(true)}
       >
-        新增工具样本
+        {t('create.open')}
       </Button>
       <Dialog
         open={isOpen}
@@ -46,7 +48,7 @@ export function CreateToolDialog() {
           setIsOpen(false);
           setError('');
         }}
-        title="新增工具样本"
+        title={t('create.title')}
         actions={
           <>
             <Button
@@ -56,19 +58,19 @@ export function CreateToolDialog() {
                 setError('');
               }}
             >
-              取消
+              {t('create.cancel')}
             </Button>
             <Button variant="text" onClick={validatePreview}>
-              查看校验反馈
+              {t('create.submit')}
             </Button>
           </>
         }
       >
         <div className={styles.dialogBody}>
-          <p>填写一个名称以查看新增流程的校验反馈。该样本不会进入目录。</p>
+          <p>{t('create.body')}</p>
           <TextField
             id="new-tool-name"
-            label="工具名称"
+            label={t('create.nameLabel')}
             value={toolName}
             onChange={(event) => {
               setToolName(event.target.value);

@@ -1,9 +1,10 @@
 import { Button } from '@itools/design-system-adapter';
-import type { AppRoute } from '../../app/route.js';
-import { categories, getTool } from '../../data/sample-catalog.js';
+import { findEnabledTool, getCategory } from '@itools/app-core';
+import { useTranslation } from 'react-i18next';
 import { PageHeading } from '../../components/page-chrome/PageHeading.js';
 import { PreviewNotice } from '../../components/page-chrome/PreviewNotice.js';
 import { MetadataChip } from '../../components/page-chrome/MetadataChip.js';
+import { useAppNavigation } from '../../app/navigation.js';
 import { ToolInputSection } from './ToolInputSection.js';
 import {
   ResultSample,
@@ -14,38 +15,39 @@ import styles from './ToolPage.module.css';
 
 interface ToolPageProps {
   toolId: string;
-  onNavigate: (route: AppRoute) => void;
 }
 
-export function ToolPage({ toolId, onNavigate }: ToolPageProps) {
-  const tool = getTool(toolId);
+export function ToolPage({ toolId }: ToolPageProps) {
+  const { locale, navigate } = useAppNavigation();
+  const { t } = useTranslation(['catalog', 'common']);
+
+  const tool = findEnabledTool(toolId);
   if (!tool) {
     return (
       <div className={styles.page}>
         <PageHeading
-          title="工具界面样本不存在"
-          description="该工具不在当前预览目录中。"
+          title={t('catalog:tool.notFoundTitle')}
+          description={t('catalog:tool.notFoundBody')}
         />
-        <Button variant="filled" onClick={() => onNavigate({ page: 'home' })}>
-          返回首页
+        <Button variant="filled" onClick={() => navigate({ page: 'home' })}>
+          {t('common:actions.backHome')}
         </Button>
       </div>
     );
   }
 
-  const category = categories.find((entry) => entry.id === tool.categoryId);
+  const category = getCategory(tool.categoryId);
+  const categoryName = category ? category.name[locale] : tool.categoryId;
 
   return (
     <div className={styles.page}>
       <PageHeading
-        eyebrow={`${category?.name ?? '工具'} · 工具界面预览`}
-        title={tool.title}
-        description={tool.summary}
-        actions={<MetadataChip label="尚未接入执行" />}
+        eyebrow={t('catalog:tool.eyebrow', { category: categoryName })}
+        title={tool.name[locale]}
+        description={tool.summary[locale]}
+        actions={<MetadataChip label={t('catalog:tool.notConnected')} />}
       />
-      <PreviewNotice>
-        本页展示统一工具流程样本。输入、任务状态和结果都不会提交或执行。
-      </PreviewNotice>
+      <PreviewNotice>{t('catalog:tool.notice')}</PreviewNotice>
       <div className={styles.sections}>
         <ToolInputSection tool={tool} />
         <WorkspaceSample tool={tool} />
@@ -53,8 +55,8 @@ export function ToolPage({ toolId, onNavigate }: ToolPageProps) {
         <ResultSample />
       </div>
       <footer className={styles.attribution}>
-        <p>设计语义参考 Material Design 3 · 组件来源由统一适配层管理。</p>
-        <p>本项目开放源码致谢样本 · 当前为阶段 2 界面预览。</p>
+        <p>{t('catalog:tool.attribution.design')}</p>
+        <p>{t('catalog:tool.attribution.stage')}</p>
       </footer>
     </div>
   );

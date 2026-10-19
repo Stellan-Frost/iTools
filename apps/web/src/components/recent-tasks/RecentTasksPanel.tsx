@@ -1,19 +1,17 @@
 import { useEffect, useRef } from 'react';
 import { Button } from '@itools/design-system-adapter';
-import { sampleTasks } from '../../data/sample-catalog.js';
+import { findTool, SAMPLE_TASKS } from '@itools/app-core';
+import { useTranslation } from 'react-i18next';
+import { useAppNavigation } from '../../app/navigation.js';
 import styles from './RecentTasksPanel.module.css';
 
 interface RecentTasksPanelProps {
   onClose: () => void;
-  onOpenTool: (toolId: string) => void;
-  onViewAll: () => void;
 }
 
-export function RecentTasksPanel({
-  onClose,
-  onOpenTool,
-  onViewAll,
-}: RecentTasksPanelProps) {
+export function RecentTasksPanel({ onClose }: RecentTasksPanelProps) {
+  const { t } = useTranslation(['common', 'navigation']);
+  const { locale, navigate } = useAppNavigation();
   const panelRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -43,40 +41,60 @@ export function RecentTasksPanel({
       className={styles.panel}
       id="recent-tasks-panel"
       role="dialog"
-      aria-label="最近任务样本"
+      aria-label={t('navigation:recentTasksTitle')}
     >
       <div className={styles.heading}>
         <div>
-          <h2>最近任务</h2>
-          <p>样本数据 · 未连接真实任务</p>
+          <h2>{t('common:recentTasks')}</h2>
+          <p>{t('navigation:tasksSampleNote')}</p>
         </div>
-        <Button variant="text" onClick={onClose} aria-label="关闭最近任务面板">
-          关闭
+        <Button
+          variant="text"
+          onClick={onClose}
+          aria-label={t('navigation:closeRecentTasks')}
+        >
+          {t('common:actions.close')}
         </Button>
       </div>
       <ul className={styles.taskList}>
-        {sampleTasks.map((task) => (
-          <li key={task.id}>
-            <Button
-              className={styles.taskButton}
-              variant="text"
-              startIcon={
-                <span className={styles.statusDot} aria-hidden="true" />
-              }
-              onClick={() => onOpenTool(task.toolId)}
-            >
-              <span className={styles.taskCopy}>
-                <span className={styles.taskTitle}>{task.title}</span>
-                <span className={styles.taskMeta}>
-                  {task.status} · {task.timeLabel}
+        {SAMPLE_TASKS.map((task) => {
+          const tool = findTool(task.toolId);
+
+          return (
+            <li key={task.id}>
+              <Button
+                className={styles.taskButton}
+                variant="text"
+                startIcon={
+                  <span className={styles.statusDot} aria-hidden="true" />
+                }
+                onClick={() => {
+                  navigate({ page: 'tool', toolId: task.toolId });
+                  onClose();
+                }}
+              >
+                <span className={styles.taskCopy}>
+                  <span className={styles.taskTitle}>
+                    {tool?.name[locale] ?? task.toolId}
+                  </span>
+                  <span className={styles.taskMeta}>
+                    {task.status[locale]} · {task.timeLabel[locale]}
+                  </span>
                 </span>
-              </span>
-            </Button>
-          </li>
-        ))}
+              </Button>
+            </li>
+          );
+        })}
       </ul>
-      <Button className={styles.viewAll} variant="outlined" onClick={onViewAll}>
-        查看全部样本
+      <Button
+        className={styles.viewAll}
+        variant="outlined"
+        onClick={() => {
+          navigate({ page: 'tasks' });
+          onClose();
+        }}
+      >
+        {t('navigation:viewAllTasks')}
       </Button>
     </section>
   );

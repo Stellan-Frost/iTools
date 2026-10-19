@@ -5,31 +5,44 @@ import {
   TextField,
   useSnackbar,
 } from '@itools/design-system-adapter';
+import { findTool, getCategory } from '@itools/app-core';
+import { useTranslation } from 'react-i18next';
 import { PreviewNotice } from '../../components/page-chrome/PreviewNotice.js';
 import { MetadataChip } from '../../components/page-chrome/MetadataChip.js';
+import { useAppNavigation } from '../../app/navigation.js';
 import styles from './AdminPage.module.css';
 
+const REFERENCE_TOOL_ID = 'image-inspector';
+
 export function AdminMetadataForm() {
-  const [title, setTitle] = useState('图片信息检查');
-  const [description, setDescription] = useState(
-    '检查图片文件的基础信息，并预览适合的后续处理方式。',
-  );
+  const { locale } = useAppNavigation();
+  const { t } = useTranslation('admin');
+  const { show } = useSnackbar();
+
+  const referenceTool = findTool(REFERENCE_TOOL_ID);
+  const referenceCategory = referenceTool
+    ? getCategory(referenceTool.categoryId)
+    : undefined;
+  const defaultName = referenceTool ? referenceTool.name[locale] : '';
+  const defaultSummary = referenceTool ? referenceTool.description[locale] : '';
+
+  const [title, setTitle] = useState(defaultName);
+  const [description, setDescription] = useState(defaultSummary);
   const [formError, setFormError] = useState('');
   const [formFeedback, setFormFeedback] = useState('');
-  const { show } = useSnackbar();
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!title.trim() || !description.trim()) {
-      setFormError('工具名称和简介都需要填写。');
+      setFormError(t('metadata.bothRequired'));
       setFormFeedback('');
       return;
     }
 
     setFormError('');
-    setFormFeedback('表单校验通过。修改只存在当前页面内存中，没有写入目录。');
+    setFormFeedback(t('metadata.success'));
     void show({
-      message: '表单校验通过 · 没有保存到后台。',
+      message: t('metadata.snackbar'),
       duration: 'short',
     });
   }
@@ -38,10 +51,10 @@ export function AdminMetadataForm() {
     <section aria-labelledby="metadata-heading">
       <div className={styles.sectionHeading}>
         <div>
-          <p>METADATA FORM</p>
-          <h2 id="metadata-heading">元数据编辑样本</h2>
+          <p>{t('metadata.kicker')}</p>
+          <h2 id="metadata-heading">{t('metadata.title')}</h2>
         </div>
-        <MetadataChip label="图片信息检查" />
+        <MetadataChip label={defaultName} />
       </div>
       <Card>
         <form
@@ -51,7 +64,7 @@ export function AdminMetadataForm() {
         >
           <TextField
             id="admin-tool-title"
-            label="工具名称"
+            label={t('metadata.nameLabel')}
             value={title}
             onChange={(event) => {
               setTitle(event.target.value);
@@ -59,13 +72,15 @@ export function AdminMetadataForm() {
             }}
             error={Boolean(formError && !title.trim())}
             errorText={
-              formError && !title.trim() ? '请填写工具名称。' : undefined
+              formError && !title.trim()
+                ? t('metadata.nameRequired')
+                : undefined
             }
             required
           />
           <TextField
             id="admin-tool-description"
-            label="工具简介"
+            label={t('metadata.summaryLabel')}
             value={description}
             onChange={(event) => {
               setDescription(event.target.value);
@@ -73,7 +88,9 @@ export function AdminMetadataForm() {
             }}
             error={Boolean(formError && !description.trim())}
             errorText={
-              formError && !description.trim() ? '请填写工具简介。' : undefined
+              formError && !description.trim()
+                ? t('metadata.summaryRequired')
+                : undefined
             }
             multiline
             rows={3}
@@ -81,10 +98,16 @@ export function AdminMetadataForm() {
             required
           />
           <div className={styles.formSummary}>
-            <span>所属分类</span>
-            <MetadataChip label="图像与设计" />
-            <span>标识符</span>
-            <code>image-inspector</code>
+            <span>{t('metadata.categoryLabel')}</span>
+            <MetadataChip
+              label={
+                referenceCategory
+                  ? referenceCategory.name[locale]
+                  : t('metadata.categoryLabel')
+              }
+            />
+            <span>{t('metadata.idLabel')}</span>
+            <code>{referenceTool ? referenceTool.id : REFERENCE_TOOL_ID}</code>
           </div>
           {formError ? (
             <PreviewNotice tone="error">{formError}</PreviewNotice>
@@ -94,20 +117,18 @@ export function AdminMetadataForm() {
           ) : null}
           <div className={styles.formActions}>
             <Button type="submit" variant="filled">
-              验证表单样本
+              {t('metadata.submit')}
             </Button>
             <Button
               variant="text"
               onClick={() => {
-                setTitle('图片信息检查');
-                setDescription(
-                  '检查图片文件的基础信息，并预览适合的后续处理方式。',
-                );
+                setTitle(defaultName);
+                setDescription(defaultSummary);
                 setFormError('');
                 setFormFeedback('');
               }}
             >
-              重置样本
+              {t('metadata.reset')}
             </Button>
           </div>
         </form>

@@ -1,48 +1,60 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { IconButton, NavigationDrawer } from '@itools/design-system-adapter';
+import { findTool, type CatalogTool, type CategoryId } from '@itools/app-core';
+import type { Locale } from '@itools/contracts';
+import { useTranslation } from 'react-i18next';
+import { useAppNavigation } from '../../app/navigation.js';
 import type { AppRoute } from '../../app/route.js';
-import { getTool, type ToolDefinition } from '../../data/sample-catalog.js';
 import { AppIcon } from '../app-icon/AppIcon.js';
-import { ToolAccordionNavigation } from './ToolAccordionNavigation.js';
-import { ToolInfoDialog } from './ToolInfoDialog.js';
 import { RecentTasksPanel } from '../recent-tasks/RecentTasksPanel.js';
 import { ToolSearchEntry } from '../tool-search-entry/ToolSearchEntry.js';
+import { ToolAccordionNavigation } from './ToolAccordionNavigation.js';
+import { ToolInfoDialog } from './ToolInfoDialog.js';
 import { useCompactViewport } from './use-compact-viewport.js';
 import styles from './AppShell.module.css';
 
 interface AppShellProps {
   children: ReactNode;
-  route: AppRoute;
   themeMode: 'light' | 'dark';
-  onNavigate: (route: AppRoute) => void;
-  onOpenSearch: () => void;
   onToggleTheme: () => void;
+  onOpenSearch: () => void;
 }
 
-function routeToCategoryId(route: AppRoute) {
+function routeToCategoryId(route: AppRoute): CategoryId | undefined {
   if (route.page === 'category') return route.categoryId;
-  if (route.page === 'tool') return getTool(route.toolId)?.categoryId;
+  if (route.page === 'tool') return findTool(route.toolId)?.categoryId;
   return undefined;
+}
+
+function nextLocale(locale: Locale): Locale {
+  return locale === 'zh-CN' ? 'en' : 'zh-CN';
 }
 
 export function AppShell({
   children,
-  route,
   themeMode,
-  onNavigate,
-  onOpenSearch,
   onToggleTheme,
+  onOpenSearch,
 }: AppShellProps) {
+  const { t } = useTranslation(['common', 'navigation']);
+  const { locale, route, navigate, switchLocale } = useAppNavigation();
   const isCompact = useCompactViewport();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isRecentOpen, setIsRecentOpen] = useState(false);
-  const [expandedCategoryIds, setExpandedCategoryIds] = useState<Set<string>>(
-    () => {
-      const categoryId = routeToCategoryId(route);
-      return categoryId ? new Set([categoryId]) : new Set();
-    },
-  );
-  const [selectedTool, setSelectedTool] = useState<ToolDefinition | null>(null);
+  const [expandedCategoryIds, setExpandedCategoryIds] = useState<
+    ReadonlySet<CategoryId>
+  >(() => {
+    const categoryId = routeToCategoryId(route);
+    return categoryId ? new Set([categoryId]) : new Set();
+  });
+  const [selectedTool, setSelectedTool] = useState<CatalogTool | null>(null);
+
+  const languageTarget = nextLocale(locale);
+  const languageTargetLabel =
+    languageTarget === 'en'
+      ? t('common:language.en')
+      : t('common:language.zhCN');
+  const switchLanguageLabel = t('common:language.switchLanguage');
 
   useEffect(() => {
     if (!isCompact) setIsDrawerOpen(false);
@@ -69,7 +81,7 @@ export function AppShell({
     return () => window.removeEventListener('keydown', handleShortcut);
   }, [onOpenSearch]);
 
-  const toggleCategory = (categoryId: string) => {
+  const toggleCategory = (categoryId: CategoryId) => {
     setExpandedCategoryIds((expandedIds) => {
       const nextExpandedIds = new Set(expandedIds);
       if (nextExpandedIds.has(categoryId)) nextExpandedIds.delete(categoryId);
@@ -79,7 +91,7 @@ export function AppShell({
   };
 
   const openToolInformation = (toolId: string) => {
-    const tool = getTool(toolId);
+    const tool = findTool(toolId);
     if (!tool) return;
     if (isCompact) setIsDrawerOpen(false);
     setSelectedTool(tool);
@@ -88,25 +100,25 @@ export function AppShell({
   const navigateToTool = (toolId: string) => {
     setSelectedTool(null);
     setIsDrawerOpen(false);
-    onNavigate({ page: 'tool', toolId });
+    navigate({ page: 'tool', toolId });
   };
 
-  const openTaskTool = (toolId: string) => {
-    onNavigate({ page: 'tool', toolId });
-    setIsRecentOpen(false);
+  const handleSwitchLanguage = () => {
+    switchLocale(languageTarget);
+    setIsDrawerOpen(false);
   };
 
   return (
     <div className={styles.shell}>
       <a className={styles.skipLink} href="#main-content">
-        跳到主要内容
+        {t('common:skipToContent')}
       </a>
       <header className={styles.topBar}>
         <button
           className={styles.brand}
           type="button"
-          onClick={() => onNavigate({ page: 'home' })}
-          aria-label="iTools 首页"
+          onClick={() => navigate({ page: 'home' })}
+          aria-label={t('common:brandHomeLabel')}
         >
           <img
             className={styles.brandMark}
@@ -130,20 +142,13 @@ export function AppShell({
               <IconButton
                 className={styles.topBarIcon}
                 icon={<AppIcon name="history" />}
-                aria-label="最近任务"
+                aria-label={t('common:recentTasks')}
                 aria-expanded={isRecentOpen}
                 aria-controls="recent-tasks-panel"
                 onClick={() => setIsRecentOpen((isOpen) => !isOpen)}
               />
               {isRecentOpen ? (
-                <RecentTasksPanel
-                  onClose={() => setIsRecentOpen(false)}
-                  onOpenTool={openTaskTool}
-                  onViewAll={() => {
-                    onNavigate({ page: 'tasks' });
-                    setIsRecentOpen(false);
-                  }}
-                />
+                <RecentTasksPanel onClose={() => setIsRecentOpen(false)} />
               ) : null}
             </div>
             <IconButton
@@ -154,15 +159,23 @@ export function AppShell({
                 />
               }
               aria-label={
-                themeMode === 'light' ? '切换深色模式' : '切换浅色模式'
+                themeMode === 'light'
+                  ? t('common:theme.toggleToDark')
+                  : t('common:theme.toggleToLight')
               }
               onClick={onToggleTheme}
             />
             <IconButton
               className={styles.topBarIcon}
+              icon={<AppIcon name="translate" />}
+              aria-label={switchLanguageLabel}
+              onClick={handleSwitchLanguage}
+            />
+            <IconButton
+              className={styles.topBarIcon}
               icon={<AppIcon name="admin_panel_settings" />}
-              aria-label="管理预览"
-              onClick={() => onNavigate({ page: 'admin' })}
+              aria-label={t('common:adminPreview')}
+              onClick={() => navigate({ page: 'admin' })}
             />
           </div>
         ) : null}
@@ -170,11 +183,14 @@ export function AppShell({
 
       <div className={styles.layout}>
         {!isCompact ? (
-          <aside className={styles.desktopNavigation} aria-label="桌面分类导航">
+          <aside
+            className={styles.desktopNavigation}
+            aria-label={t('navigation:desktopLabel')}
+          >
             <ToolAccordionNavigation
               expandedCategoryIds={expandedCategoryIds}
               onToggleCategory={toggleCategory}
-              onNavigateHome={() => onNavigate({ page: 'home' })}
+              onNavigateHome={() => navigate({ page: 'home' })}
               onOpenTool={openToolInformation}
             />
           </aside>
@@ -187,7 +203,7 @@ export function AppShell({
       {isCompact ? (
         <NavigationDrawer
           id="mobile-navigation-drawer"
-          aria-label="工具分类"
+          aria-label={t('navigation:categoriesLabel')}
           aria-hidden={!isDrawerOpen}
           inert={!isDrawerOpen}
           variant="modal"
@@ -196,14 +212,17 @@ export function AppShell({
         >
           <div className={styles.drawerContent}>
             <div className={styles.drawerHeader}>
-              <span>浏览分类</span>
+              <span>{t('navigation:browseCategories')}</span>
               <IconButton
                 icon={<AppIcon name="close" />}
-                aria-label="关闭分类导航"
+                aria-label={t('navigation:closeNavigation')}
                 onClick={() => setIsDrawerOpen(false)}
               />
             </div>
-            <div className={styles.drawerActions} aria-label="应用操作">
+            <div
+              className={styles.drawerActions}
+              aria-label={t('navigation:appActions')}
+            >
               <IconButton
                 className={styles.topBarIcon}
                 style={{ borderRadius: 'var(--md-sys-shape-corner-full)' }}
@@ -213,29 +232,45 @@ export function AppShell({
                   />
                 }
                 aria-label={
-                  themeMode === 'light' ? '切换深色模式' : '切换浅色模式'
+                  themeMode === 'light'
+                    ? t('common:theme.toggleToDark')
+                    : t('common:theme.toggleToLight')
                 }
                 onClick={onToggleTheme}
               />
-              <span>{themeMode === 'light' ? '深色模式' : '浅色模式'}</span>
+              <span className={styles.drawerActionLabel}>
+                {themeMode === 'light'
+                  ? t('common:theme.darkMode')
+                  : t('common:theme.lightMode')}
+              </span>
+              <IconButton
+                className={styles.topBarIcon}
+                style={{ borderRadius: 'var(--md-sys-shape-corner-full)' }}
+                icon={<AppIcon name="translate" />}
+                aria-label={switchLanguageLabel}
+                onClick={handleSwitchLanguage}
+              />
+              <span className={styles.drawerActionLabel}>
+                {languageTargetLabel}
+              </span>
               <IconButton
                 className={styles.topBarIcon}
                 style={{ borderRadius: 'var(--md-sys-shape-corner-full)' }}
                 icon={<AppIcon name="admin_panel_settings" />}
-                aria-label="管理预览"
+                aria-label={t('common:adminPreview')}
                 onClick={() => {
                   setIsDrawerOpen(false);
-                  onNavigate({ page: 'admin' });
+                  navigate({ page: 'admin' });
                 }}
               />
               <IconButton
                 className={styles.topBarIcon}
                 style={{ borderRadius: 'var(--md-sys-shape-corner-full)' }}
                 icon={<AppIcon name="history" />}
-                aria-label="最近任务"
+                aria-label={t('common:recentTasks')}
                 onClick={() => {
                   setIsDrawerOpen(false);
-                  onNavigate({ page: 'tasks' });
+                  navigate({ page: 'tasks' });
                 }}
               />
             </div>
@@ -244,7 +279,7 @@ export function AppShell({
               onToggleCategory={toggleCategory}
               onNavigateHome={() => {
                 setIsDrawerOpen(false);
-                onNavigate({ page: 'home' });
+                navigate({ page: 'home' });
               }}
               onOpenTool={openToolInformation}
             />

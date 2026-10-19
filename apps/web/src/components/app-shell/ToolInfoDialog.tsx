@@ -1,11 +1,13 @@
 import { Button, Dialog } from '@itools/design-system-adapter';
-import { getCategory, type ToolDefinition } from '../../data/sample-catalog.js';
+import { getCategory, type CatalogTool } from '@itools/app-core';
+import { useTranslation } from 'react-i18next';
 import { AppIcon } from '../app-icon/AppIcon.js';
 import { MetadataChip } from '../page-chrome/MetadataChip.js';
+import { useAppNavigation } from '../../app/navigation.js';
 import styles from './ToolInfoDialog.module.css';
 
 interface ToolInfoDialogProps {
-  tool: ToolDefinition | null;
+  tool: CatalogTool | null;
   onClose: () => void;
   onNavigate: (toolId: string) => void;
 }
@@ -15,15 +17,19 @@ export function ToolInfoDialog({
   onClose,
   onNavigate,
 }: ToolInfoDialogProps) {
+  const { t } = useTranslation(['common', 'navigation']);
+  const { locale } = useAppNavigation();
+
   if (!tool) return null;
 
   const category = getCategory(tool.categoryId);
+  const categoryLabel = category?.name[locale] ?? '';
 
   return (
     <Dialog
       open
       onClose={onClose}
-      title={<span className={styles.title}>{tool.title}</span>}
+      title={<span className={styles.title}>{tool.name[locale]}</span>}
       icon={
         <span className={styles.iconSurface}>
           <AppIcon name={tool.icon} />
@@ -32,38 +38,41 @@ export function ToolInfoDialog({
       actions={
         <div className={styles.actions}>
           <Button variant="text" onClick={onClose} data-autofocus>
-            关闭
+            {t('common:actions.close')}
           </Button>
           <Button variant="filled" onClick={() => onNavigate(tool.id)}>
-            前往
+            {t('common:actions.goToTool')}
           </Button>
         </div>
       }
     >
       <div className={styles.content}>
-        <p className={styles.eyebrow}>工具样本 · 界面预览</p>
-        <p className={styles.description}>{tool.summary}</p>
+        <p className={styles.eyebrow}>{t('navigation:toolDialogEyebrow')}</p>
+        <p className={styles.description}>{tool.summary[locale]}</p>
         <dl className={styles.metadata}>
           <div>
-            <dt>分类</dt>
+            <dt>{t('navigation:toolCategoryLabel')}</dt>
             <dd>
-              <MetadataChip label={category?.name ?? '样本分类'} />
-              {category ? <span>{category.description}</span> : null}
+              <MetadataChip label={categoryLabel} />
+              {category ? <span>{category.description[locale]}</span> : null}
             </dd>
           </div>
           <div>
-            <dt>输入样本</dt>
+            <dt>{t('navigation:toolInputLabel')}</dt>
             <dd>
-              <span>{tool.inputLabel}</span>
-              <code>{tool.sampleInput}</code>
+              <span>{tool.preview.inputLabel[locale]}</span>
+              <code>{tool.preview.sampleInput[locale]}</code>
             </dd>
           </div>
           <div>
-            <dt>{tool.workspaceTitle}</dt>
+            <dt>{tool.preview.workspaceTitle[locale]}</dt>
             <dd>
               <ul>
-                {tool.workspaceLines.map((line) => (
-                  <li key={line}>{line}</li>
+                {tool.preview.workspaceLines.map((line) => (
+                  <li key={`${line.label[locale]}-${line.value}`}>
+                    {line.label[locale]}
+                    <span aria-hidden="true"> {line.value}</span>
+                  </li>
                 ))}
               </ul>
             </dd>

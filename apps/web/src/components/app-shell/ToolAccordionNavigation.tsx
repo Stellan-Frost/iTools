@@ -1,10 +1,16 @@
-import { categories, getToolsForCategory } from '../../data/sample-catalog.js';
+import {
+  CATEGORIES,
+  listEnabledToolsByCategory,
+  type CategoryId,
+} from '@itools/app-core';
+import { useTranslation } from 'react-i18next';
+import { useAppNavigation } from '../../app/navigation.js';
 import { AppIcon } from '../app-icon/AppIcon.js';
 import styles from './ToolAccordionNavigation.module.css';
 
 export interface ToolAccordionNavigationProps {
-  expandedCategoryIds: ReadonlySet<string>;
-  onToggleCategory: (categoryId: string) => void;
+  expandedCategoryIds: ReadonlySet<CategoryId>;
+  onToggleCategory: (categoryId: CategoryId) => void;
   onNavigateHome: () => void;
   onOpenTool: (toolId: string) => void;
 }
@@ -15,24 +21,28 @@ export function ToolAccordionNavigation({
   onNavigateHome,
   onOpenTool,
 }: ToolAccordionNavigationProps) {
+  const { t } = useTranslation('navigation');
+  const { locale } = useAppNavigation();
+
   return (
-    <nav className={styles.root} aria-label="工具分类">
+    <nav className={styles.root} aria-label={t('categoriesLabel')}>
       <button
         className={styles.home}
         type="button"
         onClick={onNavigateHome}
-        aria-label="首页"
+        aria-label={t('home')}
       >
         <span className={styles.categoryIcon}>
           <AppIcon name="home" />
         </span>
-        <span>首页</span>
+        <span>{t('home')}</span>
       </button>
 
-      {categories.map((category) => {
+      {CATEGORIES.map((category) => {
         const isExpanded = expandedCategoryIds.has(category.id);
         const toolListId = `tool-list-${category.id}`;
-        const categoryTools = getToolsForCategory(category.id);
+        const categoryName = category.name[locale];
+        const categoryTools = listEnabledToolsByCategory(category.id);
 
         return (
           <section
@@ -50,7 +60,7 @@ export function ToolAccordionNavigation({
               <span className={styles.categoryIcon}>
                 <AppIcon name={category.icon} />
               </span>
-              <span className={styles.categoryLabel}>{category.name}</span>
+              <span className={styles.categoryLabel}>{categoryName}</span>
               <span className={styles.chevron}>
                 <AppIcon name="expand_more" />
               </span>
@@ -58,7 +68,7 @@ export function ToolAccordionNavigation({
             <ul
               className={styles.toolList}
               id={toolListId}
-              aria-label={`${category.name}中的工具`}
+              aria-label={t('categoryTools', { category: categoryName })}
               aria-hidden={!isExpanded}
               inert={!isExpanded}
               data-expanded={isExpanded}
@@ -75,12 +85,14 @@ export function ToolAccordionNavigation({
                       <span className={styles.toolIcon}>
                         <AppIcon name={tool.icon} />
                       </span>
-                      <span className={styles.toolLabel}>{tool.title}</span>
+                      <span className={styles.toolLabel}>
+                        {tool.name[locale]}
+                      </span>
                     </button>
                   </li>
                 ))
               ) : (
-                <li className={styles.emptyState}>暂无样本工具</li>
+                <li className={styles.emptyState}>{t('emptyCategory')}</li>
               )}
             </ul>
           </section>

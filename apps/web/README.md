@@ -1,44 +1,41 @@
-# Web 界面预览
+# Web 应用（SSR + 客户端水合）
 
-`apps/web` 是 React 19 与 Vite 构建的客户端界面样本，使用工作区包 `@itools/design-system-adapter`。它展示阶段 2 的应用壳与样本页面，不是已接入后端的完整产品。
+`apps/web` 是 React 19 + Vite 的 iTools 前端，负责人 React 组件、URL 路由、双语页面、SEO head 与 SSR 渲染函数。它由 `apps/server` 通过 Fastify 托管；不再有独立的内存路由入口。
 
-## 入口与状态
+## 入口
 
-- `index.html` 加载 `/src/main.tsx`；`main.tsx` 引入适配包样式并挂载 React。
-- `App.tsx` 保存当前页面、浅/深色主题和搜索面板开关。页面种类定义在 `src/app/route.ts`：首页、分类、工具、任务和管理预览。导航只更新 React state，不改变浏览器 URL；刷新会回到首页，主题也不会保存。
-- `src/data/sample-catalog.ts` 提供样本分类、工具目录和任务信息。搜索、任务状态、管理表单及开关均为界面演示数据，没有真实工具执行或服务端存储。
+- `index.html`：SSR 模板，包含 `<!--app-head-->`、`<!--app-html-->` 与开发入口 `/src/entry-client.tsx`。
+- `src/entry-client.tsx`：浏览器入口，读取 `<html lang>` 与 `location.pathname`，用 `hydrateRoot` 挂载 `<App>`，并引入一次适配层全局样式。
+- `src/entry-server.tsx`：SSR 入口，导出 `render()`、`listSitemapUrls()`、`supportedLocales`、`defaultLocale`，供 `apps/server` 加载（开发经 Vite `ssrLoadModule`，生产加载 `dist/server/entry-server.js`）。
+- `src/App.tsx`：应用壳组合；持有 locale/route/theme/search 状态，提供 `AppNavigationProvider` 与 `I18nextProvider`。
 
-## 页面和交互
+## 路由与数据
 
-- 首页、分类和工具详情位于 `src/pages/home`、`src/pages/category`、`src/pages/tool`；任务样本页位于 `src/pages/tasks`，管理界面样本位于 `src/pages/admin`。
-- `src/components/app-shell` 提供共享顶部栏、桌面分类侧栏和窄屏导航抽屉。窄屏时，顶部搜索栏中的菜单按钮打开分类抽屉；抽屉还提供主题切换、最近任务入口和管理预览入口。桌面顶部栏提供最近任务样本面板、主题切换和管理预览入口。
-- `src/components/tool-search-entry/ToolSearchEntry.tsx` 在首页与应用壳复用适配包的 `SearchBar`。点击搜索栏或按 `Ctrl+K` / `Cmd+K` 会打开 `src/components/command-palette` 中的命令面板；方向键选择结果，Enter 打开工具。这里不是独立搜索按钮。
-- 工具详情页展示输入区、工作区、任务状态、结果和说明等样本内容。最近任务面板和任务页展示静态任务样本。管理预览提供表单校验、状态开关和新建工具对话框；这些操作不会写入目录或数据库。
+- 路由规则在 `src/app/route.ts`：`/{locale}`、`/{locale}/{category}`、`/{locale}/{category}/{toolId}`、`/{locale}/tasks`、`/{locale}/admin`。未知语言、未知分类、停用工具和分类不匹配都解析为 `not-found`（HTTP 404）。
+- 客户端导航使用 `history.pushState`，并监听 `popstate`；没有引入额外路由库。
+- 目录数据与 i18n 资源来自工作区包 `@itools/app-core`：分类、工具、示例任务、`createI18n` 和资源都在该包内，Web 不维护副本。
+- SEO 由 `src/app/seo.ts` 生成：`title`、`description`、`canonical`、`zh-CN`/`en`/`x-default` 链接；404、任务页和管理页输出 `robots noindex`。
 
-## 本地命令
-
-从仓库根目录执行：
+## 构建与运行
 
 ```sh
-pnpm install --frozen-lockfile
-pnpm --filter @itools/design-system-adapter build
+# 仓库根目录；会先构建 contracts / app-core / adapter，再启动 Fastify + Vite middleware
 pnpm dev
-```
 
-适配包的 `dist` 由单独的 build 命令生成，Web 的 `dev` 脚本只启动 Vite。验证 Web 包可运行：
+# 生产构建：dist/client（浏览器）与 dist/server（SSR）
+pnpm --filter @itools/web build
 
-```sh
+# 包级检查
 pnpm --filter @itools/web typecheck
 pnpm --filter @itools/web test
-pnpm --filter @itools/web build
 ```
+
+`vite.config.ts` 的 `ssr.noExternal` 必须包含 `@itools/app-core`、`@itools/design-system-adapter`、`m3-expressive-react`、`@material/material-color-utilities`；否则 Vite SSR 无法解析 `@material/material-color-utilities` 的扩展名省略导入。
 
 ## 修改边界
 
-- 页面内容与编排在 `src/pages`；应用壳与导航行为在 `src/components/app-shell`；样本目录在 `src/data/sample-catalog.ts`。
-- 搜索入口在 `src/components/tool-search-entry`，命令面板在 `src/components/command-palette`。底层 `SearchBar`、主题、组件样式与通用组件属于 `packages/design-system-adapter`；需要改适配包时应在该包实现，不要在 Web 中复制一套基础组件。
-- Web 自有样式放在相邻 CSS Module。检查现有包边界与架构要求后再引入依赖或跨包接口；阶段 2 预览不应被描述成已经具备真实执行、持久化或认证能力。
-
-## 回归建议
-
-改动应用壳、路由或搜索时，检查首页到分类/工具的导航、`Ctrl+K` / `Cmd+K` 搜索和键盘选择、最近任务到工具或全部任务的跳转，以及窄屏抽屉打开/关闭和菜单操作。改动页面或样本目录时，检查无效工具/分类的空状态、工具页各样本区块和管理表单校验。涉及响应式样式时，同时查看桌面与窄屏布局。根据改动范围运行上面的包级 typecheck、test、build 命令。
+- 页面与展示组件在 `src/pages` 与 `src/components/{catalog,page-chrome,app-icon}`；壳层、搜索、最近任务与导航在 `src/components/{app-shell,command-palette,recent-tasks,tool-search-entry}`。
+- 页面的导航与搜索统一走 `src/app/navigation.tsx` 的 `useAppNavigation()`；不要在页面里直接操作 `history`。
+- 基础 UI 组件、主题与字体属于 `packages/design-system-adapter`；分类、工具、示例任务与 i18n 文案属于 `packages/app-core`。Web 不复制这两层。
+- 所有可见文案必须来自 i18next 或目录双语字段；新增文案时中英同时补齐。英文页面不得出现中文字符。
+- 当前仍没有真实工具执行、数据库、认证、IndexedDB、任务运行时或 PWA；不要把这些能力写成已实现。

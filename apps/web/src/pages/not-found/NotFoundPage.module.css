@@ -1,0 +1,11 @@
+.page {
+  width: min(100%, var(--itools-layout-content-max));
+  margin-inline: auto;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--itools-space-2);
+  margin-top: var(--itools-space-6);
+}

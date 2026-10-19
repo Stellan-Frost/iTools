@@ -1,7 +1,9 @@
 import { useState } from 'react';
+import { listTools } from '@itools/app-core';
+import { useTranslation } from 'react-i18next';
 import { PageHeading } from '../../components/page-chrome/PageHeading.js';
 import { PreviewNotice } from '../../components/page-chrome/PreviewNotice.js';
-import { tools } from '../../data/sample-catalog.js';
+import { useAppNavigation } from '../../app/navigation.js';
 import { AdminCatalogSection } from './AdminCatalogSection.js';
 import { AdminFeedbackExamples } from './AdminFeedbackExamples.js';
 import { AdminMetadataForm } from './AdminMetadataForm.js';
@@ -9,12 +11,12 @@ import { CreateToolDialog } from './CreateToolDialog.js';
 import styles from './AdminPage.module.css';
 
 export function AdminPage() {
+  const { locale } = useAppNavigation();
+  const { t } = useTranslation('admin');
   const [enabledTools, setEnabledTools] = useState<Record<string, boolean>>(
     () =>
       Object.fromEntries(
-        tools
-          .slice(0, 4)
-          .map((tool) => [tool.id, tool.id !== 'regex-playground']),
+        listTools().map((tool) => [tool.id, tool.enabled] as const),
       ),
   );
 
@@ -25,22 +27,20 @@ export function AdminPage() {
   return (
     <div className={styles.page}>
       <PageHeading
-        eyebrow="目录维护 · 界面预览"
-        title="管理后台样本"
-        description="查看工具状态、元数据编辑和反馈样本。所有修改都只在当前页面内存中。"
+        eyebrow={t('eyebrow')}
+        title={t('title')}
+        description={t('description')}
         actions={<CreateToolDialog />}
       />
 
-      <PreviewNotice>
-        预览模式：没有管理员认证、数据库或目录写入 API。
-      </PreviewNotice>
+      <PreviewNotice>{t('notice')}</PreviewNotice>
 
       <div className={styles.adminGrid}>
         <AdminCatalogSection
           enabledTools={enabledTools}
           onToggleTool={updateToolEnabled}
         />
-        <AdminMetadataForm />
+        <AdminMetadataForm key={locale} />
       </div>
 
       <AdminFeedbackExamples />

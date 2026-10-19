@@ -1,75 +1,94 @@
 import { Button } from '@itools/design-system-adapter';
-import type { AppRoute } from '../../app/route.js';
 import {
-  categories,
+  CATEGORIES,
   getCategory,
-  getToolsForCategory,
-} from '../../data/sample-catalog.js';
+  listEnabledToolsByCategory,
+  type CategoryId,
+} from '@itools/app-core';
+import { useTranslation } from 'react-i18next';
 import { ToolCard } from '../../components/catalog/ToolCard.js';
 import { PageHeading } from '../../components/page-chrome/PageHeading.js';
 import { PreviewNotice } from '../../components/page-chrome/PreviewNotice.js';
 import { MetadataChip } from '../../components/page-chrome/MetadataChip.js';
+import { useAppNavigation } from '../../app/navigation.js';
 import styles from './CategoryPage.module.css';
 
 interface CategoryPageProps {
-  categoryId: string;
-  onNavigate: (route: AppRoute) => void;
+  categoryId: CategoryId;
 }
 
-export function CategoryPage({ categoryId, onNavigate }: CategoryPageProps) {
+export function CategoryPage({ categoryId }: CategoryPageProps) {
+  const { locale, navigate } = useAppNavigation();
+  const { t } = useTranslation(['catalog', 'common']);
+
   const category = getCategory(categoryId);
-  const categoryTools = getToolsForCategory(categoryId);
+  const categoryTools = listEnabledToolsByCategory(categoryId);
 
   if (!category) {
     return (
       <div className={styles.page}>
         <PageHeading
-          title="分类样本不存在"
-          description="这个分类不在当前界面预览目录中。"
+          title={t('catalog:category.notFoundTitle')}
+          description={t('catalog:category.notFoundBody')}
         />
-        <Button variant="filled" onClick={() => onNavigate({ page: 'home' })}>
-          返回首页
+        <Button variant="filled" onClick={() => navigate({ page: 'home' })}>
+          {t('common:actions.backHome')}
         </Button>
       </div>
     );
   }
 
+  const anotherCategory = CATEGORIES.find(
+    (entry) =>
+      entry.id !== categoryId &&
+      listEnabledToolsByCategory(entry.id).length > 0,
+  );
+
   return (
     <div className={styles.page}>
       <PageHeading
-        eyebrow="工具分类 · 界面预览"
-        title={category.name}
-        description={category.description}
-        actions={<MetadataChip label={`${categoryTools.length} 个样本工具`} />}
+        eyebrow={t('catalog:category.eyebrow')}
+        title={category.name[locale]}
+        description={category.description[locale]}
+        actions={
+          <MetadataChip
+            label={t('catalog:category.count', {
+              total: categoryTools.length,
+            })}
+          />
+        }
       />
-      <PreviewNotice>
-        以下内容是用于展示目录浏览方式的样本，不代表已接入真实工具。
-      </PreviewNotice>
+      <PreviewNotice>{t('catalog:category.notice')}</PreviewNotice>
       {categoryTools.length > 0 ? (
         <section
           className={styles.list}
-          aria-label={`${category.name}工具样本`}
+          aria-label={t('catalog:category.listLabel', {
+            category: category.name[locale],
+          })}
         >
           {categoryTools.map((tool) => (
             <ToolCard
               key={tool.id}
               tool={tool}
-              categoryName={category.name}
-              onOpen={() => onNavigate({ page: 'tool', toolId: tool.id })}
+              categoryName={category.name[locale]}
+              onOpen={() => navigate({ page: 'tool', toolId: tool.id })}
             />
           ))}
         </section>
       ) : (
         <div className={styles.empty}>
-          <h2>此分类暂时没有样本工具</h2>
-          <p>分类结构仍可查看；之后可以在此呈现已实现的工具。</p>
+          <h2>{t('catalog:category.emptyTitle')}</h2>
+          <p>{t('catalog:category.emptyBody')}</p>
           <Button
             variant="outlined"
             onClick={() =>
-              onNavigate({ page: 'category', categoryId: categories[0]!.id })
+              navigate({
+                page: 'category',
+                categoryId: anotherCategory?.id ?? categoryId,
+              })
             }
           >
-            浏览其他分类
+            {t('catalog:actions.browseOtherCategory')}
           </Button>
         </div>
       )}

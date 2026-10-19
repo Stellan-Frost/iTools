@@ -1,71 +1,130 @@
-import { useState } from 'react';
 import {
   AppThemeProvider,
   SnackbarProvider,
+  type AppColorMode,
 } from '@itools/design-system-adapter';
-import type { AppRoute } from './app/route.js';
-import { CommandPalette } from './components/command-palette/CommandPalette.js';
+import { createI18n } from '@itools/app-core';
+import type { Locale } from '@itools/contracts';
+import { I18nextProvider } from 'react-i18next';
+import { useEffect, useMemo, useState, useCallback } from 'react';
+import { AppNavigationProvider, type AppNavigation } from './app/navigation.js';
+import { buildAppPath, parseAppPath, type AppRoute } from './app/route.js';
 import { AppShell } from './components/app-shell/AppShell.js';
+import { CommandPalette } from './components/command-palette/CommandPalette.js';
 import { AdminPage } from './pages/admin/AdminPage.js';
 import { CategoryPage } from './pages/category/CategoryPage.js';
 import { HomePage } from './pages/home/HomePage.js';
+import { NotFoundPage } from './pages/not-found/NotFoundPage.js';
 import { TasksPage } from './pages/tasks/TasksPage.js';
 import { ToolPage } from './pages/tool/ToolPage.js';
 
-function CurrentPage({
-  route,
-  onNavigate,
-  onOpenSearch,
-}: {
-  route: AppRoute;
-  onNavigate: (route: AppRoute) => void;
-  onOpenSearch: () => void;
-}) {
-  if (route.page === 'home')
-    return <HomePage onNavigate={onNavigate} onOpenSearch={onOpenSearch} />;
-  if (route.page === 'category')
-    return (
-      <CategoryPage categoryId={route.categoryId} onNavigate={onNavigate} />
-    );
-  if (route.page === 'tool')
-    return <ToolPage toolId={route.toolId} onNavigate={onNavigate} />;
-  if (route.page === 'tasks') return <TasksPage onNavigate={onNavigate} />;
-  return <AdminPage />;
+export interface AppProps {
+  initialLocale: Locale;
+  initialRoute: AppRoute;
 }
 
-export function App() {
-  const [route, setRoute] = useState<AppRoute>({ page: 'home' });
-  const [themeMode, setThemeMode] = useState<'light' | 'dark'>('light');
+function scrollToTop() {
+  document.documentElement.scrollTop = 0;
+  document.body.scrollTop = 0;
+}
+
+function pushPath(path: string) {
+  if (typeof window === 'undefined') return;
+  if (window.location.pathname === path) return;
+  window.history.pushState(null, '', path);
+}
+
+function CurrentPage({ route }: { route: AppRoute }) {
+  switch (route.page) {
+    case 'home':
+      return <HomePage />;
+    case 'category':
+      return <CategoryPage categoryId={route.categoryId} />;
+    case 'tool':
+      return <ToolPage toolId={route.toolId} />;
+    case 'tasks':
+      return <TasksPage />;
+    case 'admin':
+      return <AdminPage />;
+    default:
+      return <NotFoundPage />;
+  }
+}
+
+export function App({ initialLocale, initialRoute }: AppProps) {
+  const [locale, setLocale] = useState<Locale>(initialLocale);
+  const [route, setRoute] = useState<AppRoute>(initialRoute);
+  const [themeMode, setThemeMode] = useState<AppColorMode>('light');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
-  function openTool(toolId: string) {
-    setRoute({ page: 'tool', toolId });
-  }
+  const i18n = useMemo(() => createI18n(locale), [locale]);
+
+  useEffect(() => {
+    document.documentElement.lang = locale;
+  }, [locale]);
+
+  const navigate = useCallback(
+    (nextRoute: AppRoute) => {
+      pushPath(buildAppPath(locale, nextRoute));
+      setRoute(nextRoute);
+      scrollToTop();
+    },
+    [locale],
+  );
+
+  const switchLocale = useCallback(
+    (nextLocale: Locale) => {
+      if (nextLocale === locale) return;
+      pushPath(buildAppPath(nextLocale, route));
+      setLocale(nextLocale);
+      scrollToTop();
+    },
+    [locale, route],
+  );
+
+  useEffect(() => {
+    function handlePopState() {
+      const parsed = parseAppPath(window.location.pathname);
+      setLocale(parsed.locale);
+      setRoute(parsed.route);
+    }
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  const navigation = useMemo<AppNavigation>(
+    () => ({
+      locale,
+      route,
+      navigate,
+      switchLocale,
+      openSearch: () => setIsSearchOpen(true),
+    }),
+    [locale, route, navigate, switchLocale],
+  );
 
   return (
-    <AppThemeProvider mode={themeMode}>
-      <SnackbarProvider>
-        <AppShell
-          route={route}
-          themeMode={themeMode}
-          onNavigate={setRoute}
-          onOpenSearch={() => setIsSearchOpen(true)}
-          onToggleTheme={() =>
-            setThemeMode((mode) => (mode === 'light' ? 'dark' : 'light'))
-          }
-        >
-          <CurrentPage
-            route={route}
-            onNavigate={setRoute}
-            onOpenSearch={() => setIsSearchOpen(true)}
-          />
-        </AppShell>
-        <CommandPalette
-          open={isSearchOpen}
-          onClose={() => setIsSearchOpen(false)}
-          onOpenTool={openTool}
-        />
-      </SnackbarProvider>
-    </AppThemeProvider>
+    <I18nextProvider i18n={i18n}>
+      <AppThemeProvider mode={themeMode}>
+        <SnackbarProvider>
+          <AppNavigationProvider value={navigation}>
+            <AppShell
+              themeMode={themeMode}
+              onToggleTheme={() =>
+                setThemeMode((mode) => (mode === 'light' ? 'dark' : 'light'))
+              }
+              onOpenSearch={() => setIsSearchOpen(true)}
+            >
+              <CurrentPage route={route} />
+            </AppShell>
+            <CommandPalette
+              open={isSearchOpen}
+              onClose={() => setIsSearchOpen(false)}
+            />
+          </AppNavigationProvider>
+        </SnackbarProvider>
+      </AppThemeProvider>
+    </I18nextProvider>
   );
 }

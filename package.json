@@ -8,8 +8,9 @@
   },
   "scripts": {
     "build": "node scripts/run-turbo.mjs build",
+    "build:workspace-deps": "pnpm --filter @itools/contracts build && pnpm --filter @itools/app-core build && pnpm --filter @itools/design-system-adapter build",
     "check:boundaries": "node scripts/check-boundaries.mjs",
-    "dev": "pnpm --filter @itools/web dev",
+    "dev": "pnpm run build:workspace-deps && pnpm --filter @itools/server dev",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "eslint apps packages scripts && pnpm check:boundaries",
