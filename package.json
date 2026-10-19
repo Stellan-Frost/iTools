@@ -9,9 +9,10 @@
   "scripts": {
     "build": "node scripts/run-turbo.mjs build",
     "check:boundaries": "node scripts/check-boundaries.mjs",
+    "dev": "pnpm --filter @itools/web dev",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "lint": "eslint packages scripts && pnpm check:boundaries",
+    "lint": "eslint apps packages scripts && pnpm check:boundaries",
     "test": "node scripts/run-turbo.mjs test",
     "typecheck": "node scripts/run-turbo.mjs typecheck"
   },

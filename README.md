@@ -29,6 +29,7 @@
 - `15-mandatory-code-requirements.md`：强制代码要求、不可违反的工程与产品约束；包含可读性、模块化、命名、DRY 与分层规则
 - `16-stage-0-audit.md`：阶段 0 仓库现状、规划依赖图、接口所有权、冲突与验收记录
 - `17-stage-1-workspace.md`：阶段 1 工作区、共享契约、命令、包边界与验收记录
+- `18-stage-2-design-system.md`：阶段 2 组件适配接口、页面预览范围、主题来源与验收记录
 
 ## 当前开发状态
 阶段 1 已完成并通过独立克隆验证：pnpm 工作区和 `@itools/contracts` 基础包可重复安装、检查、测试和构建。应用、数据库、工具与设计系统尚未实现。建设状态和实际验收证据见 `docs/17-stage-1-workspace.md`。

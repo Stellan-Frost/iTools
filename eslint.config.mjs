@@ -12,4 +12,13 @@ export default tseslint.config(
       globals: globals.node,
     },
   },
+  {
+    files: [
+      'apps/**/*.{ts,tsx}',
+      'packages/design-system-adapter/**/*.{ts,tsx}',
+    ],
+    languageOptions: {
+      globals: globals.browser,
+    },
+  },
 );
