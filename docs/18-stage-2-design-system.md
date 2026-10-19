@@ -36,6 +36,17 @@
 - 英文使用 Roboto，中文使用 Noto Sans SC，图标使用本地 Material Symbols Rounded。通过 CSS 字体栈和本地资源加载，不请求第三方字体服务。
 - 禁止局部 CSS 覆盖主库基础组件内部类；应用 CSS 只负责页面布局与组合。
 
+### 布局 Token 接口
+
+| 类别 | 公开变量 | 用途 |
+| --- | --- | --- |
+| 间距 | `--itools-space-{1,2,3,4,6,8,12,16}` | 分别为 0.25、0.5、0.75、1、1.5、2、3、4 rem；页面组合只用这些间距级别。 |
+| 内容宽度 | `--itools-layout-content-max`、`--itools-layout-readable-max` | 分别为 80 rem、72 ch；宽屏内容与正文阅读宽度。 |
+| 形状 | `--md-sys-shape-corner-{none,extra-small,small,medium,large,extra-large,full}` | 页面组合与主库遵守同一形状级别。 |
+| 自适应 | compact 600 px、medium 840 px、expanded 1200 px、large 1600 px | CSS 媒体查询使用这些固定阈值；CSS 自定义属性不能直接用于媒体查询。 |
+
+排版沿用 `--md-sys-typescale-*`，语义色沿用 `--md-sys-color-*`。适配层 README 是各 Token 的实际取值和示例的单一来源；此表冻结应用可用的命名接口。
+
 ## 阶段验收
 
 | 验收项 | 状态 | 证据 |
