@@ -17,7 +17,6 @@ export {
   Chip,
   CircularProgressIndicator,
   DatePicker,
-  Dialog,
   Divider,
   Fab,
   IconButton,
@@ -44,6 +43,7 @@ export {
   Tooltip,
   useSnackbar,
 } from 'm3-expressive-react';
+export { Dialog } from './components/Dialog.js';
 
 export type {
   AutocompleteProps,

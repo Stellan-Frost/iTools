@@ -27,6 +27,9 @@ describe('AppThemeProvider', () => {
     );
     expect(
       provider.style.getPropertyValue('--itools-shape-corner-rectangle'),
+    ).toBe('2rem');
+    expect(
+      provider.style.getPropertyValue('--itools-shape-corner-dialog'),
     ).toBe('3rem');
     expect(
       provider.style.getPropertyValue('--md-sys-shape-corner-medium'),

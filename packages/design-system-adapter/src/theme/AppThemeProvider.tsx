@@ -19,7 +19,8 @@ export function AppThemeProvider({ mode, children }: AppThemeProviderProps) {
     [mode],
   );
   const shapeVars = {
-    '--itools-shape-corner-rectangle': '3rem',
+    '--itools-shape-corner-rectangle': '2rem',
+    '--itools-shape-corner-dialog': '3rem',
     '--md-sys-shape-corner-extra-small': 'var(--itools-shape-corner-rectangle)',
     '--md-sys-shape-corner-small': 'var(--itools-shape-corner-rectangle)',
     '--md-sys-shape-corner-medium': 'var(--itools-shape-corner-rectangle)',
