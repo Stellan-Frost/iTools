@@ -10,6 +10,10 @@ export const common = {
   },
   adminPreview: 'Admin preview',
   recentTasks: 'Recent tasks',
+  availability: {
+    preview: 'Preview',
+    unavailable: 'Unavailable',
+  },
   actions: {
     close: 'Close',
     backHome: 'Back to home',

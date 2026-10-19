@@ -75,7 +75,7 @@ export function RecentTasksPanel({ onClose }: RecentTasksPanelProps) {
               >
                 <span className={styles.taskCopy}>
                   <span className={styles.taskTitle}>
-                    {tool?.name[locale] ?? task.toolId}
+                    {tool?.metadata.name[locale] ?? task.toolId}
                   </span>
                   <span className={styles.taskMeta}>
                     {task.status[locale]} · {task.timeLabel[locale]}

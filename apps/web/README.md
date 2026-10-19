@@ -13,7 +13,8 @@
 
 - 路由规则在 `src/app/route.ts`：`/{locale}`、`/{locale}/{category}`、`/{locale}/{category}/{toolId}`、`/{locale}/tasks`、`/{locale}/admin`。未知语言、未知分类、停用工具和分类不匹配都解析为 `not-found`（HTTP 404）。
 - 客户端导航使用 `history.pushState`，并监听 `popstate`；没有引入额外路由库。
-- 目录数据与 i18n 资源来自工作区包 `@itools/app-core`：分类、工具、示例任务、`createI18n` 和资源都在该包内，Web 不维护副本。
+- 目录数据与 i18n 资源来自工作区包 `@itools/app-core`：三态注册表（`preview / implemented / disabled`）、分类、样本任务、`createI18n` 和资源都在该包内，Web 不维护副本。
+- 可用性规则：`implemented` 可执行；`preview` 可见但只读，页面 200 + `noindex`、不进 Sitemap，导航/搜索/卡片显示“预览”徽标；`disabled` 返回 404。当前 `implemented` 为 0，6 个样本都是预览。
 - SEO 由 `src/app/seo.ts` 生成：`title`、`description`、`canonical`、`zh-CN`/`en`/`x-default` 链接；404、任务页和管理页输出 `robots noindex`。
 
 ## 构建与运行
@@ -37,5 +38,6 @@ pnpm --filter @itools/web test
 - 页面与展示组件在 `src/pages` 与 `src/components/{catalog,page-chrome,app-icon}`；壳层、搜索、最近任务与导航在 `src/components/{app-shell,command-palette,recent-tasks,tool-search-entry}`。
 - 页面的导航与搜索统一走 `src/app/navigation.tsx` 的 `useAppNavigation()`；不要在页面里直接操作 `history`。
 - 基础 UI 组件、主题与字体属于 `packages/design-system-adapter`；分类、工具、示例任务与 i18n 文案属于 `packages/app-core`。Web 不复制这两层。
-- 所有可见文案必须来自 i18next 或目录双语字段；新增文案时中英同时补齐。英文页面不得出现中文字符。
+- 所有可见文案必须来自 i18next 或注册表双语字段；新增文案时中英同时补齐。英文页面不得出现中文字符。
+- 工具页按可用性渲染：预览工具的输入框禁用，任务区/结果区只显示“未实现”说明，不得出现伪造的进度、校验通过或结果。
 - 当前仍没有真实工具执行、数据库、认证、IndexedDB、任务运行时或 PWA；不要把这些能力写成已实现。

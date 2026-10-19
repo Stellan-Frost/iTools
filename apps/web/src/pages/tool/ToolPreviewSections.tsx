@@ -1,9 +1,5 @@
-import {
-  Card,
-  CircularProgressIndicator,
-  LinearProgressIndicator,
-} from '@itools/design-system-adapter';
-import type { CatalogTool } from '@itools/app-core';
+import { Card } from '@itools/design-system-adapter';
+import type { RegistryEntry } from '@itools/app-core';
 import { useTranslation } from 'react-i18next';
 import { AppIcon } from '../../components/app-icon/AppIcon.js';
 import { MetadataChip } from '../../components/page-chrome/MetadataChip.js';
@@ -11,14 +7,16 @@ import { useAppNavigation } from '../../app/navigation.js';
 import styles from './ToolPage.module.css';
 
 interface WorkspaceSampleProps {
-  tool: CatalogTool;
+  tool: RegistryEntry;
 }
 
+/** 主工作区：只读展示注册表中的示例内容，不运行任何处理。 */
 export function WorkspaceSample({ tool }: WorkspaceSampleProps) {
   const { locale } = useAppNavigation();
   const { t } = useTranslation('catalog');
+  const metadata = tool.metadata;
 
-  const workspacePreview = tool.preview.workspaceLines
+  const workspacePreview = metadata.preview.workspaceLines
     .map((line) => `${line.label[locale]}: ${line.value}`)
     .join('\n');
 
@@ -36,14 +34,14 @@ export function WorkspaceSample({ tool }: WorkspaceSampleProps) {
           <div className={styles.workspaceHeader}>
             <div>
               <p className={styles.sampleLabel}>{t('tool.workspace.kicker')}</p>
-              <h3>{tool.preview.workspaceTitle[locale]}</h3>
+              <h3>{metadata.preview.workspaceTitle[locale]}</h3>
             </div>
             <MetadataChip label={t('tool.workspace.chip')} />
           </div>
           <pre
             className={styles.workspacePreview}
             aria-label={t('tool.workspace.ariaLabel', {
-              name: tool.name[locale],
+              name: metadata.name[locale],
             })}
           >
             {workspacePreview}
@@ -57,7 +55,8 @@ export function WorkspaceSample({ tool }: WorkspaceSampleProps) {
   );
 }
 
-export function TaskStatusSample() {
+/** 任务区：预览态只说明运行能力尚未接入，不展示伪造进度。 */
+export function PreviewTaskSection() {
   const { t } = useTranslation('catalog');
 
   return (
@@ -66,7 +65,6 @@ export function TaskStatusSample() {
         <span className={styles.step}>03</span>
         <div>
           <h2 id="tool-task-heading">{t('tool.task.title')}</h2>
-          <p>{t('tool.task.description')}</p>
         </div>
       </div>
       <Card>
@@ -76,26 +74,17 @@ export function TaskStatusSample() {
               <AppIcon name="hourglass_top" />
             </span>
             <div>
-              <h3>{t('tool.task.heading')}</h3>
-              <p>{t('tool.task.subtitle')}</p>
+              <p>{t('tool.previewTaskBody')}</p>
             </div>
-            <MetadataChip label={t('tool.task.status')} />
           </div>
-          <div className={styles.progressRow}>
-            <LinearProgressIndicator
-              value={0.42}
-              aria-label={t('tool.task.progressLabel')}
-            />
-            <span>42%</span>
-          </div>
-          <p className={styles.taskFootnote}>{t('tool.task.footnote')}</p>
         </div>
       </Card>
     </section>
   );
 }
 
-export function ResultSample() {
+/** 结果区：预览态只说明输出尚未接入，不展示伪造结果。 */
+export function PreviewResultSection() {
   const { t } = useTranslation('catalog');
 
   return (
@@ -104,19 +93,16 @@ export function ResultSample() {
         <span className={styles.step}>04</span>
         <div>
           <h2 id="tool-result-heading">{t('tool.result.title')}</h2>
-          <p>{t('tool.result.description')}</p>
         </div>
       </div>
       <Card>
         <div className={styles.resultSample}>
-          <CircularProgressIndicator
-            value={0.7}
-            aria-label={t('tool.result.ariaLabel')}
-          />
+          <span className={styles.taskIcon}>
+            <AppIcon name="output" />
+          </span>
           <div>
-            <MetadataChip label={t('tool.result.chip')} />
             <h3>{t('tool.result.heading')}</h3>
-            <p>{t('tool.result.body')}</p>
+            <p>{t('tool.previewResultBody')}</p>
           </div>
         </div>
       </Card>

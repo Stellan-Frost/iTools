@@ -7,6 +7,7 @@ import {
   ServerEnvironmentSchema,
   TaskStatusSchema,
   ToolManifestSchema,
+  TOOL_AVAILABILITIES,
   apiSuccessSchema,
   isLocale,
   parseServerEnvironment,
@@ -99,5 +100,9 @@ describe('shared contracts', () => {
     expect(isLocale('en')).toBe(true);
     expect(isLocale('zh-cn')).toBe(false);
     expect(isLocale('fr')).toBe(false);
+  });
+
+  it('freezes the tool availability states', () => {
+    expect(TOOL_AVAILABILITIES).toEqual(['preview', 'implemented', 'disabled']);
   });
 });

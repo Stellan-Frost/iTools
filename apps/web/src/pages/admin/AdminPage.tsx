@@ -16,7 +16,10 @@ export function AdminPage() {
   const [enabledTools, setEnabledTools] = useState<Record<string, boolean>>(
     () =>
       Object.fromEntries(
-        listTools().map((tool) => [tool.id, tool.enabled] as const),
+        listTools().map(
+          (tool) =>
+            [tool.metadata.id, tool.availability !== 'disabled'] as const,
+        ),
       ),
   );
 

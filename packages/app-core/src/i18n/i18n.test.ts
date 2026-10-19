@@ -60,6 +60,60 @@ describe('createI18n', () => {
   });
 });
 
+describe('阶段 4 预览文案', () => {
+  it('common 提供可用性文案', () => {
+    expect(createI18n('zh-CN').t('common:availability.preview')).toBe('预览');
+    expect(createI18n('en').t('common:availability.preview')).toBe('Preview');
+    expect(createI18n('zh-CN').t('common:availability.unavailable')).toBe(
+      '暂不可用',
+    );
+    expect(createI18n('en').t('common:availability.unavailable')).toBe(
+      'Unavailable',
+    );
+  });
+
+  it('catalog 提供预览页说明文案', () => {
+    const zh = createI18n('zh-CN');
+    const en = createI18n('en');
+
+    expect(zh.t('catalog:tool.previewBadge')).toBe('预览');
+    expect(en.t('catalog:tool.previewBadge')).toBe('Preview');
+    expect(zh.t('catalog:tool.previewInputHint')).toBe(
+      '输入区将在工具实现后启用。',
+    );
+    expect(en.t('catalog:tool.previewInputHint')).toBe(
+      'Input is disabled until this tool is implemented.',
+    );
+  });
+});
+
+describe('createI18n 额外资源', () => {
+  const extraResources = {
+    en: { 'tools/demo': { greeting: 'Hello' } },
+    'zh-CN': { 'tools/demo': { greeting: '你好' } },
+  } as const;
+
+  it('合并工具命名空间后可按语言取值', () => {
+    expect(createI18n('en', extraResources).t('tools/demo:greeting')).toBe(
+      'Hello',
+    );
+    expect(createI18n('zh-CN', extraResources).t('tools/demo:greeting')).toBe(
+      '你好',
+    );
+  });
+
+  it('不传额外资源时现有资源不变', () => {
+    expect(createI18n('en').t('common:actions.close')).toBe('Close');
+    expect(createI18n('zh-CN').t('common:actions.close')).toBe('关闭');
+    expect(createI18n('en').hasResourceBundle('en', 'tools/demo')).toBe(false);
+  });
+
+  it('内置资源不被额外资源修改', () => {
+    createI18n('en', extraResources);
+    expect(resources.en).not.toHaveProperty('tools/demo');
+  });
+});
+
 describe('common 资源', () => {
   it('两个语言的叶子键集合完全一致', () => {
     const zhKeys = collectLeaves(resources['zh-CN'].common)

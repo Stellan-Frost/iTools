@@ -1,5 +1,10 @@
 #!/usr/bin/env node
 /**
+ * 阶段 3 历史验收脚本（不再作为当前门禁）。
+ * 阶段 4 引入 preview 三态后，Sitemap 只包含 implemented 工具，本脚本中
+ * “Sitemap 含 json-viewer / 工具页可索引”等断言已不适用。
+ * 当前验收请使用 `node scripts/verify-stage-4.mjs`。
+ *
  * 阶段 3 端到端验收：启动生产构建产物，对真实 HTTP 响应做断言。
  * 前置：先执行 `pnpm build`。
  * 用法：`node scripts/verify-stage-3.mjs`

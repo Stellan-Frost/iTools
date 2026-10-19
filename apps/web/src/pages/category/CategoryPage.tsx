@@ -2,7 +2,7 @@ import { Button } from '@itools/design-system-adapter';
 import {
   CATEGORIES,
   getCategory,
-  listEnabledToolsByCategory,
+  listVisibleByCategory,
   type CategoryId,
 } from '@itools/app-core';
 import { useTranslation } from 'react-i18next';
@@ -22,7 +22,7 @@ export function CategoryPage({ categoryId }: CategoryPageProps) {
   const { t } = useTranslation(['catalog', 'common']);
 
   const category = getCategory(categoryId);
-  const categoryTools = listEnabledToolsByCategory(categoryId);
+  const categoryTools = listVisibleByCategory(categoryId);
 
   if (!category) {
     return (
@@ -40,8 +40,7 @@ export function CategoryPage({ categoryId }: CategoryPageProps) {
 
   const anotherCategory = CATEGORIES.find(
     (entry) =>
-      entry.id !== categoryId &&
-      listEnabledToolsByCategory(entry.id).length > 0,
+      entry.id !== categoryId && listVisibleByCategory(entry.id).length > 0,
   );
 
   return (
@@ -68,10 +67,12 @@ export function CategoryPage({ categoryId }: CategoryPageProps) {
         >
           {categoryTools.map((tool) => (
             <ToolCard
-              key={tool.id}
+              key={tool.metadata.id}
               tool={tool}
               categoryName={category.name[locale]}
-              onOpen={() => navigate({ page: 'tool', toolId: tool.id })}
+              onOpen={() =>
+                navigate({ page: 'tool', toolId: tool.metadata.id })
+              }
             />
           ))}
         </section>

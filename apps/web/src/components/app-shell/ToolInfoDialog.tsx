@@ -1,13 +1,14 @@
 import { Button, Dialog } from '@itools/design-system-adapter';
-import { getCategory, type CatalogTool } from '@itools/app-core';
+import { getCategory, type RegistryEntry } from '@itools/app-core';
 import { useTranslation } from 'react-i18next';
 import { AppIcon } from '../app-icon/AppIcon.js';
 import { MetadataChip } from '../page-chrome/MetadataChip.js';
 import { useAppNavigation } from '../../app/navigation.js';
+import { PreviewBadge } from './PreviewBadge.js';
 import styles from './ToolInfoDialog.module.css';
 
 interface ToolInfoDialogProps {
-  tool: CatalogTool | null;
+  tool: RegistryEntry | null;
   onClose: () => void;
   onNavigate: (toolId: string) => void;
 }
@@ -17,22 +18,29 @@ export function ToolInfoDialog({
   onClose,
   onNavigate,
 }: ToolInfoDialogProps) {
-  const { t } = useTranslation(['common', 'navigation']);
+  const { t } = useTranslation(['common', 'navigation', 'catalog']);
   const { locale } = useAppNavigation();
 
   if (!tool) return null;
 
-  const category = getCategory(tool.categoryId);
+  const { metadata } = tool;
+  const category = getCategory(metadata.category);
   const categoryLabel = category?.name[locale] ?? '';
+  const isPreview = tool.availability === 'preview';
 
   return (
     <Dialog
       open
       onClose={onClose}
-      title={<span className={styles.title}>{tool.name[locale]}</span>}
+      title={
+        <span className={styles.titleRow}>
+          <span className={styles.title}>{metadata.name[locale]}</span>
+          {isPreview ? <PreviewBadge /> : null}
+        </span>
+      }
       icon={
         <span className={styles.iconSurface}>
-          <AppIcon name={tool.icon} />
+          <AppIcon name={metadata.icon} />
         </span>
       }
       actions={
@@ -40,7 +48,7 @@ export function ToolInfoDialog({
           <Button variant="text" onClick={onClose} data-autofocus>
             {t('common:actions.close')}
           </Button>
-          <Button variant="filled" onClick={() => onNavigate(tool.id)}>
+          <Button variant="filled" onClick={() => onNavigate(metadata.id)}>
             {t('common:actions.goToTool')}
           </Button>
         </div>
@@ -48,7 +56,10 @@ export function ToolInfoDialog({
     >
       <div className={styles.content}>
         <p className={styles.eyebrow}>{t('navigation:toolDialogEyebrow')}</p>
-        <p className={styles.description}>{tool.summary[locale]}</p>
+        <p className={styles.description}>{metadata.summary[locale]}</p>
+        {isPreview ? (
+          <p className={styles.previewNote}>{t('catalog:tool.previewBody')}</p>
+        ) : null}
         <dl className={styles.metadata}>
           <div>
             <dt>{t('navigation:toolCategoryLabel')}</dt>
@@ -60,15 +71,15 @@ export function ToolInfoDialog({
           <div>
             <dt>{t('navigation:toolInputLabel')}</dt>
             <dd>
-              <span>{tool.preview.inputLabel[locale]}</span>
-              <code>{tool.preview.sampleInput[locale]}</code>
+              <span>{metadata.preview.inputLabel[locale]}</span>
+              <code>{metadata.preview.sampleInput[locale]}</code>
             </dd>
           </div>
           <div>
-            <dt>{tool.preview.workspaceTitle[locale]}</dt>
+            <dt>{metadata.preview.workspaceTitle[locale]}</dt>
             <dd>
               <ul>
-                {tool.preview.workspaceLines.map((line) => (
+                {metadata.preview.workspaceLines.map((line) => (
                   <li key={`${line.label[locale]}-${line.value}`}>
                     {line.label[locale]}
                     <span aria-hidden="true"> {line.value}</span>

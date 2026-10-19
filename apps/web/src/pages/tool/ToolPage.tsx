@@ -1,5 +1,5 @@
 import { Button } from '@itools/design-system-adapter';
-import { findEnabledTool, getCategory } from '@itools/app-core';
+import { findVisibleTool, getCategory } from '@itools/app-core';
 import { useTranslation } from 'react-i18next';
 import { PageHeading } from '../../components/page-chrome/PageHeading.js';
 import { PreviewNotice } from '../../components/page-chrome/PreviewNotice.js';
@@ -7,8 +7,8 @@ import { MetadataChip } from '../../components/page-chrome/MetadataChip.js';
 import { useAppNavigation } from '../../app/navigation.js';
 import { ToolInputSection } from './ToolInputSection.js';
 import {
-  ResultSample,
-  TaskStatusSample,
+  PreviewResultSection,
+  PreviewTaskSection,
   WorkspaceSample,
 } from './ToolPreviewSections.js';
 import styles from './ToolPage.module.css';
@@ -21,7 +21,7 @@ export function ToolPage({ toolId }: ToolPageProps) {
   const { locale, navigate } = useAppNavigation();
   const { t } = useTranslation(['catalog', 'common']);
 
-  const tool = findEnabledTool(toolId);
+  const tool = findVisibleTool(toolId);
   if (!tool) {
     return (
       <div className={styles.page}>
@@ -36,23 +36,28 @@ export function ToolPage({ toolId }: ToolPageProps) {
     );
   }
 
-  const category = getCategory(tool.categoryId);
-  const categoryName = category ? category.name[locale] : tool.categoryId;
+  const metadata = tool.metadata;
+  const category = getCategory(metadata.category);
+  const categoryName = category ? category.name[locale] : metadata.category;
 
   return (
     <div className={styles.page}>
       <PageHeading
         eyebrow={t('catalog:tool.eyebrow', { category: categoryName })}
-        title={tool.name[locale]}
-        description={tool.summary[locale]}
-        actions={<MetadataChip label={t('catalog:tool.notConnected')} />}
+        title={metadata.name[locale]}
+        description={metadata.summary[locale]}
+        actions={
+          tool.availability === 'preview' ? (
+            <MetadataChip label={t('catalog:tool.previewBadge')} />
+          ) : null
+        }
       />
-      <PreviewNotice>{t('catalog:tool.notice')}</PreviewNotice>
+      <PreviewNotice>{t('catalog:tool.previewBody')}</PreviewNotice>
       <div className={styles.sections}>
         <ToolInputSection tool={tool} />
         <WorkspaceSample tool={tool} />
-        <TaskStatusSample />
-        <ResultSample />
+        <PreviewTaskSection />
+        <PreviewResultSection />
       </div>
       <footer className={styles.attribution}>
         <p>{t('catalog:tool.attribution.design')}</p>

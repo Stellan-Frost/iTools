@@ -1,6 +1,10 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { IconButton, NavigationDrawer } from '@itools/design-system-adapter';
-import { findTool, type CatalogTool, type CategoryId } from '@itools/app-core';
+import {
+  findTool,
+  type CategoryId,
+  type RegistryEntry,
+} from '@itools/app-core';
 import type { Locale } from '@itools/contracts';
 import { useTranslation } from 'react-i18next';
 import { useAppNavigation } from '../../app/navigation.js';
@@ -22,7 +26,9 @@ interface AppShellProps {
 
 function routeToCategoryId(route: AppRoute): CategoryId | undefined {
   if (route.page === 'category') return route.categoryId;
-  if (route.page === 'tool') return findTool(route.toolId)?.categoryId;
+  if (route.page === 'tool') {
+    return findTool(route.toolId)?.metadata.category;
+  }
   return undefined;
 }
 
@@ -47,7 +53,7 @@ export function AppShell({
     const categoryId = routeToCategoryId(route);
     return categoryId ? new Set([categoryId]) : new Set();
   });
-  const [selectedTool, setSelectedTool] = useState<CatalogTool | null>(null);
+  const [selectedTool, setSelectedTool] = useState<RegistryEntry | null>(null);
 
   const languageTarget = nextLocale(locale);
   const languageTargetLabel =

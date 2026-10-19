@@ -15,7 +15,8 @@
 | `pnpm lint` | ESLint 检查 `apps`、`packages`、`scripts`，随后运行依赖清单边界检查。 |
 | `pnpm format:check` | Prettier 格式检查。 |
 | `pnpm check:boundaries` | 单独检查工作区包依赖清单。 |
-| `node scripts/verify-stage-3.mjs` | 生产构建后的真实 HTTP 验收（需先 `pnpm build`）。 |
+| `pnpm check:tools` | 校验注册表结构、翻译与样本任务引用（需先构建 app-core）。 |
+| `node scripts/verify-stage-4.mjs` | 生产构建后的真实 HTTP 验收（需先 `pnpm build`）。 |
 
 各 package manifest 中记录包级脚本。全新克隆后执行 `pnpm install`，再 `pnpm dev`：根 `dev` 会串行构建 contracts、app-core、adapter（它们的 exports 指向 `dist`），再启动服务端。`pnpm peers check` 是 pnpm 内建命令，不在 `package.json` scripts。阶段 3 本轮实际执行了 install、format、lint、typecheck、test、build，结果见 [21](21-stage-3-acceptance.md)。
 
@@ -32,6 +33,7 @@
 | `src/environment.ts` | `ServerEnvironmentSchema`、`parseServerEnvironment` | 服务进程和数据库连接。           |
 | `src/locale.ts`      | `LOCALES`、`DEFAULT_LOCALE`、`isLocale`             | 语言内容与路由实现（在 app-core/web）。 |
 | `src/ssr.ts`         | `SsrRenderRequest`、`SsrRenderResult`、`SsrRenderer` | SSR 实现（在 web/server）。      |
+| `src/tool-registry.ts` | 三态可用性、`ToolCatalogMetadata`、`RegistryEntry` | 注册表实现（在 app-core）。     |
 | `src/task.ts`        | 任务状态枚举、进度和记录形状                        | 状态机、队列、Worker、持久化。   |
 | `src/tool.ts`        | Tool manifest、`ToolDefinition`、adapter 执行接口   | 注册表、真实工具和执行宿主。     |
 
@@ -42,7 +44,7 @@
 | 路径                             | 职责及边界                                                                          |
 | -------------------------------- | ----------------------------------------------------------------------------------- |
 | `packages/contracts`             | 纯共享契约，运行依赖 TypeBox；不依赖 UI、数据库实现或具体工具。                     |
-| `packages/app-core`              | 代码目录（分类/工具/样本任务）与 i18n 资源、`createI18n`；不依赖 React/DOM。        |
+| `packages/app-core`              | 三态工具注册表、分类与样本任务、i18n 资源与 `createI18n`；不依赖 React/DOM。 |
 | `packages/design-system-adapter` | 对 MD3 库、固定主题及字体做应用适配；应用从此包导入基础 UI。                        |
 | `apps/web`                       | React 页面、URL 路由、SSR 渲染函数与 SEO head；不直接访问数据库或文件系统。         |
 | `apps/server`                    | Fastify SSR 宿主、静态资源、Sitemap/robots；只依赖 `SsrRenderer` 契约。             |
@@ -53,6 +55,6 @@
 
 ## 已有验收记录
 
-阶段 1 的独立克隆记录曾报告 frozen-lockfile 安装、format、lint、typecheck、build、peer 检查通过，contracts 有 4 项测试，manifest 边界脚本的违规依赖负向检查也通过。阶段 2 记录为 22 项测试。阶段 3 本轮实测：contracts 5、app-core 28、adapter 9、web 52、server 14，共 108 项；format、lint、typecheck、build 通过，生产 HTTP 验收 31 项通过。证据见 [21](21-stage-3-acceptance.md)。
+阶段 1 的独立克隆记录曾报告 frozen-lockfile 安装、format、lint、typecheck、build、peer 检查通过，contracts 有 4 项测试，manifest 边界脚本的违规依赖负向检查也通过。阶段 2 记录为 22 项测试。阶段 3 实测 108 项；阶段 4 实测 139 项（contracts 6、app-core 49、adapter 9、web 61、server 14），format、lint、typecheck、build、`check:tools` 通过，生产 HTTP 验收 28 项通过。证据见 [阶段 4 验收](24-stage-4-acceptance.md)。
 
-尚未实现的架构规划见 `docs/00`–`15`：其中 PostgreSQL/Drizzle、TypeBox 路由、TanStack Query、Worker、IndexedDB、身份认证、PWA、CI 与部署均不得据规划文档描述为现有能力。Fastify SSR、i18n 与 Sitemap 已在阶段 3 实现。阶段推进与冲突状态见 [当前审计](16-stage-0-audit.md) 和 [接手指南](19-agent-handoff.md)。
+尚未实现的架构规划见 `docs/00`–`15`：其中 PostgreSQL/Drizzle、TypeBox 路由、TanStack Query、Worker、IndexedDB、身份认证、PWA、CI 与部署均不得据规划文档描述为现有能力。Fastify SSR、i18n、Sitemap 与三态注册表已分别在阶段 3/4 实现；真实工具执行与任务运行时仍未实现。

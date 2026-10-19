@@ -21,6 +21,15 @@ import { ToolPage } from './tool/ToolPage.js';
 
 const CJK_PATTERN = /[\u4e00-\u9fff]/;
 
+const VISIBLE_TOOL_NAMES = [
+  '图片信息检查',
+  'Markdown 预览',
+  'JSON 查看器',
+  '正则表达式工作台',
+  '时间戳换算',
+  '文本差异比较',
+];
+
 function renderPage(page: ReactNode, locale: Locale) {
   const navigation: AppNavigation = {
     locale,
@@ -49,8 +58,8 @@ afterEach(() => {
   cleanup();
 });
 
-describe('stage 3 pages · 中文', () => {
-  it('首页展示 5 个分类与 6 个启用工具，且不出现停用工具', () => {
+describe('stage 4 pages · 中文', () => {
+  it('首页展示 5 个分类与 6 个预览工具，且不出现停用工具', () => {
     const { container } = renderPage(<HomePage />, 'zh-CN');
 
     expect(
@@ -71,25 +80,19 @@ describe('stage 3 pages · 中文', () => {
       ).toBeInTheDocument();
     }
 
-    for (const toolName of [
-      '图片信息检查',
-      'Markdown 预览',
-      'JSON 查看器',
-      '正则表达式工作台',
-      '时间戳换算',
-      '文本差异比较',
-    ]) {
+    for (const toolName of VISIBLE_TOOL_NAMES) {
       expect(
         screen.getByRole('heading', { name: toolName }),
       ).toBeInTheDocument();
     }
 
     expect(screen.getByText('5 个分类')).toBeInTheDocument();
-    expect(screen.getByText('6 个启用工具')).toBeInTheDocument();
+    expect(screen.getByText('6 个工具')).toBeInTheDocument();
+    expect(screen.getAllByText('预览')).toHaveLength(6);
     expect(container.textContent).not.toContain('CSV 检查器');
   });
 
-  it('分类页只列出该分类下已启用的工具', () => {
+  it('分类页只列出该分类下的可见工具并标注预览', () => {
     const { container } = renderPage(
       <CategoryPage categoryId="text" />,
       'zh-CN',
@@ -111,6 +114,7 @@ describe('stage 3 pages · 中文', () => {
       ).toBeInTheDocument();
     }
 
+    expect(screen.getAllByText('预览')).toHaveLength(4);
     expect(container.textContent).not.toContain('CSV 检查器');
   });
 
@@ -125,16 +129,36 @@ describe('stage 3 pages · 中文', () => {
     ).toBeInTheDocument();
   });
 
-  it('工具页使用目录双语数据渲染工作区', () => {
-    renderPage(<ToolPage toolId="image-inspector" />, 'zh-CN');
+  it('预览工具页显示预览标识、禁用输入与未实现说明', () => {
+    const { container } = renderPage(
+      <ToolPage toolId="image-inspector" />,
+      'zh-CN',
+    );
 
     expect(
       screen.getByRole('heading', { name: '图片信息检查', level: 1 }),
     ).toBeInTheDocument();
+    expect(screen.getAllByText('预览')).toHaveLength(1);
+    expect(
+      screen.getByText('该工具尚未实现，当前仅展示页面结构与示例布局。'),
+    ).toBeInTheDocument();
+
+    const input = screen.getByLabelText('图片文件名（预览）');
+    expect(input).toBeDisabled();
+    expect(input).toHaveValue('sample-image.png');
+    expect(screen.getByText('输入区将在工具实现后启用。')).toBeInTheDocument();
+    expect(
+      screen.getByText('任务运行时将在工具实现后接入。'),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText('结果区将在工具实现后展示真实输出。'),
+    ).toBeInTheDocument();
+
     expect(
       screen.getByLabelText('图片信息检查工作区样本').textContent,
     ).toContain('宽度: 1600 px');
-    expect(screen.getByText('图片文件名（预览）')).toBeInTheDocument();
+
+    expect(container.textContent).not.toContain('校验通过');
   });
 
   it('停用工具的工具页展示不存在状态', () => {
@@ -145,7 +169,7 @@ describe('stage 3 pages · 中文', () => {
     ).toBeInTheDocument();
   });
 
-  it('任务页的工具名与分类名来自目录', () => {
+  it('任务页的工具名与分类名来自注册表', () => {
     renderPage(<TasksPage />, 'zh-CN');
 
     expect(
@@ -153,19 +177,23 @@ describe('stage 3 pages · 中文', () => {
     ).toBeInTheDocument();
     expect(screen.getByText('图片信息检查')).toBeInTheDocument();
     expect(screen.getByText('图像与设计')).toBeInTheDocument();
-    expect(screen.getByText('结果样本')).toBeInTheDocument();
   });
 
-  it('管理页列出全部 7 条目录记录，含停用样本', () => {
-    renderPage(<AdminPage />, 'zh-CN');
+  it('管理页列出全部 7 条注册表记录，含停用样本', () => {
+    const { container } = renderPage(<AdminPage />, 'zh-CN');
 
     expect(screen.getAllByRole('switch')).toHaveLength(7);
     expect(screen.getByText('7 项')).toBeInTheDocument();
     expect(screen.getByText('CSV 检查器（停用样本）')).toBeInTheDocument();
+    expect(screen.getAllByText('预览')).toHaveLength(6);
+    expect(screen.getByText('暂不可用')).toBeInTheDocument();
     expect(screen.getByRole('switch', { name: /图片信息检查/ })).toBeChecked();
     expect(
       screen.getByRole('switch', { name: /CSV 检查器/ }),
     ).not.toBeChecked();
+    expect(container.textContent).toContain(
+      '状态开关只用于查看交互状态，目录数据不会持久化。',
+    );
   });
 
   it('404 页展示本地化文案并可返回首页', () => {
@@ -179,7 +207,7 @@ describe('stage 3 pages · 中文', () => {
   });
 });
 
-describe('stage 3 pages · English', () => {
+describe('stage 4 pages · English', () => {
   const pages: readonly { name: string; page: ReactNode; title: string }[] = [
     {
       name: 'home',
@@ -226,12 +254,15 @@ describe('stage 3 pages · English', () => {
     });
   }
 
-  it('工具页的英文工作区使用英文标签与英文样例', () => {
+  it('工具页的英文预览内容使用英文标签', () => {
     renderPage(<ToolPage toolId="image-inspector" />, 'en');
 
     expect(
       screen.getByLabelText('Image inspector workspace sample').textContent,
     ).toContain('Width: 1600 px');
-    expect(screen.getByText('Image file name (preview)')).toBeInTheDocument();
+    expect(screen.getByLabelText('Image file name (preview)')).toBeDisabled();
+    expect(
+      screen.getByText('Input is disabled until this tool is implemented.'),
+    ).toBeInTheDocument();
   });
 });

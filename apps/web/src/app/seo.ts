@@ -1,4 +1,4 @@
-import { findTool, getCategory } from '@itools/app-core';
+import { findVisibleTool, getCategory } from '@itools/app-core';
 import { DEFAULT_LOCALE, type Locale } from '@itools/contracts';
 import { buildAppPath, type AppRoute } from './route.js';
 
@@ -56,12 +56,13 @@ function pageMeta(locale: Locale, route: AppRoute, t: Translate): PageMeta {
       break;
     }
     case 'tool': {
-      const tool = findTool(route.toolId);
+      const tool = findVisibleTool(route.toolId);
       if (tool) {
         return {
-          title: tool.name[locale],
-          description: tool.description[locale],
-          noindex: false,
+          title: tool.metadata.name[locale],
+          description: tool.metadata.description[locale],
+          // 预览工具可访问但不索引；只有已实现工具进入索引。
+          noindex: tool.availability !== 'implemented',
         };
       }
       break;

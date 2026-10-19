@@ -1,11 +1,12 @@
 import {
   CATEGORIES,
-  listEnabledToolsByCategory,
+  listVisibleByCategory,
   type CategoryId,
 } from '@itools/app-core';
 import { useTranslation } from 'react-i18next';
 import { useAppNavigation } from '../../app/navigation.js';
 import { AppIcon } from '../app-icon/AppIcon.js';
+import { PreviewBadge } from './PreviewBadge.js';
 import styles from './ToolAccordionNavigation.module.css';
 
 export interface ToolAccordionNavigationProps {
@@ -42,7 +43,7 @@ export function ToolAccordionNavigation({
         const isExpanded = expandedCategoryIds.has(category.id);
         const toolListId = `tool-list-${category.id}`;
         const categoryName = category.name[locale];
-        const categoryTools = listEnabledToolsByCategory(category.id);
+        const categoryTools = listVisibleByCategory(category.id);
 
         return (
           <section
@@ -74,20 +75,23 @@ export function ToolAccordionNavigation({
               data-expanded={isExpanded}
             >
               {categoryTools.length > 0 ? (
-                categoryTools.map((tool) => (
-                  <li key={tool.id}>
+                categoryTools.map((entry) => (
+                  <li key={entry.metadata.id}>
                     <button
                       className={styles.toolItem}
                       type="button"
                       aria-haspopup="dialog"
-                      onClick={() => onOpenTool(tool.id)}
+                      onClick={() => onOpenTool(entry.metadata.id)}
                     >
                       <span className={styles.toolIcon}>
-                        <AppIcon name={tool.icon} />
+                        <AppIcon name={entry.metadata.icon} />
                       </span>
                       <span className={styles.toolLabel}>
-                        {tool.name[locale]}
+                        {entry.metadata.name[locale]}
                       </span>
+                      {entry.availability === 'preview' ? (
+                        <PreviewBadge />
+                      ) : null}
                     </button>
                   </li>
                 ))

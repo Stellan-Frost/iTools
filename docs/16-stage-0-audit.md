@@ -9,20 +9,21 @@
 | 路径 | 当前职责 | 现有内容 |
 | --- | --- | --- |
 | `packages/contracts` | 共享数据形状 | TypeBox API 错误/成功响应、资产引用、任务状态与记录、工具 manifest/definition、服务端环境 Schema、语言集合与 SSR 渲染契约。 |
-| `packages/app-core` | 代码目录与 i18n | 5 个分类、7 个工具（6 启用 + 1 停用样本）、3 条样本任务；查询/搜索/Sitemap 路径；5 个 i18n 命名空间与中英资源。 |
+| `packages/app-core` | 三态工具注册表与 i18n | 6 个 preview + 1 个 disabled 条目；分类与 3 条样本任务；5 个 i18n 命名空间与中英资源；注册表校验。 |
 | `packages/design-system-adapter` | MD3 组件和主题适配 | `m3-expressive-react` 组件公开入口、鸭青主题、字体与全局样式。 |
-| `apps/web` | React 页面与 SSR 渲染 | URL 路由、双语页面、SEO head、`entry-client`/`entry-server`、语言切换。 |
+| `apps/web` | React 页面与 SSR 渲染 | URL 路由、双语页面、预览标识与只读工具页、SEO head、`entry-client`/`entry-server`、语言切换。 |
 | `apps/server` | Fastify 宿主 | SSR、静态资源、Sitemap/robots、真实 404、开发 Vite middleware。 |
 
 依赖方向为 `apps/web → app-core / design-system-adapter / contracts`；`apps/server → contracts`；`app-core → contracts`。详见各包 `package.json` 与 [阶段 3 冻结](20-stage-3-routing-ssr-i18n-seo.md)。
 
 ## 不可从现有代码推断为已实现的能力
 
-- 没有数据库、迁移、API 路由、OpenAPI、目录 Seed 或服务端持久化；目录来自代码注册表。
-- 没有真实工具注册表（能力声明/执行契约）、处理引擎、Worker/调度器、文件资产存储或 IndexedDB。
+- 没有数据库、迁移、API 路由、OpenAPI、目录 Seed 或服务端持久化；注册表是代码常量。
+- 没有可执行工具：默认注册表 `implemented` 为 0；6 个样本是 `preview`，只读、不可执行。
+- 没有处理引擎、Worker/调度器、文件资产存储或 IndexedDB。
 - 没有管理员认证/授权、PWA、CI 工作流或部署配置。
 - 任务页、结果区、管理表单与开关仍是界面样本；刷新会丢失内存状态。
-- 阶段 3 已实现 SSR、真实 URL 路由、i18n、真实 404、Sitemap 与 SEO head；这些不再是“未实现”。
+- 阶段 3 已实现 SSR、真实 URL 路由、i18n、真实 404、Sitemap 与 SEO head；阶段 4 已实现三态注册表与预览页规则。
 
 `packages/contracts` 只定义契约形状，不实现这些契约背后的运行时。`ServerEnvironmentSchema` 是环境配置校验函数，不是服务器或数据库连接；阶段 3 服务端使用独立的 `loadConfig`，不读取 `DATABASE_URL`。
 
@@ -46,4 +47,4 @@
 
 最初审计目录没有 Git、源代码、包清单或测试；纯文档阶段只形成架构要求和待决清单。之后阶段 1 建立工作区及 contracts，阶段 2 建立设计系统适配层和交互预览。完整的阶段 0/1历史验收细节已由本概览取代；Git 历史可用于追溯原始记录。
 
-阶段 2 的验收记录列出 contracts 4、adapter 9、web 9，共 22 项测试。阶段 3 本轮实测为 108 项（contracts 5、app-core 28、adapter 9、web 52、server 14），format、lint、typecheck、build 通过，生产 HTTP 验收 31/31 通过；证据见 [阶段 3 验收](21-stage-3-acceptance.md)。阶段 2 四张截图仍保留在 `docs/assets/stage-2/`，但分类与导航已改变，不再作为当前状态证据。
+阶段 2 的验收记录列出 contracts 4、adapter 9、web 9，共 22 项测试。阶段 3 实测 108 项，生产 HTTP 验收 31 项。阶段 4 实测 139 项（contracts 6、app-core 49、adapter 9、web 61、server 14），`check:tools` 通过，生产 HTTP 验收 28/28；证据见 [阶段 4 验收](24-stage-4-acceptance.md)。阶段 2 四张截图仍保留在 `docs/assets/stage-2/`，但分类、导航与可用性口径已改变，不再作为当前状态证据。

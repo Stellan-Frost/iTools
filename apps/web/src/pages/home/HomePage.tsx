@@ -2,8 +2,8 @@ import { Button, Card } from '@itools/design-system-adapter';
 import {
   CATEGORIES,
   getCategory,
-  listEnabledTools,
-  listEnabledToolsByCategory,
+  listVisibleByCategory,
+  listVisibleTools,
 } from '@itools/app-core';
 import { useTranslation } from 'react-i18next';
 import { CategoryCard } from '../../components/catalog/CategoryCard.js';
@@ -18,10 +18,10 @@ export function HomePage() {
   const { locale, navigate, openSearch } = useAppNavigation();
   const { t } = useTranslation(['catalog', 'common']);
 
-  const enabledTools = listEnabledTools();
+  const visibleTools = listVisibleTools();
   const firstCategory =
     CATEGORIES.find(
-      (category) => listEnabledToolsByCategory(category.id).length > 0,
+      (category) => listVisibleByCategory(category.id).length > 0,
     ) ?? CATEGORIES[0]!;
 
   return (
@@ -69,7 +69,7 @@ export function HomePage() {
           })}
         />
         <MetadataChip
-          label={t('catalog:home.toolCount', { total: enabledTools.length })}
+          label={t('catalog:home.toolCount', { total: visibleTools.length })}
         />
         <MetadataChip label={t('catalog:home.realRuns')} />
       </section>
@@ -96,7 +96,7 @@ export function HomePage() {
             <CategoryCard
               key={category.id}
               category={category}
-              toolCount={listEnabledToolsByCategory(category.id).length}
+              toolCount={listVisibleByCategory(category.id).length}
               onOpen={() =>
                 navigate({ page: 'category', categoryId: category.id })
               }
@@ -116,16 +116,18 @@ export function HomePage() {
           <MetadataChip label={t('catalog:home.featuredCaption')} />
         </div>
         <div className={styles.toolGrid}>
-          {enabledTools.map((tool) => {
-            const category = getCategory(tool.categoryId);
+          {visibleTools.map((tool) => {
+            const category = getCategory(tool.metadata.category);
             return (
               <ToolCard
-                key={tool.id}
+                key={tool.metadata.id}
                 tool={tool}
                 categoryName={
-                  category ? category.name[locale] : tool.categoryId
+                  category ? category.name[locale] : tool.metadata.category
                 }
-                onOpen={() => navigate({ page: 'tool', toolId: tool.id })}
+                onOpen={() =>
+                  navigate({ page: 'tool', toolId: tool.metadata.id })
+                }
               />
             );
           })}

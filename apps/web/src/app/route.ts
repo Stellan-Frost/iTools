@@ -1,6 +1,6 @@
 import {
-  findEnabledTool,
   findTool,
+  findVisibleTool,
   getCategory,
   isCategoryId,
   type CategoryId,
@@ -66,21 +66,21 @@ export function parseAppPath(pathname: string): {
       return { locale, route: NOT_FOUND_ROUTE };
     }
 
-    const tool = findEnabledTool(toolId);
+    const tool = findVisibleTool(toolId);
 
-    if (!tool || tool.categoryId !== categoryId) {
+    if (!tool || tool.metadata.category !== categoryId) {
       return { locale, route: NOT_FOUND_ROUTE };
     }
 
-    return { locale, route: { page: 'tool', toolId: tool.id } };
+    return { locale, route: { page: 'tool', toolId: tool.metadata.id } };
   }
 
   return { locale, route: NOT_FOUND_ROUTE };
 }
 
 /**
- * 生成规范路径。工具路径包含所属分类；未知工具与 404 回退到该语言首页。
- * 停用工具仍可生成路径（解析时会返回 404），便于客户端从旧状态恢复。
+ * 生成规范路径。工具路径包含所属分类；未知或停用工具与 404 回退到该语言首页。
+ * 预览工具与已实现工具都生成路径（预览页返回 200 但 noindex）。
  */
 export function buildAppPath(locale: Locale, route: AppRoute): string {
   const home = `/${locale}`;
@@ -92,8 +92,8 @@ export function buildAppPath(locale: Locale, route: AppRoute): string {
       return `${home}/${route.categoryId}`;
     case 'tool': {
       const tool = findTool(route.toolId);
-      if (!tool) return home;
-      return `${home}/${tool.categoryId}/${tool.id}`;
+      if (!tool || tool.availability === 'disabled') return home;
+      return `${home}/${tool.metadata.category}/${tool.metadata.id}`;
     }
     case 'tasks':
       return `${home}/tasks`;

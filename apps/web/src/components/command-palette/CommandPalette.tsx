@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState, type KeyboardEvent } from 'react';
 import { Button, Dialog, TextField } from '@itools/design-system-adapter';
-import { getCategory, searchEnabledTools } from '@itools/app-core';
+import { getCategory, searchVisibleTools } from '@itools/app-core';
 import { useTranslation } from 'react-i18next';
 import { useAppNavigation } from '../../app/navigation.js';
 import { AppIcon } from '../app-icon/AppIcon.js';
+import { PreviewBadge } from '../app-shell/PreviewBadge.js';
 import styles from './CommandPalette.module.css';
 
 interface CommandPaletteProps {
@@ -17,7 +18,7 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
   const [query, setQuery] = useState('');
   const [activeIndex, setActiveIndex] = useState(0);
   const results = useMemo(
-    () => searchEnabledTools(query, locale),
+    () => searchVisibleTools(query, locale),
     [query, locale],
   );
 
@@ -35,7 +36,7 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
   function selectActiveResult() {
     const selectedTool = results[activeIndex];
     if (!selectedTool) return;
-    navigate({ page: 'tool', toolId: selectedTool.id });
+    navigate({ page: 'tool', toolId: selectedTool.metadata.id });
     onClose();
   }
 
@@ -86,7 +87,7 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
             'aria-expanded': true,
             'aria-controls': 'tool-search-results',
             'aria-activedescendant': results[activeIndex]
-              ? `tool-option-${results[activeIndex].id}`
+              ? `tool-option-${results[activeIndex].metadata.id}`
               : undefined,
             onKeyDown: handleInputKeyDown,
           }}
@@ -103,27 +104,32 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
             role="listbox"
             aria-label={t('search.resultsLabel')}
           >
-            {results.map((tool, index) => {
-              const category = getCategory(tool.categoryId);
+            {results.map((entry, index) => {
+              const category = getCategory(entry.metadata.category);
               const isActive = activeIndex === index;
               return (
-                <li key={tool.id}>
+                <li key={entry.metadata.id}>
                   <Button
                     className={styles.result}
                     variant={isActive ? 'tonal' : 'text'}
                     role="option"
                     aria-selected={isActive}
-                    id={`tool-option-${tool.id}`}
-                    startIcon={<AppIcon name={tool.icon} />}
+                    id={`tool-option-${entry.metadata.id}`}
+                    startIcon={<AppIcon name={entry.metadata.icon} />}
                     onMouseEnter={() => setActiveIndex(index)}
                     onClick={() => {
-                      navigate({ page: 'tool', toolId: tool.id });
+                      navigate({ page: 'tool', toolId: entry.metadata.id });
                       onClose();
                     }}
                   >
                     <span className={styles.resultCopy}>
-                      <span className={styles.resultTitle}>
-                        {tool.name[locale]}
+                      <span className={styles.resultHeading}>
+                        <span className={styles.resultTitle}>
+                          {entry.metadata.name[locale]}
+                        </span>
+                        {entry.availability === 'preview' ? (
+                          <PreviewBadge />
+                        ) : null}
                       </span>
                       <span className={styles.resultMeta}>
                         {category?.name[locale]} · {t('search.previewSuffix')}

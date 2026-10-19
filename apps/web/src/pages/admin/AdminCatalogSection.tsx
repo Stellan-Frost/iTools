@@ -16,7 +16,7 @@ export function AdminCatalogSection({
   onToggleTool,
 }: AdminCatalogSectionProps) {
   const { locale } = useAppNavigation();
-  const { t } = useTranslation('admin');
+  const { t } = useTranslation(['admin', 'common']);
   const tools = listTools();
 
   return (
@@ -26,42 +26,50 @@ export function AdminCatalogSection({
     >
       <div className={styles.sectionHeading}>
         <div>
-          <p>{t('catalog.kicker')}</p>
-          <h2 id="catalog-heading">{t('catalog.title')}</h2>
+          <p>{t('admin:catalog.kicker')}</p>
+          <h2 id="catalog-heading">{t('admin:catalog.title')}</h2>
         </div>
-        <MetadataChip label={t('catalog.count', { total: tools.length })} />
+        <MetadataChip
+          label={t('admin:catalog.count', { total: tools.length })}
+        />
       </div>
       <Card>
         <ul className={styles.catalogList}>
           {tools.map((tool) => {
-            const category = getCategory(tool.categoryId);
-            const active = enabledTools[tool.id] ?? tool.enabled;
+            const metadata = tool.metadata;
+            const category = getCategory(metadata.category);
+            const active =
+              enabledTools[metadata.id] ?? tool.availability !== 'disabled';
 
             return (
-              <li key={tool.id} className={styles.catalogRow}>
+              <li key={metadata.id} className={styles.catalogRow}>
                 <span className={styles.toolIcon}>
-                  <AppIcon name={tool.icon} />
+                  <AppIcon name={metadata.icon} />
                 </span>
                 <span className={styles.toolDetails}>
-                  <strong>{tool.name[locale]}</strong>
+                  <strong>{metadata.name[locale]}</strong>
                   <span>
                     <MetadataChip
-                      label={category ? category.name[locale] : tool.categoryId}
+                      label={
+                        category ? category.name[locale] : metadata.category
+                      }
                     />
                     <MetadataChip
                       label={
-                        active ? t('catalog.enabled') : t('catalog.disabled')
+                        tool.availability === 'disabled'
+                          ? t('common:availability.unavailable')
+                          : t('common:availability.preview')
                       }
                     />
                   </span>
                 </span>
                 <Switch
                   selected={active}
-                  aria-label={t('catalog.toggleLabel', {
-                    name: tool.name[locale],
+                  aria-label={t('admin:catalog.toggleLabel', {
+                    name: metadata.name[locale],
                   })}
                   onChange={(_event, selected) => {
-                    onToggleTool(tool.id, selected);
+                    onToggleTool(metadata.id, selected);
                   }}
                 />
               </li>
@@ -69,7 +77,7 @@ export function AdminCatalogSection({
           })}
         </ul>
       </Card>
-      <p className={styles.helper}>{t('catalog.helper')}</p>
+      <p className={styles.helper}>{t('admin:catalog.helper')}</p>
     </section>
   );
 }

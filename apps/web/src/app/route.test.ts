@@ -46,6 +46,24 @@ describe('parseAppPath', () => {
     expect(parseAppPath(path)).toEqual({ locale, route });
   });
 
+  it('resolves preview tools in both locales', () => {
+    expect(parseAppPath('/zh-CN/text/json-viewer')).toEqual({
+      locale: 'zh-CN',
+      route: { page: 'tool', toolId: 'json-viewer' },
+    });
+    expect(parseAppPath('/en/text/text-diff')).toEqual({
+      locale: 'en',
+      route: { page: 'tool', toolId: 'text-diff' },
+    });
+  });
+
+  it('rejects disabled tools even when the category matches', () => {
+    expect(parseAppPath('/en/text/csv-inspector')).toEqual({
+      locale: 'en',
+      route: { page: 'not-found' },
+    });
+  });
+
   it.each([
     ['/zh-CN/tasks', 'zh-CN', { page: 'tasks' }],
     ['/en/admin', 'en', { page: 'admin' }],
@@ -61,6 +79,7 @@ describe('parseAppPath', () => {
     [''],
     ['/zh-CN/text/unknown-tool'],
     ['/zh-CN/nope'],
+    ['/zh-CN/nope/markdown-preview'],
     ['/zh-CN/text/csv-inspector'],
     ['/zh-CN/image/markdown-preview'],
     ['/zh-CN/text/markdown-preview/extra'],
@@ -105,6 +124,24 @@ describe('buildAppPath', () => {
     expect(buildAppPath('zh-CN', { page: 'tool', toolId: 'missing' })).toBe(
       '/zh-CN',
     );
+  });
+
+  it('falls back to the locale home for disabled tools', () => {
+    expect(
+      buildAppPath('zh-CN', { page: 'tool', toolId: 'csv-inspector' }),
+    ).toBe('/zh-CN');
+    expect(buildAppPath('en', { page: 'tool', toolId: 'csv-inspector' })).toBe(
+      '/en',
+    );
+  });
+
+  it('builds preview tool paths from registry metadata', () => {
+    expect(
+      buildAppPath('zh-CN', { page: 'tool', toolId: 'markdown-preview' }),
+    ).toBe('/zh-CN/text/markdown-preview');
+    expect(
+      buildAppPath('en', { page: 'tool', toolId: 'timestamp-converter' }),
+    ).toBe('/en/other/timestamp-converter');
   });
 
   it.each(['zh-CN', 'en'] as const)(

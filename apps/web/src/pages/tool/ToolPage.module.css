@@ -62,28 +62,6 @@
   gap: var(--itools-space-2);
 }
 
-.feedback {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--itools-space-2);
-  margin: 0;
-  border-radius: var(--itools-shape-corner-rectangle);
-  background: var(--md-sys-color-tertiary-container);
-  color: var(--md-sys-color-on-tertiary-container);
-  padding: var(--itools-space-3);
-}
-
-.feedback > :first-child {
-  display: grid;
-  width: 2rem;
-  height: 2rem;
-  flex: 0 0 2rem;
-  place-items: center;
-  border-radius: var(--md-sys-shape-corner-full);
-  background: var(--md-sys-color-tertiary);
-  color: var(--md-sys-color-on-tertiary);
-}
-
 .workspace {
   padding: var(--itools-space-5);
 }
@@ -128,8 +106,7 @@
   white-space: pre-wrap;
 }
 
-.workspaceFootnote,
-.taskFootnote {
+.workspaceFootnote {
   margin: var(--itools-space-3) 0 0;
   color: var(--md-sys-color-on-surface-variant);
   font-size: var(--md-sys-typescale-body-small-size);
@@ -178,23 +155,6 @@
   background: var(--md-sys-color-secondary-container);
   color: var(--md-sys-color-on-secondary-container);
   font-size: 1.5rem;
-}
-
-.progressRow {
-  display: flex;
-  align-items: center;
-  gap: var(--itools-space-3);
-  margin-top: var(--itools-space-4);
-}
-
-.progressRow > :first-child {
-  flex: 1;
-}
-
-.progressRow > span {
-  min-width: 3ch;
-  color: var(--md-sys-color-on-surface-variant);
-  font-size: var(--md-sys-typescale-label-medium-size);
 }
 
 .resultSample {

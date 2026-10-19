@@ -10,6 +10,10 @@ export const common = {
   },
   adminPreview: '管理预览',
   recentTasks: '最近任务',
+  availability: {
+    preview: '预览',
+    unavailable: '暂不可用',
+  },
   actions: {
     close: '关闭',
     backHome: '返回首页',

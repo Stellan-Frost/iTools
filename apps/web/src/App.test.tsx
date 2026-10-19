@@ -19,7 +19,7 @@ function desktopNavigation() {
   return screen.getByRole('complementary', { name: '桌面分类导航' });
 }
 
-describe('stage 3 application shell', () => {
+describe('stage 4 application shell', () => {
   beforeEach(() => {
     window.innerWidth = 1280;
     document.documentElement.lang = 'zh-CN';
@@ -29,7 +29,34 @@ describe('stage 3 application shell', () => {
     cleanup();
   });
 
-  it('expands desktop categories without navigating and lists enabled tools', async () => {
+  it('lists the six visible registry tools with preview badges', async () => {
+    const user = userEvent.setup();
+    renderApp();
+
+    const navigation = desktopNavigation();
+    for (const category of [
+      '音频与声音',
+      '图像与设计',
+      '视频与动效',
+      '文档与文字',
+      '实用与其他',
+    ]) {
+      await user.click(
+        within(navigation).getByRole('button', { name: category }),
+      );
+    }
+
+    const toolRows = navigation.querySelectorAll(
+      'button[aria-haspopup="dialog"]',
+    );
+    expect(toolRows).toHaveLength(6);
+    expect(within(navigation).getAllByText('预览')).toHaveLength(6);
+    expect(
+      within(navigation).queryByRole('button', { name: /CSV 检查器/ }),
+    ).not.toBeInTheDocument();
+  });
+
+  it('expands desktop categories without navigating and lists visible tools', async () => {
     const user = userEvent.setup();
     renderApp();
 
@@ -104,6 +131,12 @@ describe('stage 3 application shell', () => {
 
     const dialog = await screen.findByRole('dialog', { name: '图片信息检查' });
     expect(within(dialog).getByRole('button', { name: '关闭' })).toHaveFocus();
+    expect(within(dialog).getAllByText('预览')).toHaveLength(1);
+    expect(
+      within(dialog).getByText(
+        '该工具尚未实现，当前仅展示页面结构与示例布局。',
+      ),
+    ).toBeInTheDocument();
     expect(within(dialog).getByText('图像与设计')).toBeInTheDocument();
     expect(
       within(dialog).getByText(
@@ -147,6 +180,7 @@ describe('stage 3 application shell', () => {
       name: '搜索工具',
     });
     expect(within(dialog).getByText('6 项')).toBeInTheDocument();
+    expect(within(dialog).getAllByText('预览')).toHaveLength(6);
     await user.click(searchField);
     await user.keyboard('{ArrowDown}{Enter}');
 

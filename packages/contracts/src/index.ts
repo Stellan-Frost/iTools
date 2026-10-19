@@ -5,3 +5,4 @@ export * from './locale.js';
 export * from './ssr.js';
 export * from './task.js';
 export * from './tool.js';
+export * from './tool-registry.js';

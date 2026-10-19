@@ -30,7 +30,9 @@ export function TasksPage() {
         <ul className={styles.taskList}>
           {SAMPLE_TASKS.map((task) => {
             const tool = findTool(task.toolId);
-            const category = tool ? getCategory(tool.categoryId) : undefined;
+            const category = tool
+              ? getCategory(tool.metadata.category)
+              : undefined;
 
             return (
               <li key={task.id}>
@@ -39,7 +41,9 @@ export function TasksPage() {
                 </div>
                 <div className={styles.taskDetails}>
                   <strong>
-                    {tool ? tool.name[locale] : t('tasks:fallbackTool')}
+                    {tool
+                      ? tool.metadata.name[locale]
+                      : t('tasks:fallbackTool')}
                   </strong>
                   <span>
                     <MetadataChip

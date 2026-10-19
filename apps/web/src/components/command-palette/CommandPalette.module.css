@@ -36,6 +36,13 @@
   gap: var(--itools-space-1);
 }
 
+.resultHeading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--itools-space-2);
+}
+
 .resultTitle {
   color: var(--md-sys-color-on-surface);
   font-family: var(--md-sys-typescale-title-small-font);

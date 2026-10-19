@@ -21,10 +21,12 @@ export function AdminMetadataForm() {
 
   const referenceTool = findTool(REFERENCE_TOOL_ID);
   const referenceCategory = referenceTool
-    ? getCategory(referenceTool.categoryId)
+    ? getCategory(referenceTool.metadata.category)
     : undefined;
-  const defaultName = referenceTool ? referenceTool.name[locale] : '';
-  const defaultSummary = referenceTool ? referenceTool.description[locale] : '';
+  const defaultName = referenceTool ? referenceTool.metadata.name[locale] : '';
+  const defaultSummary = referenceTool
+    ? referenceTool.metadata.summary[locale]
+    : '';
 
   const [title, setTitle] = useState(defaultName);
   const [description, setDescription] = useState(defaultSummary);
@@ -107,7 +109,9 @@ export function AdminMetadataForm() {
               }
             />
             <span>{t('metadata.idLabel')}</span>
-            <code>{referenceTool ? referenceTool.id : REFERENCE_TOOL_ID}</code>
+            <code>
+              {referenceTool ? referenceTool.metadata.id : REFERENCE_TOOL_ID}
+            </code>
           </div>
           {formError ? (
             <PreviewNotice tone="error">{formError}</PreviewNotice>
