@@ -6,17 +6,18 @@
 
 根目录以 `pnpm@11.25.0` 管理 workspace，要求 Node.js `>=22`。`pnpm-workspace.yaml` 纳入 `apps/*` 与 `packages/*`；当前只有 `@itools/contracts`、`@itools/design-system-adapter`、`@itools/web` 三个包。
 
-| 命令                    | 作用                                                                  |
-| ----------------------- | --------------------------------------------------------------------- |
-| `pnpm dev`              | 启动 Vite 浏览器预览。                                                |
-| `pnpm build`            | 经 `scripts/run-turbo.mjs` 执行 Turbo build。                         |
-| `pnpm test`             | 经 Turbo 执行包测试。                                                 |
-| `pnpm typecheck`        | 经 Turbo 执行包类型检查。                                             |
-| `pnpm lint`             | ESLint 检查 `apps`、`packages`、`scripts`，随后运行依赖清单边界检查。 |
-| `pnpm format:check`     | Prettier 格式检查。                                                   |
-| `pnpm check:boundaries` | 单独检查工作区包依赖清单。                                            |
+| 命令                                                | 作用                                                                                                 |
+| --------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `pnpm --filter @itools/design-system-adapter build` | 构建 adapter 的 `dist` 入口，供 Web 解析 workspace package exports。首次执行 `pnpm dev` 前必须运行。 |
+| `pnpm dev`                                          | 启动 Vite 浏览器预览；根脚本直接运行 Vite，不会先构建 adapter。                                      |
+| `pnpm build`                                        | 经 `scripts/run-turbo.mjs` 执行 Turbo build。                                                        |
+| `pnpm test`                                         | 经 Turbo 执行包测试。                                                                                |
+| `pnpm typecheck`                                    | 经 Turbo 执行包类型检查。                                                                            |
+| `pnpm lint`                                         | ESLint 检查 `apps`、`packages`、`scripts`，随后运行依赖清单边界检查。                                |
+| `pnpm format:check`                                 | Prettier 格式检查。                                                                                  |
+| `pnpm check:boundaries`                             | 单独检查工作区包依赖清单。                                                                           |
 
-各 package manifest 中记录包级脚本。根脚本没有 `peers check` 命令；阶段 2 文档所记 peer 检查是其当时执行的独立检查。安装可使用 `pnpm install --frozen-lockfile`。本轮没有运行安装或构建检查。
+各 package manifest 中记录包级脚本。全新克隆后，先运行 `pnpm install --frozen-lockfile`，再运行上表中的 adapter build，之后才能启动 `pnpm dev`：adapter 的 package exports 指向 `dist`，而根 `dev` 脚本不会通过 Turbo 自动构建依赖。`pnpm peers check` 是 pnpm 内建命令，不在 `package.json` scripts；既有记录曾通过。本轮没有运行安装或构建检查。
 
 `scripts/check-boundaries.mjs` 读取 `apps/*/package.json` 和 `packages/*/package.json` 的 `dependencies`、`devDependencies`、`peerDependencies`，按包名白名单验证 `@itools/*` 依赖方向。它不解析 TypeScript/JavaScript 源码 import，也不验证所有源码导入路径。`scripts/run-turbo.mjs` 用 Node 启动本地锁定的 Turbo，并设置 `TURBO_TELEMETRY_DISABLED=1`。
 

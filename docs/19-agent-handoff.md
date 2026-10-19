@@ -39,16 +39,18 @@
 
 ```sh
 pnpm install --frozen-lockfile
+pnpm --filter @itools/design-system-adapter build
 pnpm dev
 pnpm format:check
 pnpm lint
 pnpm typecheck
 pnpm test
 pnpm build
+pnpm peers check
 pnpm check:boundaries
 ```
 
-根 `lint` 同时运行 ESLint 与 workspace manifest 边界检查；后者不验证所有源码导入。根脚本没有 `peers check`。以上是当前可用操作说明，不表示本指南编写期间执行过这些命令。
+全新克隆后先安装依赖并构建 design-system-adapter，再启动 `pnpm dev`。adapter 的 exports 指向 `dist`，而根 `dev` 脚本直接启动 Vite，不会先构建依赖。根 `lint` 同时运行 ESLint 与 workspace manifest 边界检查；后者不验证所有源码导入。`pnpm peers check` 是 pnpm 内建命令，不在 `package.json` scripts；既有记录曾通过。以上是操作说明，不表示本指南编写期间执行过这些命令。
 
 ## 未决事项与下一阶段门槛
 
@@ -66,7 +68,7 @@ pnpm check:boundaries
 
 - 根 Agent 负责规划、跨模块接口裁决、集成、验收和冲突处理；实施 Agent 只在明确派发的文件范围内工作。派发内容需写明目标、禁止事项、文件所有权、依赖/冻结接口和验收标准。
 - 共享工作目录中不可假设自己独占代码库；先看 `git status` 和当前 diff，不覆盖或撤销他人修改。不同 Agent 不并行改同一契约，除非根 Agent已协调。
-- 模型和推理强度服从当前任务/主 Agent 的明确设置；历史 `docs/12` 中的模型名称只是当时协作约定，不能覆盖当前运行设置。
+- 当前协作约定由根 Agent（GPT-6 Sol）负责规划、接口裁决、集成和验收，实施 Agent（GPT-6 Luna）负责获派范围内的实现与对应检查。模型选择及推理强度按当前任务的明确指示或协作约定执行；需要调整时由根 Agent协调，不自行覆盖约定。
 - Agent 可在获派范围内实现、修复、写文档并运行要求的检查；不得伪报未执行的验证。生产部署、生产迁移、破坏性数据操作和公网安全配置变更遵循 `docs/12`、`docs/15` 的审批边界。
 - 契约、产品范围或阶段顺序若需变更，先记录原因、影响、迁移、验证和回滚方案，交根 Agent/用户审阅；未确认前不把提案写成决定。
 
