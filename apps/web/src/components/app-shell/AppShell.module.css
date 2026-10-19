@@ -62,21 +62,17 @@
 }
 
 .brand:focus-visible {
-  border-radius: var(--md-sys-shape-corner-small);
+  border-radius: var(--itools-shape-corner-rectangle);
   outline: var(--itools-layout-focus-ring-width) solid
     var(--md-sys-color-primary);
   outline-offset: var(--itools-space-1);
 }
 
 .brandMark {
-  display: grid;
+  display: block;
   width: var(--itools-layout-brand-mark-size);
-  aspect-ratio: 1;
-  place-items: center;
-  border-radius: var(--md-sys-shape-corner-small);
-  background: var(--md-sys-color-primary);
-  color: var(--md-sys-color-on-primary);
-  font-weight: var(--md-sys-typescale-title-large-weight);
+  height: var(--itools-layout-brand-mark-size);
+  object-fit: contain;
 }
 
 .previewTag {
@@ -113,11 +109,14 @@
 
 .searchButton kbd {
   border: 1px solid var(--md-sys-color-outline-variant);
-  border-radius: var(--md-sys-shape-corner-extra-small);
+  border-radius: var(--itools-shape-corner-rectangle);
   color: var(--md-sys-color-on-surface-variant);
-  padding: var(--itools-space-1) var(--itools-space-2);
-  font-family: inherit;
+  padding: var(--itools-space-2) var(--itools-space-3);
+  font-family: var(--md-sys-typescale-label-small-font);
   font-size: var(--md-sys-typescale-label-small-size);
+  font-weight: var(--md-sys-typescale-label-small-weight);
+  line-height: var(--md-sys-typescale-label-small-line-height);
+  letter-spacing: var(--md-sys-typescale-label-small-tracking);
 }
 
 .recentAnchor {

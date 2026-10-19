@@ -18,7 +18,7 @@
   align-items: center;
   gap: var(--itools-space-3);
   border: 0;
-  border-radius: var(--md-sys-shape-corner-medium);
+  border-radius: var(--itools-shape-corner-rectangle);
   background: transparent;
   color: var(--md-sys-color-on-surface-variant);
   cursor: pointer;
@@ -92,8 +92,9 @@
 .categoryGroup[data-expanded='true'] .categoryTrigger:focus-visible {
   background: color-mix(
     in srgb,
-    var(--md-sys-color-on-surface) var(--itools-state-layer-focus-opacity),
-    var(--md-sys-color-surface-container-high)
+    var(--md-sys-color-on-secondary-container)
+      var(--itools-state-layer-focus-opacity),
+    var(--md-sys-color-secondary-container)
   );
 }
 
@@ -119,8 +120,42 @@
 .categoryGroup[data-expanded='true'] .categoryTrigger:active {
   background: color-mix(
     in srgb,
-    var(--md-sys-color-on-surface) var(--itools-state-layer-pressed-opacity),
-    var(--md-sys-color-surface-container-high)
+    var(--md-sys-color-on-secondary-container)
+      var(--itools-state-layer-pressed-opacity),
+    var(--md-sys-color-secondary-container)
+  );
+}
+
+.categoryGroup[data-expanded='true']
+  .toolItem:not([aria-current='page']):not([aria-selected='true']):hover {
+  background: color-mix(
+    in srgb,
+    var(--md-sys-color-on-secondary-container)
+      var(--itools-state-layer-hover-opacity),
+    var(--md-sys-color-secondary-container)
+  );
+}
+
+.categoryGroup[data-expanded='true']
+  .toolItem:not([aria-current='page']):not(
+    [aria-selected='true']
+  ):focus-visible {
+  background: color-mix(
+    in srgb,
+    var(--md-sys-color-on-secondary-container)
+      var(--itools-state-layer-focus-opacity),
+    var(--md-sys-color-secondary-container)
+  );
+  color: var(--md-sys-color-on-secondary-container);
+}
+
+.categoryGroup[data-expanded='true']
+  .toolItem:not([aria-current='page']):not([aria-selected='true']):active {
+  background: color-mix(
+    in srgb,
+    var(--md-sys-color-on-secondary-container)
+      var(--itools-state-layer-pressed-opacity),
+    var(--md-sys-color-secondary-container)
   );
 }
 
@@ -147,13 +182,20 @@
   display: grid;
   min-width: 0;
   grid-template-rows: auto minmax(0, 0fr);
-  border-radius: var(--md-sys-shape-corner-large);
-  transition: grid-template-rows var(--itools-motion-duration-medium)
-    var(--itools-motion-easing-emphasized);
+  border-radius: var(--itools-shape-corner-rectangle);
+  transition:
+    grid-template-rows var(--itools-motion-duration-medium)
+      var(--itools-motion-easing-emphasized),
+    background-color var(--itools-motion-duration-short)
+      var(--itools-motion-easing-standard),
+    color var(--itools-motion-duration-short)
+      var(--itools-motion-easing-standard);
 }
 
 .categoryGroup[data-expanded='true'] {
   grid-template-rows: auto minmax(0, 1fr);
+  background: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
 }
 
 .categoryTrigger {
@@ -162,15 +204,16 @@
 }
 
 .categoryGroup[data-expanded='true'] .categoryTrigger {
-  background: var(--md-sys-color-surface-container-high);
-  color: var(--md-sys-color-on-surface);
+  background: transparent;
+  color: var(--md-sys-color-on-secondary-container);
 }
 
 .categoryGroup[data-expanded='true'] .categoryTrigger:hover {
   background: color-mix(
     in srgb,
-    var(--md-sys-color-on-surface) var(--itools-state-layer-hover-opacity),
-    var(--md-sys-color-surface-container-high)
+    var(--md-sys-color-on-secondary-container)
+      var(--itools-state-layer-hover-opacity),
+    var(--md-sys-color-secondary-container)
   );
 }
 
@@ -203,9 +246,9 @@
   gap: var(--itools-space-1);
   margin: 0;
   padding: var(--itools-space-1) var(--itools-space-1) var(--itools-space-2)
-    var(--itools-space-8);
+    var(--itools-space-6);
   overflow: hidden;
-  color: var(--md-sys-color-on-surface-variant);
+  color: var(--md-sys-color-on-secondary-container);
   list-style: none;
   opacity: 0;
   transform: translateY(calc(var(--itools-space-2) * -1));
@@ -247,18 +290,63 @@
 
 .toolItem[aria-current='page'],
 .toolItem[aria-selected='true'] {
-  background: var(--md-sys-color-secondary-container);
-  color: var(--md-sys-color-on-secondary-container);
+  background: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
 }
 
 .toolItem[aria-current='page'] .toolIcon,
 .toolItem[aria-selected='true'] .toolIcon {
+  color: var(--md-sys-color-on-primary-container);
+}
+
+.categoryGroup[data-expanded='true'] .categoryIcon,
+.categoryGroup[data-expanded='true'] .toolIcon {
   color: var(--md-sys-color-on-secondary-container);
+}
+
+.categoryGroup[data-expanded='true'] .toolItem[aria-current='page']:hover,
+.categoryGroup[data-expanded='true'] .toolItem[aria-selected='true']:hover {
+  background: color-mix(
+    in srgb,
+    var(--md-sys-color-on-primary-container)
+      var(--itools-state-layer-hover-opacity),
+    var(--md-sys-color-primary-container)
+  );
+  color: var(--md-sys-color-on-primary-container);
+}
+
+.categoryGroup[data-expanded='true']
+  .toolItem[aria-current='page']:focus-visible,
+.categoryGroup[data-expanded='true']
+  .toolItem[aria-selected='true']:focus-visible {
+  background: color-mix(
+    in srgb,
+    var(--md-sys-color-on-primary-container)
+      var(--itools-state-layer-focus-opacity),
+    var(--md-sys-color-primary-container)
+  );
+  color: var(--md-sys-color-on-primary-container);
+}
+
+.categoryGroup[data-expanded='true'] .toolItem[aria-current='page']:active,
+.categoryGroup[data-expanded='true'] .toolItem[aria-selected='true']:active {
+  background: color-mix(
+    in srgb,
+    var(--md-sys-color-on-primary-container)
+      var(--itools-state-layer-pressed-opacity),
+    var(--md-sys-color-primary-container)
+  );
+  color: var(--md-sys-color-on-primary-container);
+}
+
+.categoryGroup[data-expanded='true'] .toolItem[aria-current='page'] .toolIcon,
+.categoryGroup[data-expanded='true'] .toolItem[aria-selected='true'] .toolIcon {
+  color: var(--md-sys-color-on-primary-container);
 }
 
 .emptyState {
   padding: var(--itools-space-2) var(--itools-space-3);
-  color: var(--md-sys-color-on-surface-variant);
+  color: var(--md-sys-color-on-secondary-container);
   font-family: var(--md-sys-typescale-body-small-font);
   font-size: var(--md-sys-typescale-body-small-size);
   line-height: var(--md-sys-typescale-body-small-line-height);

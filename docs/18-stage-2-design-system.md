@@ -1,6 +1,6 @@
 # 18 · 阶段 2 设计系统与全局应用壳
 
-> 状态：已通过阶段 2 验收。日期：2026-10-19。设计参考为用户指定的 `@material-3`；当前工具无法读取该私有插件内容，因此组件语义、配色和自适应设计以 [Material 3 官方规范](https://m3.material.io/)核对，待插件可访问时再对照复核。阶段 2 只实现可操作界面预览，不声称 SSR、数据库目录、工具计算或管理员认证已完成。
+> 状态：阶段 2 基线验收通过；2026-10-19 鸭青主题与壳层视觉迭代待截图复查。设计参考为用户指定的 `@material-3`；当前工具无法读取该私有插件内容，因此组件语义、配色和自适应设计以 [Material 3 官方规范](https://m3.material.io/)核对，待插件可访问时再对照复核。阶段 2 只实现可操作界面预览，不声称 SSR、数据库目录、工具计算或管理员认证已完成。
 
 ## 目标与页面结构
 
@@ -17,7 +17,7 @@
 
 `m3-expressive-react@1.6.0` 作为主 React MD3 组件库，锁定精确版本并包在 `@itools/design-system-adapter` 后。它提供主题、按钮、输入、对话框、导航、反馈和进度组件。选择依据是其当前 MD3 组件覆盖与近期维护；低社区采用、单维护者和快速更新是已知依赖风险。阶段 2 必须通过实际构建、交互测试和桌面/移动视觉检查，不依赖版本声明推断质量。
 
-`@material/material-color-utilities@0.4.0` 用于固定洋红主题来源；字体与 Material Symbols Rounded 从 Fontsource 包打包为站点本地资源，不引入运行时字体 CDN。库与字体版本见各包清单及 `pnpm-lock.yaml`。主应用不得直接依赖 `m3-expressive-react`。
+`@material/material-color-utilities@0.4.0` 用于固定鸭青主题来源；字体与 Material Symbols Rounded 从 Fontsource 包打包为站点本地资源，不引入运行时字体 CDN。库与字体版本见各包清单及 `pnpm-lock.yaml`。主应用不得直接依赖 `m3-expressive-react`。
 
 ## 已冻结的包接口与所有权
 
@@ -31,7 +31,7 @@
 
 ## 主题 Token 约束
 
-- 固定种子色：`#E5007D`。浅色/深色语义色通过 Material Color Utilities 的 `SchemeVibrant`（2025 规范、对比度级别 0）生成；包括 primary/secondary/tertiary、surface 各层、outline、error、inverse、fixed 等角色。页面只引用语义变量，不散布色值。
+- 固定种子色：`#009688`（鸭青）。浅色/深色采用 Material Color Utilities 的 `SchemeVibrant`（2025 规范、对比度级别 0）生成完整语义角色；每个模式均包含 primary/secondary/tertiary、surface 各层、outline、error、inverse、fixed/dim 等角色。浅深模式 role 值以 `packages/design-system-adapter/README.md` 的 MCU 输出表为准；页面只引用语义变量，不散布色值。
 - 适配层应保留 `--md-sys-color-*` 的角色关系，并集中定义站点间距、断点、最大宽度、形状、字号与动效 Token。`prefers-reduced-motion` 禁用非必要动效。
 - 英文使用 Roboto，中文使用 Noto Sans SC，图标使用本地 Material Symbols Rounded。通过 CSS 字体栈和本地资源加载，不请求第三方字体服务。
 - 禁止局部 CSS 覆盖主库基础组件内部类；应用 CSS 只负责页面布局与组合。
@@ -47,9 +47,12 @@
 
 排版沿用 `--md-sys-typescale-*`，语义色沿用 `--md-sys-color-*`。适配层 README 是各 Token 的实际取值和示例的单一来源；此表冻结应用可用的命名接口。
 
+壳层的矩形轮廓统一使用 `--itools-shape-corner-rectangle`（48px）。胶囊和圆形按钮继续使用各自形态；短控件依照其实际尺寸自然限制圆角，避免为匹配 48px 而增加无意义高度。壳层文字均引用 `--md-sys-typescale-*` 语义角色。
+
 ### 导航视觉迭代记录
 
 - 桌面侧栏宽度增至 `18.5rem`，使用持久手风琴层级。分类展开后以空间过渡显示工具列表；箭头同步旋转，工具行提供 state layer、键盘焦点和 48 px 触控高度。多分类可以同时展开。
+- 展开的分类组整体使用 `secondary-container` / `on-secondary-container` 成对角色；强调面从分类标题延续到内含工具列表，悬停、焦点、按压与工具图标仍使用同一语义前景角色。空间展开、列表渐显、逐行进入和箭头旋转保留；减少动态效果设置会关闭这些非必要动效。
 - 840 px 以下，顶栏重排为品牌与最右侧“展开”按钮在首行，搜索、最近任务、主题与后台入口在第二行；抽屉复用同一手风琴。600 px 与 840 px 的适配继续使用共享断点。
 - 工具详情通过主库 Dialog 展示分类、简介和元数据，并以“关闭”和“前往”作为对应操作。关闭由 Dialog 的标准行为负责，进入动效由内容层级变化表达。
 - 页面组合只使用 `--md-sys-color-*`、`--md-sys-typescale-*`、现有形状/间距/动效 Token；新增导航宽度、行高、图标、焦点环、state-layer opacity 与按压/对话框进入 scale token 记录在适配层 README。分类和对话框动效遵循 `prefers-reduced-motion`；抽屉开合继续由主库 NavigationDrawer 负责。
@@ -66,7 +69,9 @@
 | 格式、Lint、类型、测试、构建与依赖边界 | 通过 | 主工作区 `pnpm install --frozen-lockfile`、`pnpm format:check`、`pnpm lint`、`pnpm typecheck`、`pnpm test`、`pnpm build`、`pnpm peers check` 均通过；`lint` 包含 `check:boundaries`。 |
 | 是否进入阶段 3 | 可以 | 阶段 2 硬性项已通过；下一阶段再实现真实路由、SSR、双语与 SEO。 |
 
-### 视觉检查留档
+### 阶段 2 原版视觉检查留档（历史截图）
+
+以下截图记录原洋红主题与阶段 2 初始外观，仅用于回溯旧版本，不作为 2026-10-19 鸭青主题、壳层圆角或手风琴容器迭代的验收证据。
 
 | 视口与状态 | 截图 | 观察 |
 | --- | --- | --- |
