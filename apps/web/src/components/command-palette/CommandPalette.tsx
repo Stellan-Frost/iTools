@@ -100,7 +100,6 @@ export function CommandPalette({
             onKeyDown: handleInputKeyDown,
           }}
           startIcon={<AppIcon name="search" />}
-          supportingText="使用 ↑ ↓ 浏览，Enter 打开，Esc 关闭。"
         />
         <div className={styles.resultHeader}>
           <span>工具样本</span>
