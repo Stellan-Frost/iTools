@@ -29,6 +29,8 @@ export interface AdminRegistrationDeps {
   readonly setupToken: string | undefined;
   /** 生产环境为 true，Cookie 加 Secure。 */
   readonly secureCookies: boolean;
+  /** 提供时对写请求做 Origin 校验，应传站点来源。 */
+  readonly allowedOrigin?: string;
   readonly now?: () => Date;
 }
 
@@ -53,7 +55,13 @@ export function registerAdmin(
     versions: deps.versions,
     now,
     readRegistryItem: deps.readRegistryItem,
-    guard: createAdminGuard({ sessions: deps.sessions, now }),
+    guard: createAdminGuard({
+      sessions: deps.sessions,
+      now,
+      ...(deps.allowedOrigin === undefined
+        ? {}
+        : { allowedOrigin: deps.allowedOrigin }),
+    }),
   };
 
   registerAdminAuthRoutes(app, authDeps);

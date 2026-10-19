@@ -7,7 +7,10 @@ import { registerOpenApi } from './api/openapi.js';
 import type { ApiOptions } from './api/options.js';
 import { registerApi } from './api/routes.js';
 import { injectHtml } from './html.js';
+import { createRequestLogger } from './logging/request-log.js';
+import type { RequestLoggerOptions } from './logging/request-log.js';
 import { buildRobotsTxt } from './robots.js';
+import { createSecurityHeadersHook } from './security/headers.js';
 import { buildSitemap } from './sitemap.js';
 
 export type { ApiOptions } from './api/options.js';
@@ -29,6 +32,10 @@ export interface CreateAppOptions {
   readonly api?: ApiOptions;
   /** 管理后台依赖；缺省时管理端点整体不存在（返回 404）。 */
   readonly admin?: AdminRegistrationDeps;
+  /** 生产环境启用严格 CSP；缺省按开发策略。 */
+  readonly isProduction?: boolean;
+  /** 提供时每个请求写一行脱敏日志。 */
+  readonly logRequests?: RequestLoggerOptions;
 }
 
 const HTML_CACHE_CONTROL = 'public, max-age=0, must-revalidate';
@@ -41,6 +48,19 @@ export async function createApp(
   options: CreateAppOptions,
 ): Promise<FastifyInstance> {
   const app = Fastify({ logger: false });
+
+  // 安全头覆盖全部响应（HTML / API / 404 / 静态资源）。
+  app.addHook(
+    'onSend',
+    createSecurityHeadersHook({
+      isProduction: options.isProduction === true,
+      siteOrigin: options.siteOrigin,
+    }),
+  );
+
+  if (options.logRequests !== undefined) {
+    app.addHook('onResponse', createRequestLogger(options.logRequests));
+  }
 
   if (options.registerDevMiddleware !== undefined) {
     await options.registerDevMiddleware(app);

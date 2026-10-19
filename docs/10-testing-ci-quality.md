@@ -1,7 +1,7 @@
 # 10 · 测试、质量与 CI
 
 > 状态：**本地测试与质量门禁已实现；CI、Playwright、性能预算未实现（阶段 11）**。
-> 当前基线：558 项 Vitest 测试、28 项生产 HTTP 验收，全部通过。数据库相关测试跑在真实 PostgreSQL 上。
+> 当前基线：584 项 Vitest 测试、28 项生产 HTTP 验收，全部通过。数据库相关测试跑在真实 PostgreSQL 上。
 
 ## 1. 工具链
 
@@ -39,6 +39,7 @@ node scripts/verify-stage-4.mjs
 
 - `check:tools`、`check:i18n` 与 HTTP 验收脚本依赖构建产物，**不在 `pnpm lint` 链**；`pnpm verify` 已按正确顺序串联。
 - `pnpm lint` 现在包含：ESLint 严格规则、`check-boundaries`（清单）、`check-imports`（源码 import）、`check-tokens`（硬编码颜色/内联样式）、`check:privacy`（本地包禁止网络调用）。
+- `pnpm verify` 在 build 之后额外执行 `check:external`（构建产物不得引用外部资源）；`check:audit` 依赖网络，暂不进门禁。
 - 隐私门禁：`scripts/check-no-network.mjs` 扫描 `asset-store` 与 `task-runtime` 的生产源码，出现 `fetch` / `XMLHttpRequest` / `WebSocket` / `EventSource` / `sendBeacon` 即失败；新增本地处理包必须加入该脚本的白名单并说明理由。
 - ESLint 会阻断：`any`、裸 HTML 控件、直接使用 `m3-expressive-react`、深层导入、server 越界依赖、生产文件超过 400 行、`console.log`、未使用变量。
 - `scripts/verify-stage-3.mjs` 已删除，只保留 `verify-stage-4.mjs`。
@@ -74,6 +75,11 @@ node scripts/verify-stage-4.mjs
 | server | `cli/reset-password-core.test.ts` | 5 | 弱口令拒绝、未初始化、重置后新旧口令校验、撤销计数 |
 | web | `api/admin-*.test.ts` | 17 | 管理客户端：CSRF 头、错误码、编码、查询选项 |
 | web | `pages/admin/admin.test.tsx` | 9 | 初始化/登录/401 回退、只提交改动字段、下架确认、回滚冲突 |
+| server | `security/headers.test.ts` | 8 | CSP 指令、开发/生产差异、HSTS 开关、头不覆盖 |
+| server | `app-security.test.ts` | 4 | 302/404/503 全覆盖、生产 CSP 不放行内联脚本 |
+| server | `admin/auth/guard-origin.test.ts` | 5 | 缺失/跨源 Origin 拒绝、读请求放行、未配置时保持旧行为 |
+| server | `logging/request-log.test.ts` | 8 | 字段结构、查询串/Cookie/Authorization/body 不落日志 |
+| server | `api/rate-limit.test.ts` | 1 | 第 121 次请求返回 429 + retry-after |
 | adapter | 5 个测试文件 | 9 | Dialog、IconButton、Drawer、图标、主题 |
 | web | `app/route.test.ts` | 33 | URL 解析/生成、可用性、404 |
 | web | `app/seo.test.ts` | 3 | noindex、canonical |

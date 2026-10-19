@@ -27,6 +27,8 @@ import { createSessionToken } from './tokens.js';
 export interface AdminGuardDeps {
   readonly sessions: AdminSessionRepository;
   readonly now: () => Date;
+  /** 提供时，非 GET/HEAD 请求必须带匹配的 Origin（来源检查）。 */
+  readonly allowedOrigin?: string;
 }
 
 export function createAdminGuard(deps: AdminGuardDeps): preHandlerHookHandler {
@@ -38,7 +40,7 @@ export function createAdminGuard(deps: AdminGuardDeps): preHandlerHookHandler {
   });
 
   return (request, reply, done) => {
-    void authenticate(request, reply, sessions).then(
+    void authenticate(request, reply, sessions, deps.allowedOrigin).then(
       (handled) => {
         if (!handled) {
           done();
@@ -60,6 +62,7 @@ async function authenticate(
   request: FastifyRequest,
   reply: FastifyReply,
   sessions: SessionService,
+  allowedOrigin: string | undefined,
 ): Promise<boolean> {
   const cookies = parseCookies(request.headers.cookie);
   const token = cookies[ADMIN_SESSION_COOKIE];
@@ -79,6 +82,15 @@ async function authenticate(
     if (!isValidCsrf(headerValue, cookies[ADMIN_CSRF_COOKIE])) {
       sendAdminError(reply, request.id, AdminErrorCode.csrfFailed, 403);
       return true;
+    }
+
+    // 来源检查：CSRF token 之外再确认请求来自站点自身，挡住跨源构造的写请求。
+    if (allowedOrigin !== undefined) {
+      const origin = readHeader(request.headers.origin);
+      if (origin !== allowedOrigin) {
+        sendAdminError(reply, request.id, AdminErrorCode.csrfFailed, 403);
+        return true;
+      }
     }
   }
 

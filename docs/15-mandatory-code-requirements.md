@@ -9,11 +9,13 @@
 | 格式 | `pnpm format:check`（Prettier） | 是 |
 | Lint | `pnpm lint`（ESLint + 清单边界 + 源码边界 + Token） | 是 |
 | 类型 | `pnpm typecheck`（TS strict） | 是 |
-| 测试 | `pnpm test`（Vitest，558 项；需 `TEST_DATABASE_URL`） | 是 |
+| 测试 | `pnpm test`（Vitest，584 项；需 `TEST_DATABASE_URL`） | 是 |
 | 构建 | `pnpm build`（Turbo） | 是 |
 | 注册表 | `pnpm check:tools`（需先 build） | 是 |
 | i18n 键 | `pnpm check:i18n`（需先 build） | 是 |
 | 隐私（本地包禁网） | `pnpm check:privacy`（已并入 lint） | 是 |
+| 外部资源 | `pnpm check:external`（verify 中 build 之后） | 是 |
+| 依赖漏洞 | `pnpm check:audit`（`pnpm audit --prod`） | 否（阶段 11 接入 CI） |
 | SSR/HTTP | `node scripts/verify-stage-4.mjs` | 是 |
 | 总门禁 | `pnpm verify`（以上全链路） | 是 |
 | CI | **未接入**，阶段 11 | 否 |

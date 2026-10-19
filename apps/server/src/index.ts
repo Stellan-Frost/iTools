@@ -26,6 +26,18 @@ async function createRuntime(config: ServerConfig): Promise<Runtime> {
       ? {}
       : { probeDatabase: catalogRuntime.probeDatabase }),
   };
+  // 管理写接口额外做来源校验，只接受站点自身发起的请求。
+  const admin =
+    catalogRuntime.admin === undefined
+      ? undefined
+      : { ...catalogRuntime.admin, allowedOrigin: config.siteOrigin };
+  const isProduction = config.mode === 'production';
+  const logRequests = isProduction
+    ? {
+        write: (line: string) => process.stdout.write(`${line}\n`),
+        now: () => new Date(),
+      }
+    : undefined;
 
   if (config.mode === 'development') {
     const { createDevRenderer } = await import('./renderer/dev.js');
@@ -36,9 +48,9 @@ async function createRuntime(config: ServerConfig): Promise<Runtime> {
       siteOrigin: config.siteOrigin,
       getTemplate: dev.getTemplate,
       api,
-      ...(catalogRuntime.admin === undefined
-        ? {}
-        : { admin: catalogRuntime.admin }),
+      isProduction,
+      ...(logRequests === undefined ? {} : { logRequests }),
+      ...(admin === undefined ? {} : { admin }),
       registerDevMiddleware: async (instance) => {
         // middie 的 decorate 在插件加载后才生效，因此把 use 推迟到 after 回调。
         instance.register(middie);
@@ -62,9 +74,9 @@ async function createRuntime(config: ServerConfig): Promise<Runtime> {
     siteOrigin: config.siteOrigin,
     getTemplate: prod.getTemplate,
     api,
-    ...(catalogRuntime.admin === undefined
-      ? {}
-      : { admin: catalogRuntime.admin }),
+    isProduction,
+    ...(logRequests === undefined ? {} : { logRequests }),
+    ...(admin === undefined ? {} : { admin }),
     staticRoots: {
       assets: `${config.webRoot}/dist/client/assets`,
       brandIcons: `${config.webRoot}/dist/client/brand-icon`,
