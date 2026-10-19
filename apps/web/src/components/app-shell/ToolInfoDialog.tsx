@@ -24,7 +24,11 @@ export function ToolInfoDialog({
       open
       onClose={onClose}
       title={<span className={styles.title}>{tool.title}</span>}
-      icon={<AppIcon name={tool.icon} />}
+      icon={
+        <span className={styles.iconSurface}>
+          <AppIcon name={tool.icon} />
+        </span>
+      }
       actions={
         <div className={styles.actions}>
           <Button variant="text" onClick={onClose} data-autofocus>

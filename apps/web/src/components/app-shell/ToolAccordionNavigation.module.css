@@ -315,7 +315,8 @@
 }
 
 .categoryGroup[data-expanded='true'] .toolIcon {
-  color: var(--md-sys-color-on-secondary-container);
+  background: var(--md-sys-color-surface-container-high);
+  color: var(--md-sys-color-on-surface);
 }
 
 .categoryGroup[data-expanded='true']
@@ -360,6 +361,7 @@
 
 .categoryGroup[data-expanded='true'] .toolItem[aria-current='page'] .toolIcon,
 .categoryGroup[data-expanded='true'] .toolItem[aria-selected='true'] .toolIcon {
+  background: var(--md-sys-color-primary-container);
   color: var(--md-sys-color-on-primary-container);
 }
 
