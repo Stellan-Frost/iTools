@@ -62,6 +62,9 @@ async function createRuntime(config: ServerConfig): Promise<Runtime> {
     siteOrigin: config.siteOrigin,
     getTemplate: prod.getTemplate,
     api,
+    ...(catalogRuntime.admin === undefined
+      ? {}
+      : { admin: catalogRuntime.admin }),
     staticRoots: {
       assets: `${config.webRoot}/dist/client/assets`,
       brandIcons: `${config.webRoot}/dist/client/brand-icon`,

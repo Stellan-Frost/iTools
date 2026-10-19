@@ -1,7 +1,7 @@
 # 10 · 测试、质量与 CI
 
 > 状态：**本地测试与质量门禁已实现；CI、Playwright、性能预算未实现（阶段 11）**。
-> 当前基线：527 项 Vitest 测试、28 项生产 HTTP 验收，全部通过。数据库相关测试跑在真实 PostgreSQL 上。
+> 当前基线：558 项 Vitest 测试、28 项生产 HTTP 验收，全部通过。数据库相关测试跑在真实 PostgreSQL 上。
 
 ## 1. 工具链
 
@@ -71,6 +71,9 @@ node scripts/verify-stage-4.mjs
 | server | `admin/auth/*.test.ts` | 75 | 口令、令牌、会话、Cookie、CSRF、限流、守卫、4 条认证路由 |
 | server | `admin/writes/*.test.ts` | 14 | 文案合并、启停、版本、回滚冲突、非法请求 |
 | server | `admin/admin-integration.test.ts` | 8 | 真实 PG：初始化 → 登录 → 编辑 → 回滚 → 登出 → 401 |
+| server | `cli/reset-password-core.test.ts` | 5 | 弱口令拒绝、未初始化、重置后新旧口令校验、撤销计数 |
+| web | `api/admin-*.test.ts` | 17 | 管理客户端：CSRF 头、错误码、编码、查询选项 |
+| web | `pages/admin/admin.test.tsx` | 9 | 初始化/登录/401 回退、只提交改动字段、下架确认、回滚冲突 |
 | adapter | 5 个测试文件 | 9 | Dialog、IconButton、Drawer、图标、主题 |
 | web | `app/route.test.ts` | 33 | URL 解析/生成、可用性、404 |
 | web | `app/seo.test.ts` | 3 | noindex、canonical |

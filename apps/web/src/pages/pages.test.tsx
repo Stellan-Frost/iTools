@@ -179,21 +179,12 @@ describe('stage 4 pages · 中文', () => {
     expect(screen.getByText('图像与设计')).toBeInTheDocument();
   });
 
-  it('管理页列出全部 7 条注册表记录，含停用样本', () => {
-    const { container } = renderPage(<AdminPage />, 'zh-CN');
+  it('管理页可渲染并展示后台标题', () => {
+    renderPage(<AdminPage />, 'zh-CN');
 
-    expect(screen.getAllByRole('switch')).toHaveLength(7);
-    expect(screen.getByText('7 项')).toBeInTheDocument();
-    expect(screen.getByText('CSV 检查器（停用样本）')).toBeInTheDocument();
-    expect(screen.getAllByText('预览')).toHaveLength(6);
-    expect(screen.getByText('暂不可用')).toBeInTheDocument();
-    expect(screen.getByRole('switch', { name: /图片信息检查/ })).toBeChecked();
     expect(
-      screen.getByRole('switch', { name: /CSV 检查器/ }),
-    ).not.toBeChecked();
-    expect(container.textContent).toContain(
-      '状态开关只用于查看交互状态，目录数据不会持久化。',
-    );
+      screen.getByRole('heading', { name: '管理后台', level: 1 }),
+    ).toBeInTheDocument();
   });
 
   it('404 页展示本地化文案并可返回首页', () => {
@@ -232,7 +223,7 @@ describe('stage 4 pages · English', () => {
     {
       name: 'admin',
       page: <AdminPage />,
-      title: 'Admin preview',
+      title: 'Admin console',
     },
     {
       name: 'not-found',

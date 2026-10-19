@@ -47,6 +47,7 @@ export const registerAdminAuthRoutes: RegisterAdminAuthRoutes = (app, deps) => {
   });
 
   registerSetup(app, deps, sessions);
+  registerSetupStatus(app, deps);
   registerLogin(app, deps, sessions, loginLimiter);
   registerSessionRead(app, deps, sessions);
   registerSessionDelete(app, deps, sessions);
@@ -193,6 +194,20 @@ function registerSessionRead(
         lastSeenAt: resolved.session.lastSeenAt,
       },
     });
+  });
+}
+
+/**
+ * 初始化入口是否可用：前端据此决定展示初始化表单还是登录表单。
+ * 只暴露布尔值，不泄露令牌配置细节。
+ */
+function registerSetupStatus(app: FastifyInstance, deps: AdminAuthDeps): void {
+  app.get(SETUP_PATH, async (_request, reply) => {
+    reply.header('cache-control', NO_STORE);
+    const credentials = await deps.credentials.get();
+    const available =
+      deps.setupToken !== undefined && credentials === undefined;
+    return reply.send({ data: { available } });
   });
 }
 

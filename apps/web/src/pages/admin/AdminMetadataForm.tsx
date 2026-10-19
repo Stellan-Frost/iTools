@@ -1,62 +1,155 @@
 import { useState, type FormEvent } from 'react';
-import {
-  Button,
-  Card,
-  TextField,
-  useSnackbar,
-} from '@itools/design-system-adapter';
-import { findTool, getCategory } from '@itools/app-core';
 import { useTranslation } from 'react-i18next';
-import { PreviewNotice } from '../../components/page-chrome/PreviewNotice.js';
-import { MetadataChip } from '../../components/page-chrome/MetadataChip.js';
-import { useAppNavigation } from '../../app/navigation.js';
+import { Button, Card, TextField } from '@itools/design-system-adapter';
+import type { ToolCatalogItem } from '@itools/contracts';
+import type { AdminMetadataPatch } from '../../api/admin-types.js';
 import styles from './AdminPage.module.css';
 
-const REFERENCE_TOOL_ID = 'image-inspector';
+const FIELD_KEYS = [
+  'zhName',
+  'zhSummary',
+  'zhDescription',
+  'enName',
+  'enSummary',
+  'enDescription',
+] as const;
 
-export function AdminMetadataForm() {
-  const { locale } = useAppNavigation();
+type FieldKey = (typeof FIELD_KEYS)[number];
+
+type Draft = Record<FieldKey, string> & { readonly order: string };
+
+export interface AdminMetadataFormProps {
+  readonly tool: ToolCatalogItem;
+  readonly onSave: (
+    toolId: string,
+    patch: AdminMetadataPatch,
+  ) => Promise<boolean>;
+}
+
+function toDraft(tool: ToolCatalogItem): Draft {
+  return {
+    zhName: tool.name['zh-CN'],
+    zhSummary: tool.summary['zh-CN'],
+    zhDescription: tool.description['zh-CN'],
+    enName: tool.name.en,
+    enSummary: tool.summary.en,
+    enDescription: tool.description.en,
+    order: String(tool.order),
+  };
+}
+
+function buildPatch(next: Draft, base: Draft): AdminMetadataPatch | undefined {
+  const zh: { name?: string; summary?: string; description?: string } = {};
+  if (next.zhName !== base.zhName) zh.name = next.zhName;
+  if (next.zhSummary !== base.zhSummary) zh.summary = next.zhSummary;
+  if (next.zhDescription !== base.zhDescription) {
+    zh.description = next.zhDescription;
+  }
+
+  const en: { name?: string; summary?: string; description?: string } = {};
+  if (next.enName !== base.enName) en.name = next.enName;
+  if (next.enSummary !== base.enSummary) en.summary = next.enSummary;
+  if (next.enDescription !== base.enDescription) {
+    en.description = next.enDescription;
+  }
+
+  const localizations: {
+    'zh-CN'?: { name?: string; summary?: string; description?: string };
+    en?: { name?: string; summary?: string; description?: string };
+  } = {};
+  if (Object.keys(zh).length > 0) localizations['zh-CN'] = zh;
+  if (Object.keys(en).length > 0) localizations.en = en;
+
+  const orderChanged = next.order.trim() !== base.order.trim();
+  if (!orderChanged && Object.keys(localizations).length === 0) {
+    return undefined;
+  }
+  if (!orderChanged) {
+    return { localizations };
+  }
+  return { localizations, order: Number(next.order) };
+}
+
+export function AdminMetadataForm({ tool, onSave }: AdminMetadataFormProps) {
   const { t } = useTranslation('admin');
-  const { show } = useSnackbar();
+  const [draft, setDraft] = useState<Draft>(() => toDraft(tool));
+  const [baseline, setBaseline] = useState<Draft>(() => toDraft(tool));
+  const [errors, setErrors] = useState<Partial<Record<FieldKey, string>>>({});
+  const [orderError, setOrderError] = useState<string | undefined>(undefined);
+  const [submitting, setSubmitting] = useState(false);
 
-  const referenceTool = findTool(REFERENCE_TOOL_ID);
-  const referenceCategory = referenceTool
-    ? getCategory(referenceTool.metadata.category)
-    : undefined;
-  const defaultName = referenceTool ? referenceTool.metadata.name[locale] : '';
-  const defaultSummary = referenceTool
-    ? referenceTool.metadata.summary[locale]
-    : '';
+  const labels: Record<FieldKey, string> = {
+    zhName: t('metadata.zhName'),
+    zhSummary: t('metadata.zhSummary'),
+    zhDescription: t('metadata.zhDescription'),
+    enName: t('metadata.enName'),
+    enSummary: t('metadata.enSummary'),
+    enDescription: t('metadata.enDescription'),
+  };
 
-  const [title, setTitle] = useState(defaultName);
-  const [description, setDescription] = useState(defaultSummary);
-  const [formError, setFormError] = useState('');
-  const [formFeedback, setFormFeedback] = useState('');
+  const dirty =
+    FIELD_KEYS.some((key) => draft[key] !== baseline[key]) ||
+    draft.order.trim() !== baseline.order.trim();
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (!title.trim() || !description.trim()) {
-      setFormError(t('metadata.bothRequired'));
-      setFormFeedback('');
-      return;
-    }
-
-    setFormError('');
-    setFormFeedback(t('metadata.success'));
-    void show({
-      message: t('metadata.snackbar'),
-      duration: 'short',
+  function updateField(key: FieldKey, value: string) {
+    setDraft((current) => ({ ...current, [key]: value }));
+    setErrors((current) => {
+      if (!(key in current)) return current;
+      const next = { ...current };
+      delete next[key];
+      return next;
     });
   }
 
+  function validate(): boolean {
+    const nextErrors: Partial<Record<FieldKey, string>> = {};
+    for (const key of FIELD_KEYS) {
+      if (!draft[key].trim()) {
+        nextErrors[key] = t('metadata.required', { field: labels[key] });
+      }
+    }
+    setErrors(nextErrors);
+
+    const trimmedOrder = draft.order.trim();
+    const order = Number(trimmedOrder);
+    if (trimmedOrder === '' || !Number.isInteger(order)) {
+      setOrderError(t('metadata.orderInvalid'));
+      return false;
+    }
+    setOrderError(undefined);
+    return Object.keys(nextErrors).length === 0;
+  }
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!validate()) {
+      return;
+    }
+    const patch = buildPatch(draft, baseline);
+    if (patch === undefined) {
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const saved = await onSave(tool.id, patch);
+      if (saved) {
+        setBaseline(draft);
+      }
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
   return (
-    <section aria-labelledby="metadata-heading">
+    <section aria-labelledby="admin-metadata-heading">
       <div className={styles.sectionHeading}>
         <div>
-          <p>{t('metadata.kicker')}</p>
-          <h2 id="metadata-heading">{t('metadata.title')}</h2>
+          <p className={styles.kicker}>{t('metadata.kicker')}</p>
+          <h2 id="admin-metadata-heading" className={styles.sectionTitle}>
+            {t('metadata.title')}
+          </h2>
         </div>
-        <MetadataChip label={defaultName} />
       </div>
       <Card>
         <form
@@ -64,77 +157,112 @@ export function AdminMetadataForm() {
           onSubmit={handleSubmit}
           noValidate
         >
+          <h3 className={styles.formGroupTitle}>{t('metadata.zhSection')}</h3>
           <TextField
-            id="admin-tool-title"
-            label={t('metadata.nameLabel')}
-            value={title}
-            onChange={(event) => {
-              setTitle(event.target.value);
-              if (formError) setFormError('');
-            }}
-            error={Boolean(formError && !title.trim())}
-            errorText={
-              formError && !title.trim()
-                ? t('metadata.nameRequired')
-                : undefined
-            }
-            required
+            id="admin-metadata-zh-name"
+            label={labels.zhName}
+            value={draft.zhName}
+            maxLength={200}
+            onChange={(event) => updateField('zhName', event.target.value)}
+            error={errors.zhName !== undefined}
+            errorText={errors.zhName}
           />
           <TextField
-            id="admin-tool-description"
-            label={t('metadata.summaryLabel')}
-            value={description}
-            onChange={(event) => {
-              setDescription(event.target.value);
-              if (formError) setFormError('');
-            }}
-            error={Boolean(formError && !description.trim())}
-            errorText={
-              formError && !description.trim()
-                ? t('metadata.summaryRequired')
-                : undefined
-            }
+            id="admin-metadata-zh-summary"
+            label={labels.zhSummary}
+            value={draft.zhSummary}
+            maxLength={400}
+            multiline
+            rows={2}
+            onChange={(event) => updateField('zhSummary', event.target.value)}
+            error={errors.zhSummary !== undefined}
+            errorText={errors.zhSummary}
+          />
+          <TextField
+            id="admin-metadata-zh-description"
+            label={labels.zhDescription}
+            value={draft.zhDescription}
+            maxLength={1000}
             multiline
             rows={3}
-            maxLength={180}
-            required
+            onChange={(event) =>
+              updateField('zhDescription', event.target.value)
+            }
+            error={errors.zhDescription !== undefined}
+            errorText={errors.zhDescription}
           />
-          <div className={styles.formSummary}>
-            <span>{t('metadata.categoryLabel')}</span>
-            <MetadataChip
-              label={
-                referenceCategory
-                  ? referenceCategory.name[locale]
-                  : t('metadata.categoryLabel')
-              }
-            />
-            <span>{t('metadata.idLabel')}</span>
-            <code>
-              {referenceTool ? referenceTool.metadata.id : REFERENCE_TOOL_ID}
-            </code>
-          </div>
-          {formError ? (
-            <PreviewNotice tone="error">{formError}</PreviewNotice>
-          ) : null}
-          {formFeedback ? (
-            <PreviewNotice tone="success">{formFeedback}</PreviewNotice>
-          ) : null}
+          <h3 className={styles.formGroupTitle}>{t('metadata.enSection')}</h3>
+          <TextField
+            id="admin-metadata-en-name"
+            label={labels.enName}
+            value={draft.enName}
+            maxLength={200}
+            onChange={(event) => updateField('enName', event.target.value)}
+            error={errors.enName !== undefined}
+            errorText={errors.enName}
+          />
+          <TextField
+            id="admin-metadata-en-summary"
+            label={labels.enSummary}
+            value={draft.enSummary}
+            maxLength={400}
+            multiline
+            rows={2}
+            onChange={(event) => updateField('enSummary', event.target.value)}
+            error={errors.enSummary !== undefined}
+            errorText={errors.enSummary}
+          />
+          <TextField
+            id="admin-metadata-en-description"
+            label={labels.enDescription}
+            value={draft.enDescription}
+            maxLength={1000}
+            multiline
+            rows={3}
+            onChange={(event) =>
+              updateField('enDescription', event.target.value)
+            }
+            error={errors.enDescription !== undefined}
+            errorText={errors.enDescription}
+          />
+          <TextField
+            id="admin-metadata-order"
+            label={t('metadata.orderLabel')}
+            type="number"
+            value={draft.order}
+            onChange={(event) => {
+              setDraft((current) => ({
+                ...current,
+                order: event.target.value,
+              }));
+              setOrderError(undefined);
+            }}
+            error={orderError !== undefined}
+            errorText={orderError}
+          />
           <div className={styles.formActions}>
-            <Button type="submit" variant="filled">
-              {t('metadata.submit')}
+            <Button
+              type="submit"
+              variant="filled"
+              disabled={submitting || !dirty}
+            >
+              {submitting ? t('actions.saving') : t('actions.save')}
             </Button>
             <Button
               variant="text"
+              disabled={submitting || !dirty}
               onClick={() => {
-                setTitle(defaultName);
-                setDescription(defaultSummary);
-                setFormError('');
-                setFormFeedback('');
+                setDraft(baseline);
+                setErrors({});
+                setOrderError(undefined);
               }}
             >
-              {t('metadata.reset')}
+              {t('actions.discard')}
             </Button>
           </div>
+          {!dirty ? (
+            <p className={styles.muted}>{t('metadata.noChanges')}</p>
+          ) : null}
         </form>
       </Card>
     </section>

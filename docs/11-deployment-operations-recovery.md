@@ -36,6 +36,15 @@ node --env-file=.env packages/db/dist/cli/seed.js
 
 安全约束：测试只连 `TEST_DATABASE_URL`，且库名必须以 `_test` 结尾，否则测试支持层直接拒绝运行；测试会重建该库的 `public` schema。
 
+管理员口令恢复（仅服务器侧，无公网接口）：
+
+```sh
+cd apps/server
+DATABASE_URL=postgresql://... node dist/cli/reset-password.js
+```
+
+未设置 `ADMIN_NEW_PASSWORD` 时生成随机口令并只打印一次；执行后会撤销全部旧会话。
+
 ## 生产拓扑
 - Linux + Docker Compose。
 - 容器：Fastify 应用与 PostgreSQL，使用私有网络、持久化卷和健康检查。
