@@ -52,7 +52,7 @@ pnpm build
 - [13 验收与未决事项](docs/13-acceptance-open-decisions.md)：项目验收和待决问题
 - [14 阶段路线图](docs/14-phase-implementation-roadmap.md)：阶段目标与退出条件
 - [15 强制代码要求](docs/15-mandatory-code-requirements.md)：工程和产品约束
-- [16 阶段 0 仓库审计](docs/16-stage-0-audit.md)：基线、差异和审计记录
-- [17 阶段 1 工作区契约](docs/17-stage-1-workspace.md)：包边界、共享约定和门禁
+- [16 当前仓库审计与实现边界](docs/16-stage-0-audit.md)：基线、差异和审计记录
+- [17 当前工作区与契约](docs/17-stage-1-workspace.md)：包边界、共享约定和门禁
 - [18 阶段 2 应用壳设计](docs/18-stage-2-design-system.md)：适配层、预览范围和验收证据
 - [19 Agent 交接](docs/19-agent-handoff.md)：当前状态、工作入口和协作约定

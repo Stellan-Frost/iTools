@@ -19,4 +19,4 @@
 
 ## 来源与状态
 
-资源来自当前提供的图标素材 ZIP；来源位置为 `C:/Users/王子涵/.codex/codex-remote-attachments/01a1528e-d1e0-71a2-abfb-bddf6d3328dc/D38206D2-E3C0-4C72-8D87-5E07CBA0D332/1-icon-pack-2.zip`。该本机路径仅作素材来源记录，不是运行依赖。ZIP 中的原始素材未修改；仓库 SVG 是应用使用的副本，配色调整为鸭青。此处描述资源用途，不表示它们通过 Apple 或 Material Design 认证。
+资源来自当前提供的图标素材 ZIP；来源位置为 `C:/Users/王子涵/.codex/codex-remote-attachments/01a1528e-d1e0-71a2-abfb-bddf6d3328dc/D38206D2-E3C0-4C72-8D87-5E07CBA0D332/1-icon-pack-2.zip`。该本机路径仅作素材来源记录，不是运行依赖。仓库中的六个 SVG 逐字沿用用户提供的鸭青版素材包；先前验收记录确认过 SHA-256 匹配。本轮没有重新计算哈希，也没有修改 SVG 文件。此处描述资源用途，不表示它们通过 Apple 或 Material Design 认证。
