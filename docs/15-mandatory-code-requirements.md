@@ -6,18 +6,38 @@
 
 | 要求 | 执行手段 | 是否自动阻断 |
 | --- | --- | --- |
-| 格式 | `pnpm format:check`（Prettier） | 是（本地） |
-| Lint | `pnpm lint`（ESLint + 包清单边界） | 是（本地） |
-| 类型 | `pnpm typecheck`（TS strict） | 是（本地） |
-| 测试 | `pnpm test`（Vitest，139 项） | 是（本地） |
-| 构建 | `pnpm build`（Turbo） | 是（本地） |
-| 注册表 | `pnpm check:tools`（需先 build） | 是（手动执行） |
-| SSR/HTTP | `node scripts/verify-stage-4.mjs` | 是（手动执行） |
+| 格式 | `pnpm format:check`（Prettier） | 是 |
+| Lint | `pnpm lint`（ESLint + 清单边界 + 源码边界 + Token） | 是 |
+| 类型 | `pnpm typecheck`（TS strict） | 是 |
+| 测试 | `pnpm test`（Vitest，139 项） | 是 |
+| 构建 | `pnpm build`（Turbo） | 是 |
+| 注册表 | `pnpm check:tools`（需先 build） | 是 |
+| i18n 键 | `pnpm check:i18n`（需先 build） | 是 |
+| SSR/HTTP | `node scripts/verify-stage-4.mjs` | 是 |
+| 总门禁 | `pnpm verify`（以上全链路） | 是 |
 | CI | **未接入**，阶段 11 | 否 |
-| 重复代码/非法 import 静态分析 | **未接入** | 否 |
 | 性能/包体预算 | **未测**，阶段 11 | 否 |
 
-审计结论（2026-10-19）：无 `any`、`@ts-ignore`、`@ts-expect-error` 或 `eslint-disable`；无裸 HTML 交互控件；十六进制颜色只存在于主题种子与主题测试；i18n 键全部有引用；壳层已拆分为 `AppShell`/`AppShellTopBar`/`AppShellDrawer`，单文件职责明确。仍存在的已知项：无 CI、无浏览器 E2E、无性能预算。
+### 严格规则清单（ESLint / 脚本）
+
+| 规则 | 实现 | 说明 |
+| --- | --- | --- |
+| 禁止 `any` / `@ts-ignore` / `eslint-disable` | `@typescript-eslint/no-explicit-any` 等 | 代码中当前为 0 |
+| 禁止裸 HTML 交互控件 | `no-restricted-syntax`（button/input/select/textarea） | 仅 `apps/web`；必须用适配层 |
+| 禁止直接使用组件库 | `no-restricted-imports`（`m3-expressive-react`） | 必须从 adapter 导入 |
+| 禁止深层导入源码/产物 | `no-restricted-imports`（`@itools/*/src/*`、`@itools/*/dist/*`） | 只用包入口 |
+| 依赖方向 | `check-boundaries` + `check:imports` | 清单与源码双重校验；server 只依赖 contracts |
+| contracts 纯净 | `no-restricted-imports`（`@itools/*`、`node:*`） | 不得依赖工作区包或运行时 |
+| 硬编码颜色 / 内联 style / `!important` | `check:tokens` | Web 只用语义 Token |
+| 单文件长度 | `max-lines: 400`（生产源码，测试除外） | 超限拆文件 |
+| 日志 | `no-console`（仅允许 warn/error） | 不得输出用户数据 |
+| 未使用变量/参数 | `no-unused-vars`（`_` 前缀豁免） | — |
+| 比较与变量声明 | `eqeqeq`、`prefer-const`、`no-var` | — |
+| i18n 键未使用 | `check:i18n` | 资源键必须全部有引用 |
+
+负向验证（2026-10-19）：探针文件加入 `<button>`、`#ff0000`、内联 style、server 导入 app-core，分别被 ESLint、`check:tokens`、`check:imports` 阻断，证明规则生效。
+
+审计结论：上述规则全部通过当前代码；剩余缺口是 CI 接入、Playwright 与性能预算。
 
 ## 1. 技术栈与工程规范
 - Monorepo：pnpm Workspace + Turborepo。

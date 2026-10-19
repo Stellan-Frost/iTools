@@ -37,7 +37,7 @@
 2. 实施 Agent 在范围内实现、运行自己包的类型检查与测试、报告实际输出。
 3. 根 Agent 检查变更范围、接口兼容、重复实现、隐私边界、i18n 键使用、测试真实性。
 4. 根 Agent 负责跨包接线（如 `apps/web` 依赖声明、构建脚本、SSR 配置）与冲突解决。
-5. 全量门禁（format/lint/typecheck/test/build/check:tools/HTTP）通过后提交；不得跳过检查。
+5. 全量门禁 `pnpm verify`（format/lint/typecheck/test/build/check:tools/check:i18n/HTTP）通过后提交；不得跳过检查。
 6. 生产部署与敏感变更仍须用户批准。
 
 ## 5. 自主权限

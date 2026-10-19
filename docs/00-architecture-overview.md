@@ -67,15 +67,18 @@ cd apps/server && NODE_ENV=production node dist/index.js
 
 ```sh
 pnpm format:check
-pnpm lint                  # ESLint + 工作区依赖边界
+pnpm lint                  # ESLint 严格规则 + 清单/源码边界 + Token 检查
 pnpm typecheck             # Turbo，依赖包先构建
 pnpm test                  # Vitest
 pnpm build
 pnpm check:tools           # 注册表校验；需先构建 app-core
+pnpm check:i18n            # i18n 键使用检查；需先构建 app-core
 node scripts/verify-stage-4.mjs   # 生产产物 HTTP 验收；需先 build
+
+pnpm verify                # 以上全链路总门禁
 ```
 
-当前基线：测试 139 项（contracts 6、app-core 49、adapter 9、web 61、server 14），HTTP 验收 28 项通过。
+当前基线：测试 139 项（contracts 6、app-core 49、adapter 9、web 61、server 14），HTTP 验收 28 项通过。CI 尚未接入。
 
 ## 4. 代码地图
 

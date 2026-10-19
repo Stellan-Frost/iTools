@@ -19,20 +19,28 @@
 ## 2. 本地门禁
 
 ```sh
+pnpm verify                        # 总门禁：format → lint → typecheck → test → build → 注册表 → i18n → HTTP
+```
+
+分步执行：
+
+```sh
 pnpm format:check
-pnpm lint                  # ESLint + check-boundaries
+pnpm lint                  # ESLint（严格规则）+ 清单边界 + 源码边界 + Token 检查
 pnpm typecheck             # Turbo，依赖包先 build
 pnpm test                  # Turbo
 pnpm build
 pnpm check:tools           # 需先构建 app-core
-node scripts/verify-stage-4.mjs   # 需先 build
+pnpm check:i18n            # 需先构建 app-core
+node scripts/verify-stage-4.mjs
 ```
 
 事实：
 
-- `check:tools` 与 HTTP 验收脚本依赖构建产物，**不在 `pnpm lint` 链**；先 build 再运行。
-- 阶段 3 的旧验收脚本已删除，只保留 `verify-stage-4.mjs`。
-- `pnpm lint` 的边界检查只校验包清单，不解析源码 import。
+- `check:tools`、`check:i18n` 与 HTTP 验收脚本依赖构建产物，**不在 `pnpm lint` 链**；`pnpm verify` 已按正确顺序串联。
+- `pnpm lint` 现在包含：ESLint 严格规则、`check-boundaries`（清单）、`check-imports`（源码 import）、`check-tokens`（硬编码颜色/内联样式）。
+- ESLint 会阻断：`any`、裸 HTML 控件、直接使用 `m3-expressive-react`、深层导入、server 越界依赖、生产文件超过 400 行、`console.log`、未使用变量。
+- `scripts/verify-stage-3.mjs` 已删除，只保留 `verify-stage-4.mjs`。
 
 ## 3. 测试分布
 

@@ -12,6 +12,7 @@
 | 构建 | 5/5 任务通过（client + SSR + server） |
 | 注册表校验 | `check:tools` 通过：7 条（preview 6、implemented 0、disabled 1），3 条样本任务 |
 | HTTP 验收 | 28/28（302/308/200/404、noindex、Sitemap、robots、缓存头） |
+| 严格代码门禁 | `pnpm verify` 通过；负向探针确认裸控件、硬编码颜色、越界导入会被阻断 |
 | 浏览器 E2E | **未执行**（无 Playwright） |
 | CI | **未接入** |
 

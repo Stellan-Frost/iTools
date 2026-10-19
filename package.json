@@ -14,9 +14,13 @@
     "dev": "pnpm run build:workspace-deps && pnpm --filter @itools/server dev",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "lint": "eslint apps packages scripts && pnpm check:boundaries",
+    "lint": "eslint apps packages scripts && pnpm check:boundaries && pnpm check:imports && pnpm check:tokens",
     "test": "node scripts/run-turbo.mjs test",
-    "typecheck": "node scripts/run-turbo.mjs typecheck"
+    "typecheck": "node scripts/run-turbo.mjs typecheck",
+    "check:imports": "node scripts/check-import-boundaries.mjs",
+    "check:tokens": "node scripts/check-design-tokens.mjs",
+    "check:i18n": "node scripts/check-i18n-keys.mjs",
+    "verify": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm check:tools && pnpm check:i18n && node scripts/verify-stage-4.mjs"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

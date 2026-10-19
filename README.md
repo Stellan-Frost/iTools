@@ -34,12 +34,16 @@ cd apps/server && NODE_ENV=production node dist/index.js
 ## 验证
 
 ```sh
+pnpm verify                       # 总门禁：format → lint → typecheck → test → build → 注册表 → i18n → HTTP
+
+# 或分步执行
 pnpm format:check
 pnpm lint
 pnpm typecheck
 pnpm test
 pnpm build
 pnpm check:tools                  # 需先构建 app-core
+pnpm check:i18n                   # 需先构建 app-core
 node scripts/verify-stage-4.mjs   # 需先 build
 ```
 
