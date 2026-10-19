@@ -31,7 +31,7 @@
 - `17-stage-1-workspace.md`：阶段 1 工作区、共享契约、命令、包边界与验收记录
 
 ## 当前开发状态
-阶段 1 已建立 pnpm 工作区和 `@itools/contracts` 基础包；应用、数据库、工具与设计系统尚未实现。建设状态和实际验收证据见 `docs/17-stage-1-workspace.md`。
+阶段 1 已完成并通过独立克隆验证：pnpm 工作区和 `@itools/contracts` 基础包可重复安装、检查、测试和构建。应用、数据库、工具与设计系统尚未实现。建设状态和实际验收证据见 `docs/17-stage-1-workspace.md`。
 
 ## 本地准备
 需要 Node.js 22 或更新版本，以及 pnpm 11.25.0。
