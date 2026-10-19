@@ -1,0 +1,93 @@
+@import 'm3-expressive-react/styles.css';
+@import '@fontsource-variable/roboto/wght.css';
+@import '@fontsource-variable/noto-sans-sc/wght.css';
+@import '@fontsource/material-symbols-rounded/400.css';
+
+:root {
+  --md-sys-typescale-brand-font-family:
+    'Roboto Variable', 'Noto Sans SC Variable', system-ui, sans-serif;
+  --md-sys-typescale-plain-font-family:
+    'Roboto Variable', 'Noto Sans SC Variable', system-ui, sans-serif;
+
+  --itools-space-1: 0.25rem;
+  --itools-space-2: 0.5rem;
+  --itools-space-3: 0.75rem;
+  --itools-space-4: 1rem;
+  --itools-space-6: 1.5rem;
+  --itools-space-8: 2rem;
+  --itools-space-12: 3rem;
+  --itools-space-16: 4rem;
+
+  --itools-breakpoint-compact: 37.5rem;
+  --itools-breakpoint-medium: 52.5rem;
+  --itools-breakpoint-expanded: 75rem;
+  --itools-breakpoint-large: 100rem;
+
+  --itools-layout-content-max: 80rem;
+  --itools-layout-readable-max: 72ch;
+  --itools-layout-page-gutter: var(--itools-space-4);
+  --itools-layout-sidebar-width: 17.5rem;
+
+  --itools-motion-duration-instant: 0ms;
+  --itools-motion-duration-short: 150ms;
+  --itools-motion-duration-medium: 250ms;
+  --itools-motion-duration-long: 400ms;
+  --itools-motion-easing-standard: cubic-bezier(0.2, 0, 0, 1);
+  --itools-motion-easing-emphasized: cubic-bezier(0.2, 0, 0, 1);
+}
+
+@media (min-width: 52.5rem) {
+  :root {
+    --itools-layout-page-gutter: var(--itools-space-6);
+  }
+}
+
+@media (min-width: 75rem) {
+  :root {
+    --itools-layout-page-gutter: var(--itools-space-8);
+  }
+}
+
+html {
+  font-family: var(--md-sys-typescale-plain-font-family);
+}
+
+body {
+  margin: 0;
+  min-width: 20rem;
+  font-family: var(--md-sys-typescale-plain-font-family);
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+.material-symbols-rounded {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Material Symbols Rounded', sans-serif;
+  font-size: 1.5rem;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  white-space: nowrap;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: 'liga';
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --itools-motion-duration-instant: 0ms;
+    --itools-motion-duration-short: 0ms;
+    --itools-motion-duration-medium: 0ms;
+    --itools-motion-duration-long: 0ms;
+  }
+}
