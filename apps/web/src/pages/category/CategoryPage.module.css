@@ -1,0 +1,32 @@
+.page {
+  width: min(100%, var(--itools-layout-content-max));
+  margin-inline: auto;
+}
+
+.count {
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.list {
+  display: grid;
+  max-width: var(--itools-layout-readable-max);
+  gap: var(--itools-space-3);
+  margin-top: var(--itools-space-6);
+}
+
+.empty {
+  margin-top: var(--itools-space-8);
+  border-radius: var(--md-sys-shape-corner-large);
+  background: var(--md-sys-color-surface-container-low);
+  padding: var(--itools-space-6);
+}
+
+.empty h2,
+.empty p {
+  margin: 0;
+}
+
+.empty p {
+  margin-block: var(--itools-space-2) var(--itools-space-4);
+  color: var(--md-sys-color-on-surface-variant);
+}
