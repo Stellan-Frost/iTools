@@ -1,68 +1,22 @@
+# 品牌图标资源
 
-# 项目接入说明
+此目录包含 iTools 品牌标记的六个 SVG 变体。应用内的品牌图标与工具功能图标用途不同：功能图标使用 Material Symbols，不使用本目录的品牌素材。
 
-## 项目接入
+| 文件                       | 用途                                 |
+| -------------------------- | ------------------------------------ |
+| `icon-preview.svg`         | 完整品牌图标；应用顶栏品牌标记使用它 |
+| `favicon.svg`              | 浏览器标签页图标                     |
+| `icon-background.svg`      | 浅色图标导出的背景图层               |
+| `icon-foreground.svg`      | 浅色图标导出的前景图层               |
+| `icon-background-dark.svg` | 深色图标导出的背景图层               |
+| `icon-foreground-dark.svg` | 深色图标导出的前景图层               |
 
-此图标包由 iTools 网站使用，原始 SVG 资源保存在 `apps/web/public/brand-icon/`：
+## 当前引用
 
-- 应用栏品牌标记：`/brand-icon/icon-preview.svg`
-- 浏览器标签页图标：`/brand-icon/favicon.svg`
-- 前景与背景明暗图层保留用于平台图标导出，不作为功能图标使用。
+`apps/web/index.html` 将 `/brand-icon/favicon.svg` 注册为 SVG favicon；Web 公共目录通过站点根路径提供资源。应用壳在 `apps/web/src/components/app-shell/AppShell.tsx` 引用 `/brand-icon/icon-preview.svg`。`AppShell.module.css` 使用 `--itools-layout-brand-mark-size`（当前为 2rem）控制显示尺寸，并使用全圆角 token 裁切展示；该 CSS 展示方式不改变 SVG 文件本身。
 
-入口引用位于 `apps/web/index.html`，网站品牌标记由应用壳引用。网站功能图标继续使用 Material Symbols。
+四个分层 SVG 保留用于外部图标组合或导出，目前页面没有单独引用它们。仓库没有 PNG 导出、`apple-touch-icon.png` 或 PWA 图标配置，不应假定这些资源已生成。
 
-原始素材包路径：`C:/Users/王子涵/.codex/codex-remote-attachments/01a1528e-d1e0-71a2-abfb-bddf6d3328dc/D38206D2-E3C0-4C72-8D87-5E07CBA0D332/1-icon-pack-2.zip`。
+## 来源与状态
 
-下方为原始素材包随附说明，保留其设计与导出说明。
-
----
-
-# 扇形工具 · 网站图标包
-
-遵循 Apple iOS 26 / Liquid Glass 图标规范设计：连续曲率圆角、分层结构、单一色相柔和渐变、图形简化加粗。
-主题色采用 Material Design 标准 Teal（鸭青）色板，主色 `#009688`（Teal 500）。
-
-## 文件说明
-
-| 文件 | 用途 |
-| --- | --- |
-| `icon-preview.svg` | 完整图标（含圆角），用于网站 logo、预览、导出 PNG |
-| `favicon.svg` | 浏览器标签页图标，针对 16–32px 优化 |
-| `icon-background.svg` | 分层文件：背景层（1024×1024，铺满、无圆角） |
-| `icon-foreground.svg` | 分层文件：前景层（透明底，支点处镂空） |
-| `icon-background-dark.svg` | 深色模式背景层 |
-| `icon-foreground-dark.svg` | 深色模式前景层 |
-
-## 使用方式
-
-### 网页
-
-```html
-<link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="/apple-touch-icon.png">
-```
-
-`apple-touch-icon.png` 需要 180×180 的 PNG，可用 `icon-preview.svg` 在 Figma、Sketch 或在线工具中导出。
-
-### Apple Icon Composer
-
-1. 新建项目，画布 1024×1024。
-2. 将 `icon-background.svg` 作为背景层，`icon-foreground.svg` 作为前景层拖入。
-3. 在深色外观下分别替换为 `-dark` 版本。
-4. 圆角蒙版、玻璃高光与阴影由系统自动添加，无需手动绘制。
-
-## 设计参数
-
-| 项目 | 值 |
-| --- | --- |
-| 背景渐变（默认） | `#26A69A`（Teal 400）→ `#00695C`（Teal 800） |
-| 支点圆点 | `#00897B`（Teal 600） |
-| 背景渐变（深色） | `#2C2C30` → `#0A0A0C` |
-| 前景色（默认） | `#FFFFFF`，侧刀片不透明度 45% |
-| 前景色（深色） | `#80CBC4`（Teal 200），侧刀片不透明度 45% |
-| 画布 | 1024×1024（分层文件）、96×96 / 32×32（预览与 favicon） |
-
-## 注意
-
-- 前景层的支点镂空使用了 SVG `mask`，导入前请确认所用工具支持；如不支持，可先在矢量软件中将其转为路径。
-- 图标内不含文字，符合 Apple 规范。
+资源来自当前提供的图标素材 ZIP；来源位置为 `C:/Users/王子涵/.codex/codex-remote-attachments/01a1528e-d1e0-71a2-abfb-bddf6d3328dc/D38206D2-E3C0-4C72-8D87-5E07CBA0D332/1-icon-pack-2.zip`。该本机路径仅作素材来源记录，不是运行依赖。ZIP 中的原始素材未修改；仓库 SVG 是应用使用的副本，配色调整为鸭青。此处描述资源用途，不表示它们通过 Apple 或 Material Design 认证。
