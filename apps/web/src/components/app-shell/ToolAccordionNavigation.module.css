@@ -175,7 +175,17 @@
   flex: 0 0 var(--itools-layout-navigation-icon-size);
   align-items: center;
   justify-content: center;
-  color: var(--md-sys-color-primary);
+  border-radius: var(--md-sys-shape-corner-full);
+}
+
+.categoryIcon {
+  background: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
+}
+
+.toolIcon {
+  background: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
 }
 
 .categoryGroup {
@@ -296,10 +306,14 @@
 
 .toolItem[aria-current='page'] .toolIcon,
 .toolItem[aria-selected='true'] .toolIcon {
+  background: var(--md-sys-color-primary-container);
   color: var(--md-sys-color-on-primary-container);
 }
 
-.categoryGroup[data-expanded='true'] .categoryIcon,
+.categoryGroup[data-expanded='true'] .categoryIcon {
+  color: var(--md-sys-color-on-primary-container);
+}
+
 .categoryGroup[data-expanded='true'] .toolIcon {
   color: var(--md-sys-color-on-secondary-container);
 }

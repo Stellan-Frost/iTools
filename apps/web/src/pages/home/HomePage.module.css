@@ -80,9 +80,11 @@
 .artworkSymbol {
   display: grid;
   width: 3rem;
+  height: 3rem;
+  flex: 0 0 3rem;
   aspect-ratio: 1;
   place-items: center;
-  border-radius: var(--itools-shape-corner-rectangle);
+  border-radius: var(--md-sys-shape-corner-full);
   background: var(--md-sys-color-secondary-container);
   color: var(--md-sys-color-on-secondary-container);
   font-size: 1.75rem;
@@ -179,7 +181,14 @@
 }
 
 .privacyNote > :first-child {
-  color: var(--md-sys-color-secondary);
+  display: grid;
+  width: 2.5rem;
+  height: 2.5rem;
+  flex: 0 0 2.5rem;
+  place-items: center;
+  border-radius: var(--md-sys-shape-corner-full);
+  background: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
   font-size: 1.5rem;
 }
 

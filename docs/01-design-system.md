@@ -12,7 +12,7 @@
 - 表面层级通过 MD3 语义表面色区分；阴影主要用于菜单、对话框等浮层。
 - 字体：界面英文 Roboto；中文 Noto Sans SC；代码使用专用等宽字体。所有文本使用 MD3 Display、Headline、Title、Body、Label 五类各 Large/Medium/Small 共十五个 typescale 角色及其字号、字重、行高、字距 Token；不得另设任意字号。Material Symbols 字形尺寸属于图标 Token，不是文本字号。
 - 图标：Material Symbols Rounded，优先本地托管。
-- 形状：全局固定矩形 corner Token 使用 32px（`--itools-shape-corner-rectangle`）；Dialog 主表面保留专用 48px token（`--itools-shape-corner-dialog`），其正文中的卡片、输入框等固定矩形继续使用 32px。NavigationDrawer 贴屏一侧保持直角，外侧两角使用全局 32px 矩形 token。`none`、`full` 及圆形几何保持各自语义。主题映射由公开 ThemeProvider `style` CSS custom properties 提供，Dialog 与 NavigationDrawer 通过 adapter 包装器在公开 `style` 入口应用形状；胶囊形 Chip/Button 继续使用 `full`。
+- 形状：全局固定矩形 corner Token 使用 32px（`--itools-shape-corner-rectangle`）；Dialog 主表面保留专用 48px token（`--itools-shape-corner-dialog`），其正文中的卡片、输入框等固定矩形继续使用 32px。NavigationDrawer 贴屏一侧保持直角，外侧两角使用全局 32px 矩形 token。`none`、`full` 及圆形几何保持各自语义。主题映射由公开 ThemeProvider `style` CSS custom properties 提供，Dialog 与 NavigationDrawer 通过 adapter 包装器在公开 `style` 入口应用形状；胶囊形 Chip/Button 继续使用 `full`。独立展示的图标底板使用等宽高布局和 `full` Token 构成圆形，并用对应的语义前景/容器色配对；内嵌在按钮、输入框和 chevron 中的图标沿用所在组件结构。IconButton adapter 在公开 `style` 入口固定圆形，覆盖上游按压时的 shape morph；库提供的触控伪元素仍至少为 48px，视觉尺寸由组件 size 决定。
 - 信息密度：宽松展示型，允许复杂工具页面有更多滚动。
 - 动效：丰富但有秩序；为页面、菜单、对话框、卡片、任务进度和结果展示定义统一时长、缓动、层级与取消规则。尊重 `prefers-reduced-motion`，避免不必要的持续动效。
 - 响应式：统一断点、网格、最大内容宽度与间距；复杂工作区随可用空间重排，不维护独立移动页面。

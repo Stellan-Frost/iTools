@@ -66,6 +66,8 @@ Set `mode` to `'light'` or `'dark'` from the app's own preference state. `AppThe
 
 The package entry re-exports the library's Button, IconButton, TextField, Dialog, Card and card actions, navigation drawer and rail, snackbar provider and hook, linear and circular progress indicators, Switch, Chip, and supporting form, list, search, menu, tabs and feedback components. Import these components through this adapter; application code should not import `m3-expressive-react` directly.
 
+The adapter's `IconButton` wrapper pins `borderRadius` to `var(--md-sys-shape-corner-full)` through the library's public `style` prop. This keeps the surface circular in default, selected, pressed and focus states, even though the upstream component normally morphs its shape while pressed or toggled. The upstream button keeps its 48px minimum hit area independently of the selected visual `size`.
+
 ## Color generation
 
 Colors are generated in `src/theme/colors.ts` with the locked `@material/material-color-utilities@0.4.0` package. The generation input is fixed and explicit so package default changes cannot silently switch the scheme:

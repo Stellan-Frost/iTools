@@ -3,6 +3,7 @@ export {
   type AppThemeProviderProps,
 } from './theme/AppThemeProvider.js';
 export { MaterialIcon, type MaterialIconProps } from './icons/MaterialIcon.js';
+export { IconButton, type IconButtonProps } from './components/IconButton.js';
 
 export {
   Autocomplete,
@@ -19,7 +20,6 @@ export {
   DatePicker,
   Divider,
   Fab,
-  IconButton,
   LinearProgressIndicator,
   List,
   ListItem,
@@ -58,7 +58,6 @@ export type {
   DialogProps,
   DividerProps,
   FabProps,
-  IconButtonProps,
   LinearProgressIndicatorProps,
   ListItemProps,
   ListProps,
