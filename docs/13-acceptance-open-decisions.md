@@ -25,9 +25,9 @@
 | API 冒烟 | 生产模式实跑：`/api/v1/tools` 200（`max-age=60`）、未知工具 404、`/health/ready` 200、OpenAPI 5 条路径 |
 | 隐私门禁 | `check:privacy` 通过：asset-store / task-runtime 生产源码无网络调用 |
 | 浏览器 E2E | Chromium 9 项已执行；真实管理员登录、跨版本 SW 更新和 Safari 差异未覆盖 |
-| IndexedDB 验证 | 仅 `fake-indexeddb`，未做真实浏览器验证 |
+| IndexedDB 验证 | `fake-indexeddb` 单元测试及真实 Chromium PWA 边界 E2E 已通过；Safari 与多标签事务未覆盖 |
 | 真实 Worker 脚本 | **未实现**（阶段 5 用测试替身验收） |
-| CI | GitHub Actions 工作流已配置；仓库无 Git remote，云端运行与分支保护未验证 |
+| CI | [云端 `quality` 运行](https://github.com/Stellan-Frost/iTools/actions/runs/39363058759) 在 `b8677ac` 成功；受保护 `main` 的失败合并阻断由 [PR #1](https://github.com/Stellan-Frost/iTools/pull/1) 验证 |
 
 ## 2. 全局验收清单
 
@@ -44,7 +44,7 @@
 | CSP、安全响应头、公开 API 限流、脱敏日志、依赖扫描 | ✅ 阶段 9（漏洞合并阻断属阶段 11 CI） |
 | 首个真实工具与执行 UI | ⏳ 待排期（D24 清单已确认；运行时已就绪） |
 | PWA、缓存清理、更新失败恢复 | ✅ 阶段 10（D36；构建产物和 Node VM 验收，浏览器 E2E 属阶段 11） |
-| CI、Playwright、性能预算 | 🟡 阶段 11 本地通过；云端 CI/分支保护待验证 |
+| CI、Playwright、性能预算 | ✅ 阶段 11 本地及云端通过，失败合并阻断已验证 |
 | Docker Compose、备份、回滚 | ⏳ 阶段 12 |
 | 全局交付与生产部署批准 | ⏳ 阶段 13；部署须用户明确批准 |
 
@@ -126,7 +126,17 @@
 | 非范围 | GitHub 仓库连接、云端 Actions 实跑、分支保护设置、生产部署、真实工具执行；用户选择先完成本地验收。 |
 | 修改文件 | `.github/workflows/quality.yml`、`playwright.config.ts`、`tsconfig.e2e.json`、`e2e/{app,pwa}.spec.ts`、`scripts/{check-coverage,check-openapi-diff,check-openapi-diff.test,openapi-compatibility,measure-performance,performance-budget,performance-budget.test,performance-report}.mjs`、`quality/{coverage,openapi,performance}-baseline.json`、根 `package.json` / `pnpm-lock.yaml` / `.gitignore`、`README.md`、`docs/{00,07,08,09,10,13,14,15}*`。 |
 | 实际命令 | `pnpm install --frozen-lockfile` 通过；`pnpm verify:stage11` 通过，其中格式/Lint/边界/隐私、类型检查 12/12、Vitest 593/593、构建 8/8、HTTP 28/28、PWA 99/99、Playwright 9/9、OpenAPI 脚本测试 3/3 与 11 路径兼容检查、覆盖率 8 包、重复块 0、性能预算两语言通过、生产依赖审计 0 告警。新增性能预算负向探针 2/2 单独复跑通过；定向 `pnpm typecheck:e2e` 已通过。 |
-| 验收标准 | 锁文件安装可复现 ✅；硬检查本地失败即非零退出 ✅；D04 安全分级已获用户确认并写入工作流 ✅；D37 预算有真实基线且已获用户确认 ✅；指定页面与错误路径 E2E ✅；GitHub 云端运行 ⏳；分支保护实际阻止合并 ⏳。 |
+| 验收标准 | 锁文件安装可复现 ✅；硬检查本地失败即非零退出 ✅；D04 安全分级已获用户确认并写入工作流 ✅；D37 预算有真实基线且已获用户确认 ✅；指定页面与错误路径 E2E ✅；GitHub 云端运行与分支保护的补充验收见下表。 |
 | 证据位置 | `.github/workflows/quality.yml`、`e2e/`、`scripts/{check-openapi-diff,performance-budget}.test.mjs` 负向探针、`quality/coverage-baseline.json`、`quality/openapi-baseline.json`、`quality/performance-baseline.json` 与 `docs/10-testing-ci-quality.md`。 |
-| 已知限制 | 仓库没有 Git remote，不能声称工作流已在 GitHub 跑通或阻止合并。Chromium E2E 未覆盖真实管理员登录、跨版本 SW 更新/修复及 Safari；性能墙钟数仅报告，Linux CI 的字节预算尚未实测。覆盖率报告只计入 V8 捕获的文件。 |
-| 下一阶段 | 阶段 11 本地交付通过；云端 CI/分支保护仍待仓库连接验证。按阶段推进规则，阶段 12 暂不开始。 |
+| 已知限制 | Chromium E2E 未覆盖真实管理员登录、跨版本 SW 更新/修复及 Safari；性能墙钟数仅报告。覆盖率报告只计入 V8 捕获的文件。云端补充验收见下表。 |
+| 下一阶段 | 本地交付通过；云端补充验收完成后，阶段 12 的前置门槛已满足。 |
+
+### 阶段 11 云端补充验收（2026-10-20）
+
+| 项 | 记录 |
+| --- | --- |
+| 仓库与范围 | [Stellan-Frost/iTools](https://github.com/Stellan-Frost/iTools) 已连接；用户确认改为公开仓库，以启用当前账号方案下的分支保护。公开前扫描了 Git 历史与文件名，并轮换与历史测试值相同的本机 PostgreSQL 口令；`.env` 未纳入 Git。 |
+| 成功路径 | 提交 `b8677ac5b0a8962b8a8868487342d62ac25f2852` 的 [Actions 运行](https://github.com/Stellan-Frost/iTools/actions/runs/39363058759) `quality` 成功；包括 Linux Chromium 字节预算、OpenAPI、覆盖率及生产依赖审计。 |
+| 分支保护 | `main` 要求由 GitHub Actions 提供的 `quality` 检查（App ID 15368）、分支与主干同步、经 PR 合并；管理员同样受约束，0 位必需审阅者，禁止强推和删除。 |
+| 负向探针 | 临时 [PR #1](https://github.com/Stellan-Frost/iTools/pull/1) 故意加入未格式化 JSON，`Check formatting` 失败；在非 draft 状态下 `mergeable_state: blocked`。验收后已关闭 PR 并删除分支。 |
+| 结论与限制 | 阶段 11 验收完成，允许进入阶段 12。已证实格式失败阻止合并；高危依赖漏洞的负向路径未单独注入，Safari 与真实管理员浏览器流程仍未覆盖。 |

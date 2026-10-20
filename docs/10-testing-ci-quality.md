@@ -1,7 +1,7 @@
 # 10 · 测试与质量门禁
 
 > 定位：说明本地质量门禁每条命令在挡什么、593 项 Vitest 和 9 项浏览器 E2E 如何运行，以及 CI、覆盖率、OpenAPI、性能预算的证据与限制。
-> 状态：阶段 11 本地门禁已实现；GitHub Actions 工作流已写入仓库，云端运行与分支保护因仓库暂无 Git remote 而待验证。
+> 状态：阶段 11 本地与 GitHub Actions 门禁已通过；`main` 分支的必需检查及失败合并阻断已验证。
 > 代码入口：`scripts/{check-boundaries,check-import-boundaries,check-design-tokens,check-no-network,check-external-resources,check-tool-registry,check-i18n-keys}.mjs`、`scripts/verify-stage-4.mjs`、`apps/web/vite.config.ts`、`packages/design-system-adapter/vitest.config.ts`、`packages/db/src/test-support/test-database.ts`。
 
 ## 1. 当前事实
@@ -25,10 +25,10 @@
 | 缺口 | 现状 |
 | --- | --- |
 | Playwright / 真实浏览器 E2E | 9 项本地通过：SSR/水合、搜索、预览直达、任务、后台失败关闭、404、CSP、SW 离线首页与 IndexedDB 保留；真实管理员登录、SW 多版本切换仍未覆盖 |
-| GitHub Actions | 工作流已配置；没有 Git remote，云端执行和分支保护未验证，不能声称已阻止合并 |
+| GitHub Actions | `main` 上的 `quality` 工作流成功；临时 PR 的格式检查失败后合并状态为 `blocked` |
 | 覆盖率阈值 | V8 基线已记录，8 包的语句/分支/函数指标最多允许回退 5 个百分点；`report:coverage` 后运行 `check:coverage` |
 | 性能与包体预算 | 中英文首页各 7 次 Chromium 基线；资源字节硬预算已按 D37 启用，FCP/LCP 只报告 |
-| 依赖漏洞阻断 | D04 已确认：生产依赖 high/critical 阻断，low/moderate 只报告；本地审计 0 项，云端待验证 |
+| 依赖漏洞阻断 | D04 已确认：生产依赖 high/critical 阻断，low/moderate 只报告；本地审计 0 项，云端工作流通过 |
 
 ## 2. 代码地图
 
@@ -151,18 +151,18 @@ node --env-file-if-exists=.env scripts/run-turbo.mjs test --filter=@itools/serve
 4. 建 `packages/task-runtime/src/__probe__.ts` 写 `fetch('/x')`，跑 `pnpm check:privacy`：期望报“出现 fetch()”。
 5. **删除全部探针文件**后重跑 `pnpm verify`，确认恢复通过；探针不得提交。
 
-### 6.5 接入 GitHub 后验证 CI
+### 6.5 GitHub CI 与分支保护验收
 
-1. 将仓库连接 GitHub，推送包含 `.github/workflows/quality.yml` 的分支；确认 PR 与 push 触发的 `quality` job 实际通过。工作流使用 PostgreSQL 17 的 `itools_test`，并执行锁文件安装、Vitest 覆盖率、构建、OpenAPI、Playwright、性能与漏洞门禁。
-2. 在 GitHub 分支保护中将 `quality` 设为必需检查；未设置之前，工作流失败本身不能阻止合并。当前仓库无 Git remote，故这两步未执行。
+1. `main` 提交 `b8677ac` 的 [云端 `quality` 运行](https://github.com/Stellan-Frost/iTools/actions/runs/39363058759) 成功；工作流使用 PostgreSQL 17 的 `itools_test`，并执行锁文件安装、Vitest 覆盖率、构建、OpenAPI、Playwright、性能与漏洞门禁。
+2. `main` 分支保护要求 GitHub Actions 的 `quality` 检查成功并保持分支同步；管理员同样受约束，只能经 PR 合并，禁止强推和删除。临时 [PR #1](https://github.com/Stellan-Frost/iTools/pull/1) 的 `Check formatting` 故意失败，PR 在非 draft 状态下返回 `mergeable_state: blocked`；验证后已关闭 PR 并删除探针分支。
 3. 浏览器 E2E 的后台用例仅覆盖无数据库时的安全失败；需要隔离的浏览器管理员会话测试时，必须使用独立 `_test` 库，不复用会重建 `public` schema 的并行测试。
 
 ## 7. 已知限制与相关决策
 
-- GitHub Actions 工作流尚未在云端运行；仓库没有 Git remote，分支保护也未设置，实际合并阻断未验证。
+- GitHub Actions 的成功运行和格式失败阻断已验证；尚未单独注入高危依赖漏洞验证 D04 的负向路径，该规则由 `pnpm check:audit` 与工作流步骤提供。
 - Playwright 覆盖真实 Chromium 的水合、CSP、SW 首次安装/离线首页和 IndexedDB 保留；多版本更新切换、损坏修复、真实管理员登录及真实工具 Worker 仍缺浏览器 E2E。
 - 服务端集成测试重建 `public` schema 且不校验 `_test` 后缀，安全性完全依赖 `TEST_DATABASE_URL` 的取值；调用前务必确认连接串。
 - `check:i18n` 只查“键有引用”，不查键集合；键集断言只覆盖 `common`。
 - 覆盖率指标含测试替身与已执行文件；新增未被任何测试导入的文件不一定进入 V8 报告，评审仍需检查测试覆盖范围。
-- 性能基线只测单台 Windows 主机上的 Chromium 首页；CI Linux 环境的资源字节门禁尚未云端验证。FCP/LCP 与真实压缩收益仅报告，未设时序硬阈值；见 [09](09-pwa-cache-update.md) 和 `quality/performance-baseline.json`。
+- 性能基线只测单台 Windows 主机上的 Chromium 首页；CI Linux 环境的资源字节门禁已在上述工作流通过，但 FCP/LCP 与真实压缩收益仅报告，未设时序硬阈值；见 [09](09-pwa-cache-update.md) 和 `quality/performance-baseline.json`。
 - 相关决策：D04（漏洞分级）、D06（验收顺序）、D15（SSR noExternal）、D35（进程内限流）、D37（性能预算）。全文见 [13](13-acceptance-open-decisions.md)。

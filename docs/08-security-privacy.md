@@ -94,7 +94,7 @@ pnpm build && pnpm check:external
 # 期望：外部资源审计通过：<N> 个 HTML/CSS 文件无外部引用。
 
 pnpm check:audit
-# 期望：No known vulnerabilities found（当前基线；阶段 11 工作流已加入 D04 分级门禁，云端待验证）
+# 期望：No known vulnerabilities found（当前基线；阶段 11 工作流已加入 D04 分级门禁，云端运行通过）
 
 pnpm test
 # 期望：593 passed（server 162 中：headers 8、app-security 4、guard-origin 5、rate-limit 1、request-log 8）
@@ -156,7 +156,7 @@ curl -s 'http://127.0.0.1:3000/api/v1/tools?token=secret' >/dev/null
 
 ## 7. 已知限制与相关决策
 
-- D04 已决：阶段 11 的工作流对生产依赖 high/critical 告警阻断，对 low/moderate 只报告；用户于 2026-10-20 确认。云端运行和分支保护仍待仓库连接验证。
+- D04 已决：阶段 11 的工作流对生产依赖 high/critical 告警阻断，对 low/moderate 只报告；用户于 2026-10-20 确认。云端运行与分支保护已验证；高危漏洞的负向注入未单独执行。
 - D34：`style-src` 必须保留 `'unsafe-inline'`；`script-src` 不放宽。
 - D35：限流为进程内固定窗口，多实例各自计数。
 - 未配置 `trustProxy`（Fastify 默认 false）：`request.ip` 是直连地址；部署在反向代理后所有请求共享代理 IP，按 IP 限流会失真，阶段 12 必须处理。
@@ -164,5 +164,5 @@ curl -s 'http://127.0.0.1:3000/api/v1/tools?token=secret' >/dev/null
 - 没有 CSP `report-uri` / `report-to`，违规只落在浏览器控制台。
 - 日志只写 stdout，无轮转、无 30 天保留（阶段 12），进程退出即丢。
 - `admin_sessions.deleteExpired` 已实现但未被调用，过期会话不会主动清理。
-- 依赖审计已写入阶段 11 的 CI 工作流，云端运行待验证；SBOM 与许可证汇总仍未完成（阶段 13）。
+- 依赖审计已写入阶段 11 的 CI 工作流，云端运行通过；SBOM 与许可证汇总仍未完成（阶段 13）。
 - 安全测试均为 `inject` 与组件级，无浏览器 E2E；CSP 在真实浏览器中的行为未自动化验证。
