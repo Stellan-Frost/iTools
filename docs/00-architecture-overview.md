@@ -1,7 +1,7 @@
 # 00 · 架构总览与开发入口
 
 > 定位：新 Agent 的唯一入口。读完本文你能：启动项目、知道每个包管什么、知道改动的标准流程与红线。
-> 状态：**阶段 0–10 已完成**；阶段 11 的本地质量门禁、Playwright 与性能预算已实现，GitHub Actions 云端运行和分支保护待仓库连接验证；阶段 12–13 未开始。
+> 状态：**阶段 0–11 已完成**；阶段 11 的本地质量门禁、Playwright、性能预算与 GitHub Actions 分支保护均已验证；阶段 12–13 未开始。
 > 目标站点：`itools.wataa.men`。强制阅读顺序：本文 → [14](14-phase-implementation-roadmap.md) → [15](15-mandatory-code-requirements.md) → 按任务读 01–12；决策一律查 [13](13-acceptance-open-decisions.md)。
 
 ## 1. 项目是什么
@@ -9,7 +9,7 @@
 多工具网站：首页 + 5 个分类（`audio/image/video/text/other`，冻结）。工具尽量在浏览器本地处理，不上传用户文件。普通用户免登录。
 
 **当前真实能力**（勿夸大）：Fastify SSR + Vite 水合、中英双语路由、真实 404、Sitemap/robots、三态工具注册表、任务运行时（未接线）、本地资产存储（未接线）、PostgreSQL + 只读/管理 API、管理后台（含界面）、CSP/限流/脱敏日志、PWA 壳层离线启动与用户确认更新。
-**当前没有**：任何可执行工具（`implemented = 0`，6 preview + 1 disabled）、真实任务 Worker、任务 UI、已运行的云端 CI、部署。Playwright 已验证真实浏览器中的 PWA 安装、离线首页与 IndexedDB 边界；更新切换和修复的完整故障矩阵仍由 Node VM 模拟验收。
+**当前没有**：任何可执行工具（`implemented = 0`，6 preview + 1 disabled）、真实任务 Worker、任务 UI、部署。Playwright 已验证真实浏览器中的 PWA 安装、离线首页与 IndexedDB 边界；更新切换和修复的完整故障矩阵仍由 Node VM 模拟验收。
 
 ## 2. 五分钟启动
 
