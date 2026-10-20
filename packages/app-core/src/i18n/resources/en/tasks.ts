@@ -9,4 +9,8 @@ export const tasks = {
   count: '{{total}} samples',
   fallbackTool: 'Unknown tool',
   fallbackCategory: 'Uncategorized',
+  offline: {
+    title: 'Tasks are unavailable offline',
+    body: 'The task list requires a network connection. Reconnect and open this page again.',
+  },
 };

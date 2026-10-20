@@ -20,6 +20,7 @@ interface AppShellProps {
   themeMode: 'light' | 'dark';
   onToggleTheme: () => void;
   onOpenSearch: () => void;
+  onOpenAppInfo: () => void;
 }
 
 function routeToCategoryId(route: AppRoute): CategoryId | undefined {
@@ -39,6 +40,7 @@ export function AppShell({
   themeMode,
   onToggleTheme,
   onOpenSearch,
+  onOpenAppInfo,
 }: AppShellProps) {
   const { t } = useTranslation(['common', 'navigation']);
   const { locale, route, navigate, switchLocale } = useAppNavigation();
@@ -140,6 +142,7 @@ export function AppShell({
         onToggleRecent={() => setIsRecentOpen((isOpen) => !isOpen)}
         onToggleTheme={onToggleTheme}
         onOpenSearch={onOpenSearch}
+        onOpenAppInfo={onOpenAppInfo}
         onOpenDrawer={() => setIsDrawerOpen(true)}
         onNavigateHome={navigateHome}
         onNavigateAdmin={navigateAdmin}
@@ -177,6 +180,10 @@ export function AppShell({
           onNavigateHome={navigateHome}
           onNavigateAdmin={navigateAdmin}
           onNavigateTasks={navigateTasks}
+          onOpenAppInfo={() => {
+            setIsDrawerOpen(false);
+            onOpenAppInfo();
+          }}
           onToggleCategory={toggleCategory}
           onOpenTool={openToolInformation}
         />

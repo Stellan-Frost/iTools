@@ -80,6 +80,7 @@ async function createRuntime(config: ServerConfig): Promise<Runtime> {
     staticRoots: {
       assets: `${config.webRoot}/dist/client/assets`,
       brandIcons: `${config.webRoot}/dist/client/brand-icon`,
+      pwa: `${config.webRoot}/dist/client`,
     },
   });
 

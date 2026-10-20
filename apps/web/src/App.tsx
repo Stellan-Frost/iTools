@@ -11,12 +11,14 @@ import { AppNavigationProvider, type AppNavigation } from './app/navigation.js';
 import { buildAppPath, parseAppPath, type AppRoute } from './app/route.js';
 import { AppShell } from './components/app-shell/AppShell.js';
 import { CommandPalette } from './components/command-palette/CommandPalette.js';
+import { PwaUpdatePanel } from './components/pwa/PwaUpdatePanel.js';
 import { AdminPage } from './pages/admin/AdminPage.js';
 import { CategoryPage } from './pages/category/CategoryPage.js';
 import { HomePage } from './pages/home/HomePage.js';
 import { NotFoundPage } from './pages/not-found/NotFoundPage.js';
 import { TasksPage } from './pages/tasks/TasksPage.js';
 import { ToolPage } from './pages/tool/ToolPage.js';
+import { usePwaUpdateManager } from './pwa/use-pwa-update-manager.js';
 
 export interface AppProps {
   initialLocale: Locale;
@@ -56,6 +58,7 @@ export function App({ initialLocale, initialRoute }: AppProps) {
   const [route, setRoute] = useState<AppRoute>(initialRoute);
   const [themeMode, setThemeMode] = useState<AppColorMode>('light');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const pwa = usePwaUpdateManager();
 
   const i18n = useMemo(() => createI18n(locale), [locale]);
 
@@ -111,6 +114,7 @@ export function App({ initialLocale, initialRoute }: AppProps) {
                 setThemeMode((mode) => (mode === 'light' ? 'dark' : 'light'))
               }
               onOpenSearch={openSearch}
+              onOpenAppInfo={pwa.openAbout}
             >
               <CurrentPage route={route} />
             </AppShell>
@@ -118,6 +122,7 @@ export function App({ initialLocale, initialRoute }: AppProps) {
               open={isSearchOpen}
               onClose={() => setIsSearchOpen(false)}
             />
+            <PwaUpdatePanel controller={pwa} />
           </AppNavigationProvider>
         </SnackbarProvider>
       </AppThemeProvider>

@@ -5,6 +5,7 @@ import { PageHeading } from '../../components/page-chrome/PageHeading.js';
 import { PreviewNotice } from '../../components/page-chrome/PreviewNotice.js';
 import { PreviewBadge } from '../../components/page-chrome/PreviewBadge.js';
 import { useAppNavigation } from '../../app/navigation.js';
+import { useOnlineStatus } from '../../pwa/use-online-status.js';
 import { ToolInputSection } from './ToolInputSection.js';
 import {
   PreviewResultSection,
@@ -20,6 +21,7 @@ interface ToolPageProps {
 export function ToolPage({ toolId }: ToolPageProps) {
   const { locale, navigate } = useAppNavigation();
   const { t } = useTranslation(['catalog', 'common']);
+  const isOnline = useOnlineStatus();
 
   const tool = findVisibleTool(toolId);
   if (!tool) {
@@ -49,6 +51,9 @@ export function ToolPage({ toolId }: ToolPageProps) {
         actions={tool.availability === 'preview' ? <PreviewBadge /> : null}
       />
       <PreviewNotice>{t('catalog:tool.previewBody')}</PreviewNotice>
+      {isOnline === false ? (
+        <PreviewNotice>{t('catalog:tool.offlinePreviewBody')}</PreviewNotice>
+      ) : null}
       <div className={styles.sections}>
         <ToolInputSection tool={tool} />
         <WorkspaceSample tool={tool} />

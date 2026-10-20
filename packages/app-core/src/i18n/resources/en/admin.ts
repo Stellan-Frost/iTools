@@ -2,6 +2,10 @@ export const admin = {
   eyebrow: 'Catalog management',
   title: 'Admin console',
   description: 'Maintain tool metadata, availability, and version history.',
+  offlineUnavailable: {
+    title: 'Admin is unavailable offline',
+    body: 'The admin page requires a connection to the admin service. Reconnect and open this page again.',
+  },
   loading: 'Checking the admin session…',
   loadError: 'The admin service is unreachable. Try again later.',
   retry: 'Retry',

@@ -1,15 +1,15 @@
 # 00 · 架构总览与开发入口
 
 > 定位：新 Agent 的唯一入口。读完本文你能：启动项目、知道每个包管什么、知道改动的标准流程与红线。
-> 状态：**阶段 0–9 已完成**；阶段 10（PWA）、11（CI/Playwright/性能）、12（部署）、13（全局验收与部署批准）未开始。
+> 状态：**阶段 0–10 已完成**；阶段 11（CI/Playwright/性能）、12（部署）、13（全局验收与部署批准）未开始。
 > 目标站点：`itools.wataa.men`。强制阅读顺序：本文 → [14](14-phase-implementation-roadmap.md) → [15](15-mandatory-code-requirements.md) → 按任务读 01–12；决策一律查 [13](13-acceptance-open-decisions.md)。
 
 ## 1. 项目是什么
 
 多工具网站：首页 + 5 个分类（`audio/image/video/text/other`，冻结）。工具尽量在浏览器本地处理，不上传用户文件。普通用户免登录。
 
-**当前真实能力**（勿夸大）：Fastify SSR + Vite 水合、中英双语路由、真实 404、Sitemap/robots、三态工具注册表、任务运行时（未接线）、本地资产存储（未接线）、PostgreSQL + 只读/管理 API、管理后台（含界面）、CSP/限流/脱敏日志。
-**当前没有**：任何可执行工具（`implemented = 0`，6 preview + 1 disabled）、真实 Worker、任务 UI、PWA、CI、Playwright、部署。
+**当前真实能力**（勿夸大）：Fastify SSR + Vite 水合、中英双语路由、真实 404、Sitemap/robots、三态工具注册表、任务运行时（未接线）、本地资产存储（未接线）、PostgreSQL + 只读/管理 API、管理后台（含界面）、CSP/限流/脱敏日志、PWA 壳层离线启动与用户确认更新。
+**当前没有**：任何可执行工具（`implemented = 0`，6 preview + 1 disabled）、真实任务 Worker、任务 UI、CI、Playwright、部署。PWA 生命周期只经过 Node VM 模拟验收，真实浏览器 E2E 留到阶段 11。
 
 ## 2. 五分钟启动
 
@@ -45,10 +45,11 @@ pnpm verify     # 全量门禁（任何提交前必须通过）
 | `pnpm dev` | 本地开发（先构建 workspace-deps） |
 | `pnpm verify` | **总门禁**：format:check → lint → typecheck → test → build → check:external → check:tools → check:i18n → HTTP 28 项 |
 | `pnpm lint` | ESLint 严格规则 + `check:boundaries` + `check:imports` + `check:tokens` + `check:privacy` |
-| `pnpm test` | 全部 584 项（自动加载 `.env`；db 测试需 PostgreSQL） |
+| `pnpm test` | 全部单元/集成测试（自动加载 `.env`；db 测试需 PostgreSQL） |
 | `pnpm test:db` | 仅 db 包（真实 PostgreSQL） |
 | `pnpm check:tools` / `check:i18n` | 注册表校验 / i18n 键引用（需先 `pnpm build`） |
 | `pnpm check:external` / `check:audit` | 构建产物外部资源审计 / 依赖漏洞扫描 |
+| `node scripts/verify-stage-10.mjs` | 构建后验证 PWA 清单、缓存更新与离线恢复（Node VM） |
 | `pnpm format` | Prettier 写入 |
 
 ## 5. 关键结构约定

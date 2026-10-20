@@ -45,6 +45,8 @@ export const catalog = {
     eyebrow: '{{category}} · Tool UI preview',
     previewBody:
       'This tool is not implemented yet. This page only shows its layout and sample content.',
+    offlinePreviewBody:
+      'You are offline. This page remains a UI preview; a processing engine is not guaranteed to be cached or available.',
     previewInputHint: 'Input is disabled until this tool is implemented.',
     previewTaskBody:
       'Task runtime will be connected with the tool implementation.',

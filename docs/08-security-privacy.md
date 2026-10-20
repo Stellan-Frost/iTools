@@ -97,7 +97,7 @@ pnpm check:audit
 # 期望：No known vulnerabilities found（当前基线；未接入 CI，见 D04）
 
 pnpm test
-# 期望：584 passed（server 159 中：headers 8、app-security 4、guard-origin 5、rate-limit 1、request-log 8）
+# 期望：593 passed（server 162 中：headers 8、app-security 4、guard-origin 5、rate-limit 1、request-log 8）
 
 grep -rn "fetch(\|XMLHttpRequest\|new WebSocket\|EventSource\|sendBeacon" \
   packages/asset-store/src packages/task-runtime/src

@@ -1,7 +1,7 @@
 # 06 · 后端、数据库与 API
 
 > 定位：定义 `packages/db` 与 `apps/server` 的职责、数据模型、迁移纪律和 `/api/v1` 契约，让新 Agent 能安全加表、加接口而不破坏「注册表权威」。
-> 状态：已实现（阶段 7 只读 API；阶段 8 管理写接口的存储层）。阶段 10 PWA、11 CI、12 部署、13 验收未开始。
+> 状态：已实现（阶段 7 只读 API；阶段 8 管理写接口的存储层）。阶段 10 PWA 已实现；阶段 11 CI、12 部署、13 验收未开始。
 > 代码入口：`packages/db/src/index.ts`、`packages/db/src/migrate.ts`、`packages/db/src/catalog/tool-catalog-service.ts`、`apps/server/src/api/routes.ts`、`apps/server/src/catalog-runtime.ts`、`apps/server/src/app.ts`。
 
 ## 1. 当前事实
@@ -12,7 +12,7 @@
 | 库 | `itools`（开发）、`itools_test`（测试；库名必须以 `_test` 结尾，否则测试支持层拒绝运行） |
 | 迁移 | `0001_initial.sql`、`0002_admin_credentials.sql` 已在真实库执行；服务启动不自动迁移 |
 | 表 | 4 张目录/会话表 + 1 张管理员凭据表 + 执行器自建 `_migrations` |
-| 测试 | db 65 项、server 159 项；全仓 584 项、HTTP 验收 28/28 |
+| 测试 | db 65 项、server 162 项；全仓 593 项、HTTP 验收 28/28、PWA 验收 99/99 |
 
 | 表 | 关键列 | 语义 |
 | --- | --- | --- |
@@ -104,7 +104,7 @@ pnpm test:db
 
 # 2) 全仓（含 server 159：API 13、健康/缓存头、真实库集成 4 等）
 pnpm test
-# 期望：584 passed
+# 期望：593 passed
 
 # 3) 依赖方向
 pnpm check:imports

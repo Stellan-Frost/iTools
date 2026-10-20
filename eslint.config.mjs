@@ -22,6 +22,12 @@ export default tseslint.config(
     },
   },
   {
+    files: ['apps/web/public/sw*.js'],
+    languageOptions: {
+      globals: globals.serviceworker,
+    },
+  },
+  {
     // 全仓库通用的严格规则
     files: ['apps/**/*.{ts,tsx}', 'packages/**/src/**/*.{ts,tsx}'],
     rules: {

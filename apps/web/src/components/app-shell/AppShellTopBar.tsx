@@ -13,6 +13,7 @@ interface AppShellTopBarProps {
   onToggleRecent: () => void;
   onToggleTheme: () => void;
   onOpenSearch: () => void;
+  onOpenAppInfo: () => void;
   onOpenDrawer: () => void;
   onNavigateHome: () => void;
   onNavigateAdmin: () => void;
@@ -28,6 +29,7 @@ export function AppShellTopBar({
   onToggleRecent,
   onToggleTheme,
   onOpenSearch,
+  onOpenAppInfo,
   onOpenDrawer,
   onNavigateHome,
   onNavigateAdmin,
@@ -99,6 +101,12 @@ export function AppShellTopBar({
             icon={<AppIcon name="admin_panel_settings" />}
             aria-label={t('adminPreview')}
             onClick={onNavigateAdmin}
+          />
+          <IconButton
+            className={styles.topBarIcon}
+            icon={<AppIcon name="info" />}
+            aria-label={t('pwa.aboutLabel')}
+            onClick={onOpenAppInfo}
           />
         </div>
       ) : null}

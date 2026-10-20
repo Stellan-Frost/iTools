@@ -18,6 +18,7 @@ import type {
 } from '../../api/admin-types.js';
 import { PageHeading } from '../../components/page-chrome/PageHeading.js';
 import { useAppNavigation } from '../../app/navigation.js';
+import { useOnlineStatus } from '../../pwa/use-online-status.js';
 import { AdminAuthSection } from './AdminAuthSection.js';
 import { AdminAvailabilityControl } from './AdminAvailabilityControl.js';
 import { AdminMetadataForm } from './AdminMetadataForm.js';
@@ -35,6 +36,7 @@ export interface AdminPageProps {
 export function AdminPage({ adminClient, catalogClient }: AdminPageProps = {}) {
   const { locale } = useAppNavigation();
   const { t } = useTranslation('admin');
+  const isOnline = useOnlineStatus();
   const { show } = useSnackbar();
   const resolvedAdminClient = useMemo(
     () => adminClient ?? createAdminApiClient(),
@@ -80,6 +82,7 @@ export function AdminPage({ adminClient, catalogClient }: AdminPageProps = {}) {
   }, [expireSession, resolvedCatalogClient]);
 
   useEffect(() => {
+    if (isOnline !== true) return;
     let cancelled = false;
 
     async function bootstrap() {
@@ -113,7 +116,7 @@ export function AdminPage({ adminClient, catalogClient }: AdminPageProps = {}) {
     return () => {
       cancelled = true;
     };
-  }, [reloadToken, refreshTools, resolvedAdminClient]);
+  }, [isOnline, reloadToken, refreshTools, resolvedAdminClient]);
 
   const handleAuthenticated = useCallback(
     (session: AdminSessionInfo) => {
@@ -185,94 +188,105 @@ export function AdminPage({ adminClient, catalogClient }: AdminPageProps = {}) {
         description={t('description')}
       />
 
-      {phase.kind === 'loading' ? (
+      {isOnline === false ? (
         <Card>
-          <div className={styles.listStatus}>
-            <CircularProgressIndicator aria-label={t('loading')} />
-            <span>{t('loading')}</span>
+          <div className={styles.statusPanel} role="status">
+            <h2>{t('offlineUnavailable.title')}</h2>
+            <p>{t('offlineUnavailable.body')}</p>
           </div>
         </Card>
-      ) : null}
+      ) : (
+        <>
+          {phase.kind === 'loading' ? (
+            <Card>
+              <div className={styles.listStatus}>
+                <CircularProgressIndicator aria-label={t('loading')} />
+                <span>{t('loading')}</span>
+              </div>
+            </Card>
+          ) : null}
 
-      {phase.kind === 'error' ? (
-        <Card>
-          <div className={styles.statusPanel}>
-            <p className={styles.errorText} role="alert">
-              {t('loadError')}
-            </p>
-            <Button
-              variant="outlined"
-              onClick={() => setReloadToken((current) => current + 1)}
-            >
-              {t('retry')}
-            </Button>
-          </div>
-        </Card>
-      ) : null}
+          {phase.kind === 'error' ? (
+            <Card>
+              <div className={styles.statusPanel}>
+                <p className={styles.errorText} role="alert">
+                  {t('loadError')}
+                </p>
+                <Button
+                  variant="outlined"
+                  onClick={() => setReloadToken((current) => current + 1)}
+                >
+                  {t('retry')}
+                </Button>
+              </div>
+            </Card>
+          ) : null}
 
-      {phase.kind === 'setup' || phase.kind === 'login' ? (
-        <div className={styles.authWrap}>
-          <AdminAuthSection
-            mode={phase.kind}
-            adminClient={resolvedAdminClient}
-            notice={phase.kind === 'login' ? phase.notice : 'none'}
-            onAuthenticated={handleAuthenticated}
-          />
-        </div>
-      ) : null}
-
-      {phase.kind === 'ready' ? (
-        <div className={styles.readyArea}>
-          <AdminSessionBar
-            session={phase.session}
-            locale={contentLocale}
-            onLogout={() => {
-              void handleLogout();
-            }}
-          />
-          <div className={styles.adminGrid}>
-            <AdminToolList
-              tools={tools}
-              selectedToolId={selectedToolId}
-              locale={contentLocale}
-              isLoading={toolsLoading}
-              hasError={toolsError}
-              onSelect={setSelectedToolId}
-            />
-            <div className={styles.detailColumn}>
-              {selectedTool === undefined ? (
-                <Card>
-                  <p className={styles.muted}>{t('tools.noSelection')}</p>
-                </Card>
-              ) : (
-                <>
-                  <AdminAvailabilityControl
-                    tool={selectedTool}
-                    locale={contentLocale}
-                    onSetAvailability={handleSetAvailability}
-                  />
-                  <AdminMetadataForm
-                    key={`${selectedTool.id}-${metadataRevision}`}
-                    tool={selectedTool}
-                    onSave={handleSaveMetadata}
-                  />
-                  <AdminVersionsPanel
-                    key={`versions-${selectedTool.id}`}
-                    adminClient={resolvedAdminClient}
-                    toolId={selectedTool.id}
-                    locale={contentLocale}
-                    onUnauthorized={expireSession}
-                    onRolledBack={() => {
-                      setMetadataRevision((current) => current + 1);
-                      void refreshTools();
-                    }}
-                  />
-                </>
-              )}
+          {phase.kind === 'setup' || phase.kind === 'login' ? (
+            <div className={styles.authWrap}>
+              <AdminAuthSection
+                mode={phase.kind}
+                adminClient={resolvedAdminClient}
+                notice={phase.kind === 'login' ? phase.notice : 'none'}
+                onAuthenticated={handleAuthenticated}
+              />
             </div>
-          </div>
-        </div>
-      ) : null}
+          ) : null}
+
+          {phase.kind === 'ready' ? (
+            <div className={styles.readyArea}>
+              <AdminSessionBar
+                session={phase.session}
+                locale={contentLocale}
+                onLogout={() => {
+                  void handleLogout();
+                }}
+              />
+              <div className={styles.adminGrid}>
+                <AdminToolList
+                  tools={tools}
+                  selectedToolId={selectedToolId}
+                  locale={contentLocale}
+                  isLoading={toolsLoading}
+                  hasError={toolsError}
+                  onSelect={setSelectedToolId}
+                />
+                <div className={styles.detailColumn}>
+                  {selectedTool === undefined ? (
+                    <Card>
+                      <p className={styles.muted}>{t('tools.noSelection')}</p>
+                    </Card>
+                  ) : (
+                    <>
+                      <AdminAvailabilityControl
+                        tool={selectedTool}
+                        locale={contentLocale}
+                        onSetAvailability={handleSetAvailability}
+                      />
+                      <AdminMetadataForm
+                        key={`${selectedTool.id}-${metadataRevision}`}
+                        tool={selectedTool}
+                        onSave={handleSaveMetadata}
+                      />
+                      <AdminVersionsPanel
+                        key={`versions-${selectedTool.id}`}
+                        adminClient={resolvedAdminClient}
+                        toolId={selectedTool.id}
+                        locale={contentLocale}
+                        onUnauthorized={expireSession}
+                        onRolledBack={() => {
+                          setMetadataRevision((current) => current + 1);
+                          void refreshTools();
+                        }}
+                      />
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+          ) : null}
+        </>
+      )}
     </div>
   );
 }

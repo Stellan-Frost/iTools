@@ -1,0 +1,52 @@
+.content {
+  display: grid;
+  gap: var(--itools-space-3);
+  max-width: 38rem;
+}
+
+.content p {
+  margin: 0;
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: var(--md-sys-typescale-body-medium-size);
+  line-height: var(--md-sys-typescale-body-medium-line-height);
+}
+
+.buildId {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--itools-space-2);
+}
+
+.buildId code {
+  overflow-wrap: anywhere;
+  border-radius: var(--md-sys-shape-corner-small);
+  background: var(--md-sys-color-surface-container-high);
+  color: var(--md-sys-color-on-surface);
+  padding: var(--itools-space-1) var(--itools-space-2);
+  font-family:
+    ui-monospace, 'Cascadia Code', 'SFMono-Regular', Consolas, monospace;
+  font-size: var(--md-sys-typescale-body-small-size);
+}
+
+.content .riskNotice {
+  border-inline-start: 3px solid var(--md-sys-color-tertiary);
+  border-radius: var(--md-sys-shape-corner-small);
+  background: var(--md-sys-color-tertiary-container);
+  color: var(--md-sys-color-on-tertiary-container);
+  padding: var(--itools-space-3);
+}
+
+.content .status,
+.content .error {
+  border-radius: var(--md-sys-shape-corner-small);
+  background: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
+  padding: var(--itools-space-3);
+}
+
+.content .error {
+  background: var(--md-sys-color-error-container);
+  color: var(--md-sys-color-on-error-container);
+}

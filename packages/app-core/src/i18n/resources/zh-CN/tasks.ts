@@ -7,4 +7,8 @@ export const tasks = {
   count: '样本 {{total}} 条',
   fallbackTool: '未知工具',
   fallbackCategory: '未分类',
+  offline: {
+    title: '离线时任务页面不可用',
+    body: '任务列表需要联网读取。请恢复网络后重新打开此页面。',
+  },
 };

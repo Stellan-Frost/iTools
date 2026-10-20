@@ -1,4 +1,6 @@
 import fastifyStatic from '@fastify/static';
+import { readFile } from 'node:fs/promises';
+import path from 'node:path';
 import type { SsrRenderer } from '@itools/contracts';
 import Fastify, { type FastifyInstance } from 'fastify';
 import { registerAdmin } from './admin/register.js';
@@ -19,6 +21,8 @@ export type { AdminRegistrationDeps } from './admin/register.js';
 export interface StaticRoots {
   readonly assets: string;
   readonly brandIcons: string;
+  /** 生产客户端根目录；只从中暴露固定的 PWA 文件。 */
+  readonly pwa?: string;
 }
 
 export interface CreateAppOptions {
@@ -43,6 +47,40 @@ const NOT_FOUND_CACHE_CONTROL = 'no-store';
 const METADATA_CACHE_CONTROL = 'public, max-age=300';
 const ASSET_CACHE_CONTROL = 'public, max-age=31536000, immutable';
 const BRAND_ICON_CACHE_CONTROL = 'public, max-age=86400';
+const PWA_CACHE_CONTROL = 'no-cache';
+
+const PWA_FILES = [
+  {
+    url: '/sw.js',
+    file: 'sw.js',
+    contentType: 'application/javascript',
+    serviceWorker: true,
+  },
+  {
+    url: '/sw-offline.js',
+    file: 'sw-offline.js',
+    contentType: 'application/javascript',
+    serviceWorker: false,
+  },
+  {
+    url: '/sw-core.js',
+    file: 'sw-core.js',
+    contentType: 'application/javascript',
+    serviceWorker: false,
+  },
+  {
+    url: '/manifest.webmanifest',
+    file: 'manifest.webmanifest',
+    contentType: 'application/manifest+json; charset=utf-8',
+    serviceWorker: false,
+  },
+  {
+    url: '/sw-manifest.json',
+    file: 'sw-manifest.json',
+    contentType: 'application/json; charset=utf-8',
+    serviceWorker: false,
+  },
+] as const;
 
 export async function createApp(
   options: CreateAppOptions,
@@ -68,6 +106,9 @@ export async function createApp(
 
   if (options.staticRoots !== undefined) {
     registerStatic(app, options.staticRoots);
+    if (options.staticRoots.pwa !== undefined) {
+      registerPwa(app, options.staticRoots.pwa);
+    }
   }
 
   app.get('/', async (_request, reply) =>
@@ -152,6 +193,41 @@ function registerStatic(app: FastifyInstance, roots: StaticRoots): void {
     setHeaders: (reply) =>
       reply.header('cache-control', BRAND_ICON_CACHE_CONTROL),
   });
+}
+
+function registerPwa(app: FastifyInstance, root: string): void {
+  for (const asset of PWA_FILES) {
+    app.get(asset.url, async (_request, reply) => {
+      let content: Buffer;
+      try {
+        content = await readFile(path.join(root, asset.file));
+      } catch (error: unknown) {
+        if (isMissingFileError(error)) {
+          return reply
+            .code(404)
+            .type('text/plain; charset=utf-8')
+            .header('cache-control', NOT_FOUND_CACHE_CONTROL)
+            .send('Not Found');
+        }
+        throw error;
+      }
+
+      reply.type(asset.contentType).header('cache-control', PWA_CACHE_CONTROL);
+      if (asset.serviceWorker) {
+        reply.header('service-worker-allowed', '/');
+      }
+      return reply.send(content);
+    });
+  }
+}
+
+function isMissingFileError(error: unknown): boolean {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'code' in error &&
+    error.code === 'ENOENT'
+  );
 }
 
 /** 拆出路径与查询串，保留原始编码，不做 URL 归一化。 */

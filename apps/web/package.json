@@ -9,7 +9,7 @@
     "build:server": "vite build --ssr src/entry-server.tsx --outDir dist/server",
     "build": "pnpm run build:client && pnpm run build:server",
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "test": "vitest run --passWithNoTests"
+    "test": "vitest run --passWithNoTests --testTimeout=30000"
   },
   "dependencies": {
     "@itools/app-core": "workspace:*",

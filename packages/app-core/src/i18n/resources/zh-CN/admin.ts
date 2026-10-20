@@ -2,6 +2,10 @@ export const admin = {
   eyebrow: '目录管理',
   title: '管理后台',
   description: '维护工具元数据、上下架状态与版本历史。',
+  offlineUnavailable: {
+    title: '离线时管理后台不可用',
+    body: '管理页面需要连接管理服务。恢复网络后请重新打开此页面。',
+  },
   loading: '正在验证管理员会话…',
   loadError: '无法连接管理服务，请稍后重试。',
   retry: '重试',

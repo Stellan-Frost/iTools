@@ -16,6 +16,7 @@ interface AppShellDrawerProps {
   onNavigateHome: () => void;
   onNavigateAdmin: () => void;
   onNavigateTasks: () => void;
+  onOpenAppInfo: () => void;
   onToggleCategory: (categoryId: CategoryId) => void;
   onOpenTool: (toolId: string) => void;
 }
@@ -32,6 +33,7 @@ export function AppShellDrawer({
   onNavigateHome,
   onNavigateAdmin,
   onNavigateTasks,
+  onOpenAppInfo,
   onToggleCategory,
   onOpenTool,
 }: AppShellDrawerProps) {
@@ -100,6 +102,15 @@ export function AppShellDrawer({
             aria-label={t('common:recentTasks')}
             onClick={onNavigateTasks}
           />
+          <IconButton
+            className={styles.topBarIcon}
+            icon={<AppIcon name="info" />}
+            aria-label={t('common:pwa.aboutLabel')}
+            onClick={onOpenAppInfo}
+          />
+          <span className={styles.drawerActionLabel}>
+            {t('common:pwa.aboutLabel')}
+          </span>
         </div>
         <ToolAccordionNavigation
           expandedCategoryIds={expandedCategoryIds}

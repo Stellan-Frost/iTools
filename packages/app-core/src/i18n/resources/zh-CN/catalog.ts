@@ -42,6 +42,8 @@ export const catalog = {
   tool: {
     eyebrow: '{{category}} · 工具界面预览',
     previewBody: '该工具尚未实现，当前仅展示页面结构与示例布局。',
+    offlinePreviewBody:
+      '你现在离线。此页面仍是界面预览，处理引擎未保证已缓存或可用。',
     previewInputHint: '输入区将在工具实现后启用。',
     previewTaskBody: '任务运行时将在工具实现后接入。',
     previewResultBody: '结果区将在工具实现后展示真实输出。',

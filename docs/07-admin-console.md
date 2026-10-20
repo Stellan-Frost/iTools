@@ -89,7 +89,7 @@
 
 ```sh
 pnpm test
-# 期望：584 passed（server 159：管理相关 auth 75、writes 14、admin-integration 8；web 96 含后台组件测试）
+# 期望：593 passed（server 162：管理相关 auth 75、writes 14、admin-integration 8；web 102 含后台组件测试）
 
 pnpm build && pnpm check:i18n
 # 期望：i18n 键检查通过（admin 命名空间两种语言都不得有未使用键）

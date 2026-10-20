@@ -124,7 +124,7 @@ pnpm --filter @itools/task-runtime typecheck
 # 期望：退出码 0
 
 pnpm verify
-# 期望：全链路通过；当前基线 584 项测试、HTTP 验收 28/28
+# 期望：全链路通过；当前基线 593 项测试、HTTP 验收 28/28、PWA 验收 99/99
 ```
 
 ## 6. 常见任务（step-by-step）

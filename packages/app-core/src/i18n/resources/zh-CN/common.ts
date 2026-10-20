@@ -15,6 +15,7 @@ export const common = {
   },
   actions: {
     close: '关闭',
+    later: '稍后',
     backHome: '返回首页',
     openPreview: '打开预览',
     goToTool: '前往',
@@ -33,6 +34,51 @@ export const common = {
     zhCN: '简体中文',
     en: 'English',
     switchLanguage: '切换语言',
+  },
+  pwa: {
+    aboutTitle: '应用与离线信息',
+    aboutLabel: '应用信息',
+    aboutBody:
+      '此应用按需缓存壳层资源；离线启动仍取决于相关页面资源是否已缓存。',
+    currentBuildId: '当前版本',
+    unknownBuildId: '暂不可读取',
+    updateBuildId: '待安装版本',
+    fontFallback:
+      '字体按需加载；离线时会回落到系统字体，不能保证所有字体均已缓存。',
+    offlineLimits:
+      '任务与管理页面需要联网。工具页面仍是预览；离线时不保证处理引擎可用。',
+    updateTitle: '新版本已就绪',
+    updateReadyBody: '新版本已下载完成。应用后页面将重新加载。',
+    updateRisk:
+      '如果你正在编辑或处理内容，重新加载可能中断当前工作。当前版本没有连接实时任务检测。',
+    reviewUpdate: '查看更新',
+    applyUpdate: '应用并重新加载',
+    applying: '正在应用…',
+    checkUpdates: '检查更新',
+    checking: '正在检查…',
+    retry: '重试',
+    repairInstallation: '修复离线安装',
+    repairConfirmTitle: '确认修复安装？',
+    repairConfirmBody:
+      '修复会重新下载应用离线缓存，并清理损坏或不完整的应用缓存。',
+    repairAssetsNote: '此操作只影响应用缓存，不会删除本地资产或任务数据。',
+    confirmRepair: '确认修复',
+    repairing: '正在修复…',
+    automaticPromptSuppressed:
+      '此版本连续失败两次，已停止自动提示。你仍可从应用信息中手动检查或重试。',
+    status: {
+      checking: '正在检查可用更新…',
+      upToDate: '当前没有可用更新。',
+      updateReady: '有新版本可安装。',
+      applying: '正在应用更新，完成后页面会重新加载。',
+      repairing: '正在修复离线缓存…',
+      updateFailed: '更新未完成，当前版本仍可继续使用。你可以重试。',
+      repairComplete: '修复完成，应用离线缓存已重新安装。',
+      repairFailed: '修复失败，当前应用仍可继续使用。你可以重试。',
+      initialInstallFailed:
+        '离线安装未完成。请保持联网并重试；本次没有可用的离线版本。',
+      unavailable: '当前环境无法使用 Service Worker 更新。请联网后刷新应用。',
+    },
   },
   notFound: {
     eyebrow: '404',

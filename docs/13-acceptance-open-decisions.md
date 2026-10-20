@@ -3,11 +3,11 @@
 > 定位：全局验收清单、验证快照、全部决策（D01–D36）与未决事项。任何「为什么这样做」的问题先查这里。
 > 状态：生效中。阶段详情见 [14](14-phase-implementation-roadmap.md)。
 
-## 1. 当前验证快照（2026-10-19）
+## 1. 当前验证快照（2026-10-20）
 
 | 项 | 结果 |
 | --- | --- |
-| 测试 | 584 项通过：contracts 9、app-core 49、task-runtime 66、asset-store 131、db 65、adapter 9、web 96、server 159 |
+| 测试 | 593 项通过：contracts 9、app-core 49、task-runtime 66、asset-store 131、db 65、adapter 9、web 102、server 162 |
 | 类型检查 | 12/12 Turbo 任务通过 |
 | 格式 / Lint | 通过（ESLint + 依赖边界 + Token + 隐私） |
 | 构建 | 8/8 任务通过（client + SSR + server + 6 包） |
@@ -16,6 +16,7 @@
 | 管理端到端 | 8 项 inject + 真实 HTTP 冒烟（setup 201/Cookie → 无 CSRF 403 → 带 CSRF 200 → 登出 204 → 写 401 → CLI 重置口令） |
 | 注册表校验 | `check:tools` 通过：7 条（preview 6、implemented 0、disabled 1），3 条样本任务 |
 | HTTP 验收 | 28/28（302/308/200/404、noindex、Sitemap、robots、缓存头） |
+| PWA 构建/模拟验收 | `verify-stage-10.mjs` 99/99：资源哈希、更新、离线与修复；真实浏览器 E2E 尚未执行 |
 | API 冒烟 | 生产模式实跑：`/api/v1/tools` 200（`max-age=60`）、未知工具 404、`/health/ready` 200、OpenAPI 5 条路径 |
 | 隐私门禁 | `check:privacy` 通过：asset-store / task-runtime 生产源码无网络调用 |
 | 浏览器 E2E | **未执行**（无 Playwright） |
@@ -37,7 +38,7 @@
 | 唯一管理员、会话、CSRF、限流、元数据回滚 | ✅ 阶段 8（含后台界面与密码恢复命令） |
 | CSP、安全响应头、公开 API 限流、脱敏日志、依赖扫描 | ✅ 阶段 9（漏洞合并阻断属阶段 11 CI） |
 | 首个真实工具与执行 UI | ⏳ 待排期（D24 清单已确认；运行时已就绪） |
-| PWA、缓存清理、更新失败恢复 | ⏳ 阶段 10（D02 已决为 D36） |
+| PWA、缓存清理、更新失败恢复 | ✅ 阶段 10（D36；构建产物和 Node VM 验收，浏览器 E2E 属阶段 11） |
 | CI、Playwright、性能预算 | ⏳ 阶段 11 |
 | Docker Compose、备份、回滚 | ⏳ 阶段 12 |
 | 全局交付与生产部署批准 | ⏳ 阶段 13；部署须用户明确批准 |
@@ -92,8 +93,22 @@
 | — | 首个真实工具排期与注册表注入点重构 | 清单已定（D24）；`视频转 GIF` 仅导航与 D10 冲突，实现时须先给方案（跳转图像分类，不在视频分类建条目） |
 | — | 汇率工具第 68/69 题 | 已列入 D24；数据来源、精度与更新策略未决，**不得推断答案** |
 | — | 性能阈值与包体预算 | 阶段 11 先测基线，再交用户确认 |
-| — | 字体预缓存策略（全量 5.4 MB vs 运行时缓存） | 与 D36 无耦合；阶段 10 实施时单独对比 |
+| — | 字体预缓存策略 | 阶段 10 采用按需缓存，避免首次安装额外预取约 5 MB；离线未访问子集回落系统字体。阶段 11 根据浏览器与性能基线复核 |
 
 ## 5. 阶段验收记录要求
 
 每个阶段结束必须记录：阶段编号、目标、范围与非范围；修改文件清单；实际执行的命令与结果（含测试数量与失败项）；验收标准逐项状态；证据位置；未解决问题与已知限制；是否允许进入下一阶段。**缺少可复现证据即视为未验收**，不得用口头声明替代。
+
+### 阶段 10 验收记录（2026-10-20）
+
+| 项 | 记录 |
+| --- | --- |
+| 目标 | 提供可安装的 PWA 壳层、受控更新、离线首页与失败修复，落实 D36 缓存边界。 |
+| 范围 | 同源 manifest/图标、构建时资源清单及 SHA-256、Service Worker 三类版本化缓存、更新确认/重试/修复 UI、双语离线状态、服务端静态路由与缓存头。 |
+| 非范围 | 真实工具或引擎执行、浏览器 E2E、CI、性能预算、部署；分别留待后续阶段或工具排期。 |
+| 修改文件 | `apps/web/public/{sw.js,sw-core.js,sw-offline.js,manifest.webmanifest,brand-icon/icon-192.png,brand-icon/icon-512.png}`、`apps/web/vite.config.ts`、`apps/web/index.html`、`apps/web/src/{pwa,components/pwa,App.tsx,components/app-shell,pages}`、`apps/server/src/{app.ts,index.ts,pwa}`、`packages/app-core/src/i18n/resources/{zh-CN,en}`、`scripts/verify-stage-10.mjs`、根及 db/server/web 的 `package.json`、`eslint.config.mjs`、`README.md`、`docs/{00,04,05,06,07,08,09,10,13,14,15}*`。 |
+| 实际命令 | `pnpm test:db`：65/65；`pnpm verify`：格式、Lint/边界/隐私、类型检查 12/12、Vitest 593/593、构建 8/8、外部资源/注册表/i18n、HTTP 28/28、PWA 99/99，全部通过。之前全量运行曾因数据库测试并发重置共享 schema 与 Web 测试 5 秒超时失败；已将测试任务串行、db/server 文件串行并将相关超时设为 30 秒，最终复验无失败项。 |
+| 验收标准 | 清单资源完整与哈希 ✅；失败安装保留旧版本 ✅；用户确认后激活并清理旧壳层/引擎缓存 ✅；离线首页与状态提示 ✅；损坏缓存修复及交换失败回滚 ✅；IndexedDB 不受缓存清理影响 ✅；全量门禁 ✅。 |
+| 证据位置 | `scripts/verify-stage-10.mjs`（最终构建产物 + Node VM 99 项）、`apps/server/src/pwa/app.test.ts`、`apps/web/src/components/pwa/*.test.tsx`、`docs/09-pwa-cache-update.md`。 |
+| 已知限制 | 浏览器 E2E 尚未执行；没有可执行工具或真实引擎，无法实测引擎离线执行；未访问字体子集离线时回落系统字体；主 JS 有 Vite 体积提示，阶段 11 建立性能基线。 |
+| 下一阶段 | 阶段 10 已验收；阶段 11 尚未开始，等待用户确认后进入。 |

@@ -1,12 +1,12 @@
 # 10 · 测试与质量门禁
 
-> 定位：说明本地质量门禁每条命令在挡什么、584 项测试分布在哪、如何新增单测/集成/HTTP 验收、如何做负向探针，以及 CI、Playwright、性能预算的真实缺口。
+> 定位：说明本地质量门禁每条命令在挡什么、593 项测试分布在哪、如何新增单测/集成/HTTP 验收、如何做负向探针，以及 CI、Playwright、性能预算的真实缺口。
 > 状态：本地测试与门禁已实现（阶段 1–9 持续累积）；**CI、Playwright、覆盖率阈值、性能/包体预算未实现（阶段 11）**。
 > 代码入口：`scripts/{check-boundaries,check-import-boundaries,check-design-tokens,check-no-network,check-external-resources,check-tool-registry,check-i18n-keys}.mjs`、`scripts/verify-stage-4.mjs`、`apps/web/vite.config.ts`、`packages/design-system-adapter/vitest.config.ts`、`packages/db/src/test-support/test-database.ts`。
 
 ## 1. 当前事实
 
-基线（2026-10-19）：**584 项 Vitest 全部通过，HTTP 验收 28/28**。测试必须连接真实 PostgreSQL 的部分由 `TEST_DATABASE_URL` 提供，缺变量时直接失败而不是跳过。
+阶段 10 基线（2026-10-19）：**593 项 Vitest、HTTP 验收 28 项、PWA 构建/Node VM 验收 99 项**。数据库测试必须由 `TEST_DATABASE_URL` 连接真实 PostgreSQL；缺变量直接失败而不是跳过。
 
 | 包 | 测试文件（关键） | 数量 |
 | --- | --- | --- |
@@ -16,9 +16,9 @@
 | `packages/asset-store` | `domain/*`、`application/*`、`infrastructure/indexeddb/*`、`create-asset-store.test.ts` | 131 |
 | `packages/db` | `migrate.test.ts`、`infrastructure/*.test.ts`、`catalog/*.test.ts` | 65 |
 | `packages/design-system-adapter` | `Dialog` / `IconButton` / `NavigationDrawer` / `MaterialIcon` / `AppThemeProvider` / `colors` | 9 |
-| `apps/web` | `app/route`、`app/seo`、`pages/pages`、`App`、`api/*`、`pages/admin/admin` | 96 |
-| `apps/server` | `app`、`api/*`、`security/headers`、`logging/request-log`、`admin/**`、`catalog-integration`、`cli/reset-password-core` | 159 |
-| **合计** | — | **584** |
+| `apps/web` | `app/route`、`app/seo`、`pages/pages`、`App`、`api/*`、`pages/admin/admin`、`pwa/*`、`components/pwa/*` | 102 |
+| `apps/server` | `app`、`api/*`、`security/headers`、`logging/request-log`、`admin/**`、`catalog-integration`、`cli/reset-password-core`、`pwa/app` | 162 |
+| **合计** | — | **593** |
 
 工具链：Vitest 5.0.5（各包 `vitest run`）、`@testing-library/react` 16 + jsdom 30（web 组件）、`fake-indexeddb` 6.2.6（asset-store）、TypeScript 6.0.2 `strict`、ESLint 10 + Prettier 3.9、Turborepo 2.11。
 
@@ -34,7 +34,7 @@
 
 | 路径 | 职责 |
 | --- | --- |
-| `package.json` 的 `verify` | 总门禁：format:check → lint → typecheck → test → build → check:external → check:tools → check:i18n → verify-stage-4 |
+| `package.json` 的 `verify` | 总门禁：format:check → lint → typecheck → test → build → check:external → check:tools → check:i18n → verify-stage-4 → verify-stage-10 |
 | `scripts/run-turbo.mjs` | 统一以 `TURBO_TELEMETRY_DISABLED=1` 调用 turbo，保证输出与退出码透传 |
 | `scripts/check-boundaries.mjs` | 只读 `package.json`，校验工作区包允许的 `@itools/*` 依赖 |
 | `scripts/check-import-boundaries.mjs` | 解析源码 import/动态 import，校验依赖方向、禁止包名自引用、禁止相对导入越出包边界 |
@@ -44,6 +44,7 @@
 | `scripts/check-tool-registry.mjs` | 读取 app-core 构建产物，校验注册表、翻译、样本任务引用 |
 | `scripts/check-i18n-keys.mjs` | 读取 app-core 构建产物的资源，断言每个叶子键在 `apps/web/src` 有引用 |
 | `scripts/verify-stage-4.mjs` | 生产模式起真实服务（端口 5198）跑 28 项 HTTP 验收，见 §1 与 §5 |
+| `scripts/verify-stage-10.mjs` | 核对最终 PWA 构建产物，Node VM 模拟 Cache Storage/客户端验证 99 项更新、离线与修复行为 |
 | `apps/web/vite.config.ts` | web 的 Vitest 配置：`environment: 'jsdom'`、`setupFiles`、`css: true`、`restoreMocks`、内联 adapter/MCU |
 | `packages/design-system-adapter/vitest.config.ts` | 仅内联 `@material/material-color-utilities`（其 ESM 内部导入无扩展名） |
 | `packages/db/src/test-support/test-database.ts` | `assertTestDatabase`、`resetTestDatabase`、`withTestDatabase`、`withIsolatedSchema` |
@@ -57,7 +58,7 @@
 2. 测试替身只能放 `src/test-support/`，且该路径必须被 `tsconfig.build.json` 排除。检查：`ls packages/*/dist | grep test-support` 应无输出。
 3. 服务端/契约断言在 node 环境跑；只有 `apps/web` 用 jsdom。禁止在 jsdom 里断言 SSR 字符串或 HTTP 状态码。
 4. 数据库测试只读 `TEST_DATABASE_URL`；db 包的库名必须以 `_test` 结尾（`assertTestDatabase`），否则直接抛错。
-5. 服务端集成测试（`catalog-integration.test.ts`、`admin/admin-integration.test.ts`）会重建 schema，**必须**人工保证 `TEST_DATABASE_URL` 指向 `_test` 库；它们不复用 db 包的守卫。
+5. 服务端集成测试（`catalog-integration.test.ts`、`admin/admin-integration.test.ts`）会重建 schema，**必须**人工保证 `TEST_DATABASE_URL` 指向 `_test` 库；它们不复用 db 包的守卫。根 `pnpm test` 以 Turbo `--concurrency=1` 串行运行包级测试，db/server 各自关闭 Vitest 文件并行，避免多个测试同时重建 `public` schema。
 6. 不得用真实时钟/真实 Worker/真实浏览器存储替代测试替身：task-runtime 用 `fake-timer`/`fake-worker`，asset-store IDB 用 `fake-indexeddb`。
 7. 禁止 `any`、`@ts-ignore`、`eslint-disable`、`.skip`、注释掉断言来“修好”测试；ESLint 会挡前两项，后两项由评审兜底。
 8. 改路由/SEO 必须同时更新 `route.test.ts`、`seo.test.ts` 与 `verify-stage-4.mjs`；只改其一则门禁不完整。
@@ -85,12 +86,13 @@
 pnpm format:check      # Prettier；期望 "All matched files use Prettier code style!"
 pnpm lint              # ESLint + 边界 + 源码 import + Token + 隐私；期望全通过且无警告
 pnpm typecheck         # Turbo 12 个任务；期望 12/12 successful
-pnpm test              # 期望 584 passed（8 个包）
+pnpm test              # 期望 593 passed（8 个包；db/server 文件与包级任务串行）
 pnpm build             # 期望 8/8 successful（client + SSR + server + 6 包）
 pnpm check:external    # 期望：外部资源审计通过：{n} 个 HTML/CSS 文件无外部引用。
 pnpm check:tools       # 期望：注册表：共 7 条（preview 6、implemented 0、disabled 1），样本任务 3 条。
 pnpm check:i18n        # 期望：i18n 检查通过：所有资源键都有引用。
 node scripts/verify-stage-4.mjs   # 期望：全部 28 项通过
+node scripts/verify-stage-10.mjs  # 构建后运行，期望：全部 99 项通过
 pnpm verify            # 以上全链路；任一步失败即整体失败
 ```
 

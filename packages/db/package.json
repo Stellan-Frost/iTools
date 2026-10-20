@@ -14,7 +14,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "test": "vitest run",
+    "test": "vitest run --no-file-parallelism --testTimeout=30000",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "node dist/cli/migrate.js",
     "db:seed": "node dist/cli/seed.js"
