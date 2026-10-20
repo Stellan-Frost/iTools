@@ -1,7 +1,7 @@
 # 09 · PWA、缓存与更新
 
 > 定位：阶段 10 的实现、缓存边界、更新时序、恢复方式与验收证据。
-> 状态：**阶段 10 已实现**。Service Worker、Web App Manifest、离线首页、更新确认和「修复安装」已接入；真实浏览器 E2E 留到阶段 11。
+> 状态：**阶段 10 已实现**。Service Worker、Web App Manifest、离线首页、更新确认和「修复安装」已接入；阶段 11 已完成首次安装、离线首页与 IndexedDB 边界的 Chromium E2E。
 
 ## 1. 当前能力与入口
 
@@ -37,11 +37,11 @@ pnpm verify
 
 `verify-stage-10.mjs` 对最终构建产物检查 buildId、资源存在性、字节数、SHA-256、JS/CSS/manifest/图标、字体排除和 Worker 脚本加载；通过 Node VM 模拟 Cache Storage、网络与客户端，覆盖完整/失败安装、更新确认、激活清旧、API 直通、离线导航、损坏缓存修复、替换失败回滚及 IndexedDB 不变。服务端另有固定 PWA 路由的 HTTP 测试。**这些是构建产物与模拟环境验收，不等于真实浏览器 E2E。**
 
-阶段 11 仍需用 Playwright 在真实浏览器验证：首次安装后断网刷新、跨版本更新拒绝/失败/成功、关闭页面时的更新、字体回落、Cache Storage 与 IndexedDB 边界，以及 Safari 等浏览器差异。当前没有真实工具，因此「未缓存引擎时离线执行」只能验证缓存与提示规则，不能做真实工具执行测试。
+阶段 11 Playwright 已在真实 Chromium 中验证首次安装后断网刷新、旧 Cache Storage 清理，以及 IndexedDB 数据保留。跨版本更新拒绝/失败/成功、关闭页面时的更新、字体回落，以及 Safari 等浏览器差异仍缺 E2E；这些行为的可模拟部分由 `verify-stage-10.mjs` 覆盖。当前没有真实工具，因此「未缓存引擎时离线执行」只能验证缓存与提示规则，不能做真实工具执行测试。
 
 ## 5. 相关决策与限制
 
 - D01：IndexedDB 永不随升级或缓存清理自动清库。
 - D14：HTML、404 与静态资源沿用既有 HTTP 缓存头；Worker 脚本单独使用 `no-cache`。
 - D36：完整下载后确认切换；新版本激活时清所有旧缓存和引擎；不保留客户端旧版。
-- 主 JS 仍触发 Vite 的 500 KB chunk 提示；阶段 11 建立性能基线后再定预算。
+- 主 JS 仍触发 Vite 的 500 KB chunk 提示；阶段 11 已按真实 Chromium 首页基线制定资源字节预算（D37），代码拆包仍可继续优化。

@@ -1,0 +1,309 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-10-20T02:40:51.653Z",
+  "purpose": "Stage 11 production browser performance baseline; informational only.",
+  "server": {
+    "command": "node dist/index.js",
+    "cwd": "apps/server",
+    "environment": {
+      "NODE_ENV": "production",
+      "HOST": "127.0.0.1",
+      "PORT": 5203,
+      "SITE_ORIGIN": "http://127.0.0.1:5203",
+      "WEB_ROOT": "../web",
+      "databaseUrl": "unset; health probe must report database skipped"
+    }
+  },
+  "methodology": {
+    "browser": "Playwright Chromium headless",
+    "browserVersion": "156.0.8078.4",
+    "playwrightVersion": "1.64.1",
+    "viewport": {
+      "width": 1365,
+      "height": 768
+    },
+    "deviceScaleFactor": 1,
+    "colorScheme": "light",
+    "reducedMotion": "reduce",
+    "serviceWorkers": "blocked",
+    "cache": "fresh browser context for every navigation",
+    "waitUntil": "load plus 500 ms for final paint/resource entries",
+    "warmupsPerLocale": 1,
+    "measuredRunsPerLocale": 7,
+    "resourceBytes": {
+      "transfer": "resourceTransferBytes sums subresources; pageTransferBytes adds the document. Transfer sizes include headers.",
+      "encoded": "encodedBodySize, the response body after content encoding.",
+      "decoded": "decodedBodySize, the body after browser decompression.",
+      "compressionRatio": "1 - encoded / decoded resource body bytes."
+    }
+  },
+  "environment": {
+    "platform": "win32",
+    "release": "10.0.26200",
+    "architecture": "x64",
+    "logicalCpuCount": 24,
+    "cpuModel": "AMD Ryzen 9 7845HX with Radeon Graphics        ",
+    "totalMemoryBytes": 34128818176,
+    "nodeVersion": "v24.19.0"
+  },
+  "source": {
+    "revision": "78893f9b000843cbf1e7f3073e350ea36d19664f",
+    "workingTreeDirty": true
+  },
+  "locales": {
+    "zh-CN": {
+      "path": "/zh-CN",
+      "runs": 7,
+      "median": {
+        "ttfbMs": 14.6,
+        "domContentLoadedMs": 161.6,
+        "loadEventEndMs": 252.8,
+        "fcpMs": 148,
+        "lcpMs": 148,
+        "resourceCount": 21,
+        "resourceTransferBytes": 2271979,
+        "resourceEncodedBodyBytes": 2266579,
+        "resourceDecodedBodyBytes": 2266579,
+        "pageTransferBytes": 2312400,
+        "pageEncodedBodyBytes": 2306700,
+        "pageDecodedBodyBytes": 2306700,
+        "resourceCompressionRatio": 0
+      },
+      "samples": [
+        {
+          "ttfbMs": 16.3,
+          "domContentLoadedMs": 159.2,
+          "loadEventEndMs": 248.8,
+          "fcpMs": 148,
+          "lcpMs": 148,
+          "resourceCount": 21,
+          "resourceTransferBytes": 2271979,
+          "resourceEncodedBodyBytes": 2266579,
+          "resourceDecodedBodyBytes": 2266579,
+          "pageTransferBytes": 2312400,
+          "pageEncodedBodyBytes": 2306700,
+          "pageDecodedBodyBytes": 2306700
+        },
+        {
+          "ttfbMs": 14.8,
+          "domContentLoadedMs": 165.7,
+          "loadEventEndMs": 252.8,
+          "fcpMs": 152,
+          "lcpMs": 152,
+          "resourceCount": 21,
+          "resourceTransferBytes": 2271979,
+          "resourceEncodedBodyBytes": 2266579,
+          "resourceDecodedBodyBytes": 2266579,
+          "pageTransferBytes": 2312400,
+          "pageEncodedBodyBytes": 2306700,
+          "pageDecodedBodyBytes": 2306700
+        },
+        {
+          "ttfbMs": 14.6,
+          "domContentLoadedMs": 157.1,
+          "loadEventEndMs": 246.9,
+          "fcpMs": 148,
+          "lcpMs": 148,
+          "resourceCount": 21,
+          "resourceTransferBytes": 2271979,
+          "resourceEncodedBodyBytes": 2266579,
+          "resourceDecodedBodyBytes": 2266579,
+          "pageTransferBytes": 2312400,
+          "pageEncodedBodyBytes": 2306700,
+          "pageDecodedBodyBytes": 2306700
+        },
+        {
+          "ttfbMs": 15.7,
+          "domContentLoadedMs": 165.2,
+          "loadEventEndMs": 254.5,
+          "fcpMs": 152,
+          "lcpMs": 152,
+          "resourceCount": 21,
+          "resourceTransferBytes": 2271979,
+          "resourceEncodedBodyBytes": 2266579,
+          "resourceDecodedBodyBytes": 2266579,
+          "pageTransferBytes": 2312400,
+          "pageEncodedBodyBytes": 2306700,
+          "pageDecodedBodyBytes": 2306700
+        },
+        {
+          "ttfbMs": 14,
+          "domContentLoadedMs": 161.6,
+          "loadEventEndMs": 249.7,
+          "fcpMs": 148,
+          "lcpMs": 148,
+          "resourceCount": 21,
+          "resourceTransferBytes": 2271979,
+          "resourceEncodedBodyBytes": 2266579,
+          "resourceDecodedBodyBytes": 2266579,
+          "pageTransferBytes": 2312400,
+          "pageEncodedBodyBytes": 2306700,
+          "pageDecodedBodyBytes": 2306700
+        },
+        {
+          "ttfbMs": 13.4,
+          "domContentLoadedMs": 161.1,
+          "loadEventEndMs": 253,
+          "fcpMs": 148,
+          "lcpMs": 148,
+          "resourceCount": 21,
+          "resourceTransferBytes": 2271979,
+          "resourceEncodedBodyBytes": 2266579,
+          "resourceDecodedBodyBytes": 2266579,
+          "pageTransferBytes": 2312400,
+          "pageEncodedBodyBytes": 2306700,
+          "pageDecodedBodyBytes": 2306700
+        },
+        {
+          "ttfbMs": 13.9,
+          "domContentLoadedMs": 163.9,
+          "loadEventEndMs": 257,
+          "fcpMs": 152,
+          "lcpMs": 152,
+          "resourceCount": 21,
+          "resourceTransferBytes": 2271979,
+          "resourceEncodedBodyBytes": 2266579,
+          "resourceDecodedBodyBytes": 2266579,
+          "pageTransferBytes": 2312400,
+          "pageEncodedBodyBytes": 2306700,
+          "pageDecodedBodyBytes": 2306700
+        }
+      ]
+    },
+    "en": {
+      "path": "/en",
+      "runs": 7,
+      "median": {
+        "ttfbMs": 14.2,
+        "domContentLoadedMs": 137.1,
+        "loadEventEndMs": 176.8,
+        "fcpMs": 136,
+        "lcpMs": 136,
+        "resourceCount": 8,
+        "resourceTransferBytes": 1499223,
+        "resourceEncodedBodyBytes": 1497723,
+        "resourceDecodedBodyBytes": 1497723,
+        "pageTransferBytes": 1539751,
+        "pageEncodedBodyBytes": 1537951,
+        "pageDecodedBodyBytes": 1537951,
+        "resourceCompressionRatio": 0
+      },
+      "samples": [
+        {
+          "ttfbMs": 15.1,
+          "domContentLoadedMs": 137.1,
+          "loadEventEndMs": 176.8,
+          "fcpMs": 140,
+          "lcpMs": 140,
+          "resourceCount": 8,
+          "resourceTransferBytes": 1499223,
+          "resourceEncodedBodyBytes": 1497723,
+          "resourceDecodedBodyBytes": 1497723,
+          "pageTransferBytes": 1539751,
+          "pageEncodedBodyBytes": 1537951,
+          "pageDecodedBodyBytes": 1537951
+        },
+        {
+          "ttfbMs": 14.9,
+          "domContentLoadedMs": 133.7,
+          "loadEventEndMs": 173.2,
+          "fcpMs": 132,
+          "lcpMs": 132,
+          "resourceCount": 8,
+          "resourceTransferBytes": 1499223,
+          "resourceEncodedBodyBytes": 1497723,
+          "resourceDecodedBodyBytes": 1497723,
+          "pageTransferBytes": 1539751,
+          "pageEncodedBodyBytes": 1537951,
+          "pageDecodedBodyBytes": 1537951
+        },
+        {
+          "ttfbMs": 14.2,
+          "domContentLoadedMs": 147.6,
+          "loadEventEndMs": 189.2,
+          "fcpMs": 148,
+          "lcpMs": 148,
+          "resourceCount": 8,
+          "resourceTransferBytes": 1499223,
+          "resourceEncodedBodyBytes": 1497723,
+          "resourceDecodedBodyBytes": 1497723,
+          "pageTransferBytes": 1539751,
+          "pageEncodedBodyBytes": 1537951,
+          "pageDecodedBodyBytes": 1537951
+        },
+        {
+          "ttfbMs": 13.9,
+          "domContentLoadedMs": 134.6,
+          "loadEventEndMs": 174,
+          "fcpMs": 140,
+          "lcpMs": 140,
+          "resourceCount": 8,
+          "resourceTransferBytes": 1499223,
+          "resourceEncodedBodyBytes": 1497723,
+          "resourceDecodedBodyBytes": 1497723,
+          "pageTransferBytes": 1539751,
+          "pageEncodedBodyBytes": 1537951,
+          "pageDecodedBodyBytes": 1537951
+        },
+        {
+          "ttfbMs": 13.4,
+          "domContentLoadedMs": 136.2,
+          "loadEventEndMs": 174.6,
+          "fcpMs": 136,
+          "lcpMs": 136,
+          "resourceCount": 8,
+          "resourceTransferBytes": 1499223,
+          "resourceEncodedBodyBytes": 1497723,
+          "resourceDecodedBodyBytes": 1497723,
+          "pageTransferBytes": 1539751,
+          "pageEncodedBodyBytes": 1537951,
+          "pageDecodedBodyBytes": 1537951
+        },
+        {
+          "ttfbMs": 13,
+          "domContentLoadedMs": 138.1,
+          "loadEventEndMs": 178.4,
+          "fcpMs": 132,
+          "lcpMs": 132,
+          "resourceCount": 8,
+          "resourceTransferBytes": 1499223,
+          "resourceEncodedBodyBytes": 1497723,
+          "resourceDecodedBodyBytes": 1497723,
+          "pageTransferBytes": 1539751,
+          "pageEncodedBodyBytes": 1537951,
+          "pageDecodedBodyBytes": 1537951
+        },
+        {
+          "ttfbMs": 21.5,
+          "domContentLoadedMs": 143.8,
+          "loadEventEndMs": 183.1,
+          "fcpMs": 132,
+          "lcpMs": 132,
+          "resourceCount": 8,
+          "resourceTransferBytes": 1499223,
+          "resourceEncodedBodyBytes": 1497723,
+          "resourceDecodedBodyBytes": 1497723,
+          "pageTransferBytes": 1539751,
+          "pageEncodedBodyBytes": 1537951,
+          "pageDecodedBodyBytes": 1537951
+        }
+      ]
+    }
+  },
+  "performanceBudget": {
+    "status": "approved",
+    "metric": "pageEncodedBodyBytes",
+    "decisionBasis": "User confirmed 2026-10-20 based on the measured baseline.",
+    "reportOnlyMetrics": ["fcpMs", "lcpMs"],
+    "byLocale": {
+      "zh-CN": {
+        "pageEncodedBodyBytes": 2539520
+      },
+      "en": {
+        "pageEncodedBodyBytes": 1699840
+      }
+    }
+  },
+  "enforcementEnabled": true,
+  "baselineFile": "quality/performance-baseline.json"
+}

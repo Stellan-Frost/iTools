@@ -1,0 +1,35 @@
+{
+  "measuredAt": "2026-10-20",
+  "method": "Vitest 5 V8 coverage; all existing tests; package coverage-final.json includes executed source and test support",
+  "maximumRegressionPoints": 5,
+  "packages": {
+    "packages/contracts": {
+      "statements": 96.0,
+      "branches": 100.0,
+      "functions": 60.0
+    },
+    "packages/app-core": {
+      "statements": 98.7,
+      "branches": 91.1,
+      "functions": 100.0
+    },
+    "packages/task-runtime": {
+      "statements": 87.6,
+      "branches": 76.3,
+      "functions": 93.8
+    },
+    "packages/asset-store": {
+      "statements": 94.6,
+      "branches": 85.5,
+      "functions": 93.3
+    },
+    "packages/db": { "statements": 94.1, "branches": 84.0, "functions": 96.2 },
+    "packages/design-system-adapter": {
+      "statements": 96.3,
+      "branches": 88.9,
+      "functions": 100.0
+    },
+    "apps/web": { "statements": 75.8, "branches": 67.5, "functions": 77.8 },
+    "apps/server": { "statements": 93.2, "branches": 88.7, "functions": 94.1 }
+  }
+}

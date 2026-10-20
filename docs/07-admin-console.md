@@ -164,4 +164,4 @@ DATABASE_URL='postgresql://...' pnpm --filter @itools/server admin:reset-passwor
 - **下架后无法在后台恢复**：后台工具列表复用公开 `GET /api/v1/tools`（`AdminPage.tsx:68`），该接口过滤 `disabled`（`tool-catalog-service.ts:131`），工具下架后即从列表消失；恢复需直接调用 `PATCH .../availability`（带 CSRF），或后续补管理专用列表。
 - 文案覆盖没有「清除」入口：`AdminLocalizedPatchSchema` 只接受 ≥1 字符字符串，`upsertOverride` 也不删除缺失 locale 行。
 - 版本列表不按语言过滤，面板展示两种语言混排；回滚只按目标版本的 `locale` 生效。
-- 未做浏览器 E2E，仅有组件测试与 `inject` 集成测试。
+- 阶段 11 的浏览器 E2E 已验证无数据库时管理入口安全失败；真实管理员初始化、登录和写入仍只有组件测试与 `inject` 集成测试，未有浏览器端到端覆盖。

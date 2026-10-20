@@ -1,0 +1,145 @@
+# Failing checks can block merging only when repository branch protection requires this workflow.
+name: quality
+
+on:
+  pull_request:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: itools
+          POSTGRES_PASSWORD: ci-test-password
+          POSTGRES_DB: itools_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U itools -d itools_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    env:
+      TEST_DATABASE_URL: postgresql://itools:ci-test-password@127.0.0.1:5432/itools_test
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.25.0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install locked dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check formatting
+        run: pnpm format:check
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Type check
+        run: pnpm typecheck
+
+      - name: Type check Playwright tests
+        run: pnpm typecheck:e2e
+
+      - name: Run Vitest with coverage
+        run: pnpm report:coverage
+
+      - name: Check coverage against the recorded baseline
+        run: pnpm check:coverage
+
+      - name: Build workspace
+        run: pnpm build
+
+      - name: Check tool registry and translations
+        run: |
+          pnpm check:tools
+          pnpm check:i18n
+
+      - name: Check local package privacy and external resources
+        run: |
+          pnpm check:privacy
+          pnpm check:external
+
+      - name: Verify HTTP routes and PWA build
+        run: |
+          node scripts/verify-stage-4.mjs
+          node scripts/verify-stage-10.mjs
+
+      - name: Install Playwright Chromium
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Run browser end-to-end acceptance
+        run: pnpm test:e2e
+
+      - name: Compare public and admin OpenAPI to the frozen baseline
+        run: |
+          node --test scripts/check-openapi-diff.test.mjs
+          pnpm check:openapi
+
+      - name: Check duplicated code
+        run: pnpm check:duplication
+
+      - name: Check browser performance budget
+        run: |
+          set -o pipefail
+          node --test scripts/performance-budget.test.mjs
+          pnpm check:performance | tee "$RUNNER_TEMP/performance-check.log"
+
+      - name: Record dependency audit report
+        shell: bash
+        run: |
+          audit_report="$RUNNER_TEMP/dependency-audit.json"
+          audit_stderr="$RUNNER_TEMP/dependency-audit.stderr"
+          audit_status=0
+          pnpm audit --prod --json > "$audit_report" 2> "$audit_stderr" || audit_status=$?
+          {
+            echo '### Dependency audit'
+            echo
+            echo 'The raw production dependency audit is attached as an artifact. High and critical findings block the workflow in the next step; low and moderate findings remain report-only.'
+            echo
+            echo "pnpm audit --prod --json exit status: $audit_status"
+          } >> "$GITHUB_STEP_SUMMARY"
+          if [ -s "$audit_stderr" ]; then
+            cat "$audit_stderr"
+          fi
+          echo "Audit report captured (pnpm exit status $audit_status); the high/critical gate runs separately."
+
+      - name: Block high and critical production vulnerabilities
+        run: pnpm check:audit
+
+      - name: Upload quality reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: quality-reports
+          if-no-files-found: ignore
+          path: |
+            ${{ runner.temp }}/dependency-audit.json
+            ${{ runner.temp }}/dependency-audit.stderr
+            ${{ runner.temp }}/performance-check.log
+            test-results/
+            apps/*/coverage/
+            packages/*/coverage/

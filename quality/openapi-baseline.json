@@ -1,0 +1,876 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "iTools API",
+    "version": "1.0.0"
+  },
+  "components": {
+    "schemas": {}
+  },
+  "paths": {
+    "/api/v1/openapi.json": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["openapi"],
+                  "properties": {
+                    "openapi": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "additionalProperties": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tools": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["data"],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "id",
+                          "category",
+                          "availability",
+                          "name",
+                          "summary",
+                          "description",
+                          "order",
+                          "source"
+                        ],
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "category": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "enum": ["audio"]
+                              },
+                              {
+                                "type": "string",
+                                "enum": ["image"]
+                              },
+                              {
+                                "type": "string",
+                                "enum": ["video"]
+                              },
+                              {
+                                "type": "string",
+                                "enum": ["text"]
+                              },
+                              {
+                                "type": "string",
+                                "enum": ["other"]
+                              }
+                            ]
+                          },
+                          "availability": {
+                            "type": "string",
+                            "enum": ["preview", "implemented", "disabled"]
+                          },
+                          "name": {
+                            "type": "object",
+                            "required": ["zh-CN", "en"],
+                            "properties": {
+                              "zh-CN": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "en": {
+                                "type": "string",
+                                "minLength": 1
+                              }
+                            },
+                            "additionalProperties": false
+                          },
+                          "summary": {
+                            "type": "object",
+                            "required": ["zh-CN", "en"],
+                            "properties": {
+                              "zh-CN": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "en": {
+                                "type": "string",
+                                "minLength": 1
+                              }
+                            },
+                            "additionalProperties": false
+                          },
+                          "description": {
+                            "type": "object",
+                            "required": ["zh-CN", "en"],
+                            "properties": {
+                              "zh-CN": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "en": {
+                                "type": "string",
+                                "minLength": 1
+                              }
+                            },
+                            "additionalProperties": false
+                          },
+                          "order": {
+                            "type": "integer"
+                          },
+                          "source": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "enum": ["registry"]
+                              },
+                              {
+                                "type": "string",
+                                "enum": ["override"]
+                              }
+                            ]
+                          }
+                        },
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["code", "message", "requestId"],
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "details": {}
+                  },
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tools/{toolId}": {
+      "get": {
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "toolId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["data"],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "required": [
+                        "id",
+                        "category",
+                        "availability",
+                        "name",
+                        "summary",
+                        "description",
+                        "order",
+                        "source"
+                      ],
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "category": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "enum": ["audio"]
+                            },
+                            {
+                              "type": "string",
+                              "enum": ["image"]
+                            },
+                            {
+                              "type": "string",
+                              "enum": ["video"]
+                            },
+                            {
+                              "type": "string",
+                              "enum": ["text"]
+                            },
+                            {
+                              "type": "string",
+                              "enum": ["other"]
+                            }
+                          ]
+                        },
+                        "availability": {
+                          "type": "string",
+                          "enum": ["preview", "implemented", "disabled"]
+                        },
+                        "name": {
+                          "type": "object",
+                          "required": ["zh-CN", "en"],
+                          "properties": {
+                            "zh-CN": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "en": {
+                              "type": "string",
+                              "minLength": 1
+                            }
+                          },
+                          "additionalProperties": false
+                        },
+                        "summary": {
+                          "type": "object",
+                          "required": ["zh-CN", "en"],
+                          "properties": {
+                            "zh-CN": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "en": {
+                              "type": "string",
+                              "minLength": 1
+                            }
+                          },
+                          "additionalProperties": false
+                        },
+                        "description": {
+                          "type": "object",
+                          "required": ["zh-CN", "en"],
+                          "properties": {
+                            "zh-CN": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "en": {
+                              "type": "string",
+                              "minLength": 1
+                            }
+                          },
+                          "additionalProperties": false
+                        },
+                        "order": {
+                          "type": "integer"
+                        },
+                        "source": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "enum": ["registry"]
+                            },
+                            {
+                              "type": "string",
+                              "enum": ["override"]
+                            }
+                          ]
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    "meta": {
+                      "type": "object",
+                      "additionalProperties": {}
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["code", "message", "requestId"],
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "details": {}
+                  },
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["code", "message", "requestId"],
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "details": {}
+                  },
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/health/live": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["status", "checks"],
+                  "properties": {
+                    "status": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "enum": ["ok"]
+                        },
+                        {
+                          "type": "string",
+                          "enum": ["degraded"]
+                        }
+                      ]
+                    },
+                    "checks": {
+                      "type": "object",
+                      "required": ["database"],
+                      "properties": {
+                        "database": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "enum": ["ok"]
+                            },
+                            {
+                              "type": "string",
+                              "enum": ["unavailable"]
+                            },
+                            {
+                              "type": "string",
+                              "enum": ["skipped"]
+                            }
+                          ]
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/health/ready": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["status", "checks"],
+                  "properties": {
+                    "status": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "enum": ["ok"]
+                        },
+                        {
+                          "type": "string",
+                          "enum": ["degraded"]
+                        }
+                      ]
+                    },
+                    "checks": {
+                      "type": "object",
+                      "required": ["database"],
+                      "properties": {
+                        "database": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "enum": ["ok"]
+                            },
+                            {
+                              "type": "string",
+                              "enum": ["unavailable"]
+                            },
+                            {
+                              "type": "string",
+                              "enum": ["skipped"]
+                            }
+                          ]
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["status", "checks"],
+                  "properties": {
+                    "status": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "enum": ["ok"]
+                        },
+                        {
+                          "type": "string",
+                          "enum": ["degraded"]
+                        }
+                      ]
+                    },
+                    "checks": {
+                      "type": "object",
+                      "required": ["database"],
+                      "properties": {
+                        "database": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "enum": ["ok"]
+                            },
+                            {
+                              "type": "string",
+                              "enum": ["unavailable"]
+                            },
+                            {
+                              "type": "string",
+                              "enum": ["skipped"]
+                            }
+                          ]
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/setup": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["token", "password"],
+                "properties": {
+                  "token": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 512
+                  },
+                  "password": {
+                    "type": "string",
+                    "minLength": 12,
+                    "maxLength": 200
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/v1/admin/session": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["password"],
+                "properties": {
+                  "password": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "delete": {
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/v1/admin/tools/{toolId}/metadata": {
+      "patch": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["localizations"],
+                "properties": {
+                  "localizations": {
+                    "type": "object",
+                    "properties": {
+                      "zh-CN": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 200
+                          },
+                          "summary": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 400
+                          },
+                          "description": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 1000
+                          }
+                        },
+                        "additionalProperties": false
+                      },
+                      "en": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 200
+                          },
+                          "summary": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 400
+                          },
+                          "description": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 1000
+                          }
+                        },
+                        "additionalProperties": false
+                      }
+                    },
+                    "additionalProperties": false
+                  },
+                  "order": {
+                    "type": "integer",
+                    "minimum": -9999,
+                    "maximum": 9999
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "toolId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/v1/admin/tools/{toolId}/availability": {
+      "patch": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["override"],
+                "properties": {
+                  "override": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "enum": ["disabled"]
+                      },
+                      {
+                        "type": "string",
+                        "enum": ["registry"]
+                      }
+                    ]
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "toolId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/v1/admin/tools/{toolId}/versions": {
+      "get": {
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "toolId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["data"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "versionId",
+                          "toolId",
+                          "locale",
+                          "name",
+                          "summary",
+                          "description",
+                          "createdAt"
+                        ],
+                        "properties": {
+                          "versionId": {
+                            "type": "integer"
+                          },
+                          "toolId": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "locale": {
+                            "type": "string",
+                            "enum": ["zh-CN", "en"]
+                          },
+                          "name": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "summary": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "description": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "createdAt": {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        },
+                        "additionalProperties": false
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/tools/{toolId}/rollback": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["versionId", "expectedVersionId"],
+                "properties": {
+                  "versionId": {
+                    "type": "integer"
+                  },
+                  "expectedVersionId": {
+                    "type": "integer"
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "toolId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,12 +1,12 @@
 # 10 · 测试与质量门禁
 
-> 定位：说明本地质量门禁每条命令在挡什么、593 项测试分布在哪、如何新增单测/集成/HTTP 验收、如何做负向探针，以及 CI、Playwright、性能预算的真实缺口。
-> 状态：本地测试与门禁已实现（阶段 1–9 持续累积）；**CI、Playwright、覆盖率阈值、性能/包体预算未实现（阶段 11）**。
+> 定位：说明本地质量门禁每条命令在挡什么、593 项 Vitest 和 9 项浏览器 E2E 如何运行，以及 CI、覆盖率、OpenAPI、性能预算的证据与限制。
+> 状态：阶段 11 本地门禁已实现；GitHub Actions 工作流已写入仓库，云端运行与分支保护因仓库暂无 Git remote 而待验证。
 > 代码入口：`scripts/{check-boundaries,check-import-boundaries,check-design-tokens,check-no-network,check-external-resources,check-tool-registry,check-i18n-keys}.mjs`、`scripts/verify-stage-4.mjs`、`apps/web/vite.config.ts`、`packages/design-system-adapter/vitest.config.ts`、`packages/db/src/test-support/test-database.ts`。
 
 ## 1. 当前事实
 
-阶段 10 基线（2026-10-19）：**593 项 Vitest、HTTP 验收 28 项、PWA 构建/Node VM 验收 99 项**。数据库测试必须由 `TEST_DATABASE_URL` 连接真实 PostgreSQL；缺变量直接失败而不是跳过。
+阶段 11 本地基线（2026-10-20）：**593 项 Vitest、9 项 Playwright Chromium、HTTP 验收 28 项、PWA 构建/Node VM 验收 99 项**。数据库测试必须由 `TEST_DATABASE_URL` 连接真实 PostgreSQL；缺变量直接失败而不是跳过。
 
 | 包 | 测试文件（关键） | 数量 |
 | --- | --- | --- |
@@ -24,11 +24,11 @@
 
 | 缺口 | 现状 |
 | --- | --- |
-| Playwright / 真实浏览器 E2E | 未接入；无水合、CSP 实际执行、SW、IndexedDB 真实行为验证 |
-| GitHub Actions / 任意 CI | 未接入；门禁只在本地手工执行 |
-| 覆盖率阈值 | 未配置，`vitest` 未开启 coverage |
-| 性能与包体预算 | 未测基线、无阈值 |
-| 依赖漏洞阻断 | 有 `pnpm check:audit`，但不在 `verify` 链，不阻断合并（D04 未决） |
+| Playwright / 真实浏览器 E2E | 9 项本地通过：SSR/水合、搜索、预览直达、任务、后台失败关闭、404、CSP、SW 离线首页与 IndexedDB 保留；真实管理员登录、SW 多版本切换仍未覆盖 |
+| GitHub Actions | 工作流已配置；没有 Git remote，云端执行和分支保护未验证，不能声称已阻止合并 |
+| 覆盖率阈值 | V8 基线已记录，8 包的语句/分支/函数指标最多允许回退 5 个百分点；`report:coverage` 后运行 `check:coverage` |
+| 性能与包体预算 | 中英文首页各 7 次 Chromium 基线；资源字节硬预算已按 D37 启用，FCP/LCP 只报告 |
+| 依赖漏洞阻断 | D04 已确认：生产依赖 high/critical 阻断，low/moderate 只报告；本地审计 0 项，云端待验证 |
 
 ## 2. 代码地图
 
@@ -45,6 +45,11 @@
 | `scripts/check-i18n-keys.mjs` | 读取 app-core 构建产物的资源，断言每个叶子键在 `apps/web/src` 有引用 |
 | `scripts/verify-stage-4.mjs` | 生产模式起真实服务（端口 5198）跑 28 项 HTTP 验收，见 §1 与 §5 |
 | `scripts/verify-stage-10.mjs` | 核对最终 PWA 构建产物，Node VM 模拟 Cache Storage/客户端验证 99 项更新、离线与修复行为 |
+| `playwright.config.ts`、`e2e/**` | 启动无数据库生产服务，用真实 Chromium 执行 9 项浏览器验收 |
+| `scripts/check-openapi-diff.mjs`、`quality/openapi-baseline.json` | 用 `_test` 数据库环境注册公开及管理 API，检测相对冻结基线的破坏性契约变更 |
+| `scripts/check-coverage.mjs`、`quality/coverage-baseline.json` | 汇总各包 V8 覆盖率，阻断超过 5 个百分点的回退或缺失报告 |
+| `scripts/{measure-performance,performance-budget,performance-report}.mjs`、`quality/performance-baseline.json` | 用 Chromium 测量首页并按 D37 阻断资源字节超预算；时序仅报告 |
+| `.github/workflows/quality.yml` | 在 PR/push/手动触发时运行上述硬检查与依赖漏洞分级；需仓库连接和分支保护才可实际阻断合并 |
 | `apps/web/vite.config.ts` | web 的 Vitest 配置：`environment: 'jsdom'`、`setupFiles`、`css: true`、`restoreMocks`、内联 adapter/MCU |
 | `packages/design-system-adapter/vitest.config.ts` | 仅内联 `@material/material-color-utilities`（其 ESM 内部导入无扩展名） |
 | `packages/db/src/test-support/test-database.ts` | `assertTestDatabase`、`resetTestDatabase`、`withTestDatabase`、`withIsolatedSchema` |
@@ -54,7 +59,7 @@
 
 ## 3. 必须遵守的规则
 
-1. 新测试必须放在被测模块旁，命名 `<module>.test.ts(x)`；E2E 才放 `e2e/`（阶段 11 建目录），当前无 E2E 目录。
+1. 新测试必须放在被测模块旁，命名 `<module>.test.ts(x)`；E2E 放 `e2e/`。
 2. 测试替身只能放 `src/test-support/`，且该路径必须被 `tsconfig.build.json` 排除。检查：`ls packages/*/dist | grep test-support` 应无输出。
 3. 服务端/契约断言在 node 环境跑；只有 `apps/web` 用 jsdom。禁止在 jsdom 里断言 SSR 字符串或 HTTP 状态码。
 4. 数据库测试只读 `TEST_DATABASE_URL`；db 包的库名必须以 `_test` 结尾（`assertTestDatabase`），否则直接抛错。
@@ -87,13 +92,22 @@ pnpm format:check      # Prettier；期望 "All matched files use Prettier code 
 pnpm lint              # ESLint + 边界 + 源码 import + Token + 隐私；期望全通过且无警告
 pnpm typecheck         # Turbo 12 个任务；期望 12/12 successful
 pnpm test              # 期望 593 passed（8 个包；db/server 文件与包级任务串行）
+pnpm report:coverage   # 同一批测试启用 V8 覆盖率；产出各包 coverage/coverage-final.json
+pnpm check:coverage    # 各包覆盖率相对 quality/coverage-baseline.json 回退不得超过 5 个百分点
 pnpm build             # 期望 8/8 successful（client + SSR + server + 6 包）
 pnpm check:external    # 期望：外部资源审计通过：{n} 个 HTML/CSS 文件无外部引用。
 pnpm check:tools       # 期望：注册表：共 7 条（preview 6、implemented 0、disabled 1），样本任务 3 条。
 pnpm check:i18n        # 期望：i18n 检查通过：所有资源键都有引用。
 node scripts/verify-stage-4.mjs   # 期望：全部 28 项通过
 node scripts/verify-stage-10.mjs  # 构建后运行，期望：全部 99 项通过
-pnpm verify            # 以上全链路；任一步失败即整体失败
+pnpm typecheck:e2e     # Playwright 配置与 E2E 严格类型检查
+pnpm test:e2e          # 先构建并安装 Chromium；期望 9 passed
+pnpm check:openapi     # 需 TEST_DATABASE_URL 指向 *_test；公开与管理 API 无破坏性变更
+pnpm check:duplication # ≥10 行、≥80 token 的源码重复块，当前 0 处
+pnpm check:performance # 构建后执行；中英文首页资源字节不得超过 D37 预算
+pnpm check:audit       # 生产依赖 high/critical 漏洞阻断；low/moderate 只报告
+pnpm verify            # 基础全链路；阶段 11 的新增门禁按上述命令执行
+pnpm verify:stage11    # 基础全链路 + 覆盖率、OpenAPI、Playwright、重复代码、性能预算、漏洞分级
 ```
 
 单元/集成子集：
@@ -137,18 +151,18 @@ node --env-file-if-exists=.env scripts/run-turbo.mjs test --filter=@itools/serve
 4. 建 `packages/task-runtime/src/__probe__.ts` 写 `fetch('/x')`，跑 `pnpm check:privacy`：期望报“出现 fetch()”。
 5. **删除全部探针文件**后重跑 `pnpm verify`，确认恢复通过；探针不得提交。
 
-### 6.5 接入 CI（阶段 11 待做）
+### 6.5 接入 GitHub 后验证 CI
 
-1. 新 workflow 依序跑 `pnpm install --frozen-lockfile` → `format:check` → `lint` → `typecheck` → `test` → `build` → `check:tools` → `check:i18n` → `verify-stage-4.mjs`。
-2. 起 PostgreSQL service（库名 `itools_test`）并注入 `TEST_DATABASE_URL`；`turbo.json` 已声明 `test.env`，否则 Turbo 严格模式会丢弃该变量。
-3. 再加 Playwright job 与 `pnpm check:audit`；漏洞分级按 D04 定规则，严重且可利用才阻断。
+1. 将仓库连接 GitHub，推送包含 `.github/workflows/quality.yml` 的分支；确认 PR 与 push 触发的 `quality` job 实际通过。工作流使用 PostgreSQL 17 的 `itools_test`，并执行锁文件安装、Vitest 覆盖率、构建、OpenAPI、Playwright、性能与漏洞门禁。
+2. 在 GitHub 分支保护中将 `quality` 设为必需检查；未设置之前，工作流失败本身不能阻止合并。当前仓库无 Git remote，故这两步未执行。
+3. 浏览器 E2E 的后台用例仅覆盖无数据库时的安全失败；需要隔离的浏览器管理员会话测试时，必须使用独立 `_test` 库，不复用会重建 `public` schema 的并行测试。
 
 ## 7. 已知限制与相关决策
 
-- 无 CI：所有门禁依赖开发者本地执行，无法阻止绕过；这是当前最大质量风险（阶段 11）。
-- 无 Playwright：水合、CSP 实际执行、SW 生命周期、真实 IndexedDB/Worker 行为均未验证；`fake-indexeddb` 通过不等于浏览器通过。
+- GitHub Actions 工作流尚未在云端运行；仓库没有 Git remote，分支保护也未设置，实际合并阻断未验证。
+- Playwright 覆盖真实 Chromium 的水合、CSP、SW 首次安装/离线首页和 IndexedDB 保留；多版本更新切换、损坏修复、真实管理员登录及真实工具 Worker 仍缺浏览器 E2E。
 - 服务端集成测试重建 `public` schema 且不校验 `_test` 后缀，安全性完全依赖 `TEST_DATABASE_URL` 的取值；调用前务必确认连接串。
 - `check:i18n` 只查“键有引用”，不查键集合；键集断言只覆盖 `common`。
-- 无覆盖率统计与阈值、无重复代码检测（doc/15 要求 CI 加入，属阶段 11）。
-- 性能与包体预算未测；当前壳层约 6.3 MB（详见 [09](09-pwa-cache-update.md)），阈值须先测基线再由用户确认。
-- 相关决策：D04（漏洞分级）、D06（验收顺序）、D15（SSR noExternal）、D35（进程内限流）。全文见 [13](13-acceptance-open-decisions.md)。
+- 覆盖率指标含测试替身与已执行文件；新增未被任何测试导入的文件不一定进入 V8 报告，评审仍需检查测试覆盖范围。
+- 性能基线只测单台 Windows 主机上的 Chromium 首页；CI Linux 环境的资源字节门禁尚未云端验证。FCP/LCP 与真实压缩收益仅报告，未设时序硬阈值；见 [09](09-pwa-cache-update.md) 和 `quality/performance-baseline.json`。
+- 相关决策：D04（漏洞分级）、D06（验收顺序）、D15（SSR noExternal）、D35（进程内限流）、D37（性能预算）。全文见 [13](13-acceptance-open-decisions.md)。

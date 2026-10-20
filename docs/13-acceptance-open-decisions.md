@@ -1,6 +1,6 @@
 # 13 · 验收、未决事项与决策记录
 
-> 定位：全局验收清单、验证快照、全部决策（D01–D36）与未决事项。任何「为什么这样做」的问题先查这里。
+> 定位：全局验收清单、验证快照、全部决策（D01–D37）与未决事项。任何「为什么这样做」的问题先查这里。
 > 状态：生效中。阶段详情见 [14](14-phase-implementation-roadmap.md)。
 
 ## 1. 当前验证快照（2026-10-20）
@@ -16,13 +16,18 @@
 | 管理端到端 | 8 项 inject + 真实 HTTP 冒烟（setup 201/Cookie → 无 CSRF 403 → 带 CSRF 200 → 登出 204 → 写 401 → CLI 重置口令） |
 | 注册表校验 | `check:tools` 通过：7 条（preview 6、implemented 0、disabled 1），3 条样本任务 |
 | HTTP 验收 | 28/28（302/308/200/404、noindex、Sitemap、robots、缓存头） |
-| PWA 构建/模拟验收 | `verify-stage-10.mjs` 99/99：资源哈希、更新、离线与修复；真实浏览器 E2E 尚未执行 |
+| PWA 构建/模拟验收 | `verify-stage-10.mjs` 99/99：资源哈希、更新、离线与修复；完整更新故障矩阵仍由模拟环境覆盖 |
+| Playwright Chromium | 9/9：双语首页水合、搜索、预览直达、任务样本、后台失败关闭、404、CSP、SW 离线首页与 IndexedDB 保留 |
+| OpenAPI 兼容性 | 公开与管理 API 共 11 条路径相对冻结基线无破坏性变更；3 项检查脚本测试通过 |
+| 覆盖率 / 重复代码 | 8 包 V8 覆盖率均在记录基线 5 个百分点以内；≥10 行且 ≥80 token 的重复块 0 处 |
+| 性能预算 | 中文首页 2,306,700 / 2,539,520 bytes，英文 1,537,951 / 1,699,840 bytes，均通过；FCP/LCP 只报告 |
+| 依赖审计 | `pnpm check:audit` 通过：当前生产依赖 0 项已知漏洞；D04 high/critical 阻断规则已写入工作流 |
 | API 冒烟 | 生产模式实跑：`/api/v1/tools` 200（`max-age=60`）、未知工具 404、`/health/ready` 200、OpenAPI 5 条路径 |
 | 隐私门禁 | `check:privacy` 通过：asset-store / task-runtime 生产源码无网络调用 |
-| 浏览器 E2E | **未执行**（无 Playwright） |
+| 浏览器 E2E | Chromium 9 项已执行；真实管理员登录、跨版本 SW 更新和 Safari 差异未覆盖 |
 | IndexedDB 验证 | 仅 `fake-indexeddb`，未做真实浏览器验证 |
 | 真实 Worker 脚本 | **未实现**（阶段 5 用测试替身验收） |
-| CI | **未接入** |
+| CI | GitHub Actions 工作流已配置；仓库无 Git remote，云端运行与分支保护未验证 |
 
 ## 2. 全局验收清单
 
@@ -39,7 +44,7 @@
 | CSP、安全响应头、公开 API 限流、脱敏日志、依赖扫描 | ✅ 阶段 9（漏洞合并阻断属阶段 11 CI） |
 | 首个真实工具与执行 UI | ⏳ 待排期（D24 清单已确认；运行时已就绪） |
 | PWA、缓存清理、更新失败恢复 | ✅ 阶段 10（D36；构建产物和 Node VM 验收，浏览器 E2E 属阶段 11） |
-| CI、Playwright、性能预算 | ⏳ 阶段 11 |
+| CI、Playwright、性能预算 | 🟡 阶段 11 本地通过；云端 CI/分支保护待验证 |
 | Docker Compose、备份、回滚 | ⏳ 阶段 12 |
 | 全局交付与生产部署批准 | ⏳ 阶段 13；部署须用户明确批准 |
 
@@ -50,7 +55,7 @@
 | D01 | IndexedDB 升级只走版本化增量迁移，迁移只允许建仓/建索引；**永不自动清库**，迁移缺失直接 abort；重置仅限用户显式 `reset()`（可先导出归档）。保留是默认，清库是例外。 |
 | D02 | 已并入 D36。 |
 | D03 | （未决，见 §4）CDN 长缓存与停用工具 404 的一致性。 |
-| D04 | （未决，见 §4）一般安全告警 vs 严重漏洞阻断的分级。 |
+| D04 | 阶段 11 CI 对生产依赖的 high/critical 漏洞告警阻断；low/moderate 只报告。用户于 2026-10-20 确认。 |
 | D05 | 只做唯一管理员；不开放注册、不做多管理员协作。 |
 | D06 | 不依赖数据库/任务运行时的部分先验收；数据库启用状态、Seed 一致性、结果持久化在阶段 7 后验收。 |
 | D08 | 分类固定 `audio/image/video/text/other`；阶段 2 的预览分类退役。 |
@@ -82,17 +87,16 @@
 | D34 | CSP `style-src` 保留 `'unsafe-inline'`（MD3 输出元素级 style 属性）；`script-src` 保持严格 `'self'`。 |
 | D35 | 公开只读 API 进程内固定窗口限流（每 IP 120 次/分钟）；多实例各自计数，集中限流属阶段 12。 |
 | D36 | PWA 更新 = **B + E1 + R1**：新版本先在版本化 cache（`<buildId>`）内完整下载，全部成功才 activate 并清空全部旧缓存（**含引擎**），失败则旧版本完整可用 + 提示 + 重试（连续 2 次失败停止自动提示）；不留上一版本，提供「修复安装」；版本回退只走服务端部署回滚。 |
+| D37 | 阶段 11 性能门禁：基于 2026-10-20 的真实 Chromium 基线，首页 `pageEncodedBodyBytes` 中文不得超过 2,539,520，英文不得超过 1,699,840；每种语言 7 次采样取最大值判断。FCP/LCP 只报告，不用受机器负载影响的时间值阻断 CI。用户于 2026-10-20 确认。 |
 
 ## 4. 未决
 
 | 编号 | 事项 | 影响/门槛 |
 | --- | --- | --- |
 | D03 | CDN 长缓存与停用工具 404 的一致性 | 404 已实现；CDN TTL 与缓存绕过须部署阶段实测 |
-| D04 | 一般安全告警 vs 严重漏洞阻断的分级 | 阶段 11 定义 CI 规则 |
 | D16 | 任务/资产端口是否冻结 | 目录端口已冻结；任务与资产端口仍只有单一实现，暂不冻结 |
 | — | 首个真实工具排期与注册表注入点重构 | 清单已定（D24）；`视频转 GIF` 仅导航与 D10 冲突，实现时须先给方案（跳转图像分类，不在视频分类建条目） |
 | — | 汇率工具第 68/69 题 | 已列入 D24；数据来源、精度与更新策略未决，**不得推断答案** |
-| — | 性能阈值与包体预算 | 阶段 11 先测基线，再交用户确认 |
 | — | 字体预缓存策略 | 阶段 10 采用按需缓存，避免首次安装额外预取约 5 MB；离线未访问子集回落系统字体。阶段 11 根据浏览器与性能基线复核 |
 
 ## 5. 阶段验收记录要求
@@ -110,5 +114,19 @@
 | 实际命令 | `pnpm test:db`：65/65；`pnpm verify`：格式、Lint/边界/隐私、类型检查 12/12、Vitest 593/593、构建 8/8、外部资源/注册表/i18n、HTTP 28/28、PWA 99/99，全部通过。之前全量运行曾因数据库测试并发重置共享 schema 与 Web 测试 5 秒超时失败；已将测试任务串行、db/server 文件串行并将相关超时设为 30 秒，最终复验无失败项。 |
 | 验收标准 | 清单资源完整与哈希 ✅；失败安装保留旧版本 ✅；用户确认后激活并清理旧壳层/引擎缓存 ✅；离线首页与状态提示 ✅；损坏缓存修复及交换失败回滚 ✅；IndexedDB 不受缓存清理影响 ✅；全量门禁 ✅。 |
 | 证据位置 | `scripts/verify-stage-10.mjs`（最终构建产物 + Node VM 99 项）、`apps/server/src/pwa/app.test.ts`、`apps/web/src/components/pwa/*.test.tsx`、`docs/09-pwa-cache-update.md`。 |
-| 已知限制 | 浏览器 E2E 尚未执行；没有可执行工具或真实引擎，无法实测引擎离线执行；未访问字体子集离线时回落系统字体；主 JS 有 Vite 体积提示，阶段 11 建立性能基线。 |
-| 下一阶段 | 阶段 10 已验收；阶段 11 尚未开始，等待用户确认后进入。 |
+| 已知限制 | 阶段 10 验收时浏览器 E2E 尚未执行；没有可执行工具或真实引擎，无法实测引擎离线执行；未访问字体子集离线时回落系统字体；主 JS 有 Vite 体积提示。阶段 11 后续补充了部分浏览器 E2E 与性能基线。 |
+| 下一阶段 | 阶段 10 已验收；用户已确认进入阶段 11。 |
+
+### 阶段 11 本地验收记录（2026-10-20）
+
+| 项 | 记录 |
+| --- | --- |
+| 目标 | 把现有本地质量检查扩展到真实浏览器、契约兼容性、覆盖率、重复代码、性能与漏洞分级，并写入可复现的 GitHub Actions 工作流。 |
+| 范围 | PostgreSQL `_test` 库上的 Vitest/完整 OpenAPI、Chromium E2E、8 包 V8 覆盖率门禁、源码重复块检查、D37 首页字节预算、D04 生产依赖漏洞分级、PR/push 工作流。 |
+| 非范围 | GitHub 仓库连接、云端 Actions 实跑、分支保护设置、生产部署、真实工具执行；用户选择先完成本地验收。 |
+| 修改文件 | `.github/workflows/quality.yml`、`playwright.config.ts`、`tsconfig.e2e.json`、`e2e/{app,pwa}.spec.ts`、`scripts/{check-coverage,check-openapi-diff,check-openapi-diff.test,openapi-compatibility,measure-performance,performance-budget,performance-budget.test,performance-report}.mjs`、`quality/{coverage,openapi,performance}-baseline.json`、根 `package.json` / `pnpm-lock.yaml` / `.gitignore`、`README.md`、`docs/{00,07,08,09,10,13,14,15}*`。 |
+| 实际命令 | `pnpm install --frozen-lockfile` 通过；`pnpm verify:stage11` 通过，其中格式/Lint/边界/隐私、类型检查 12/12、Vitest 593/593、构建 8/8、HTTP 28/28、PWA 99/99、Playwright 9/9、OpenAPI 脚本测试 3/3 与 11 路径兼容检查、覆盖率 8 包、重复块 0、性能预算两语言通过、生产依赖审计 0 告警。新增性能预算负向探针 2/2 单独复跑通过；定向 `pnpm typecheck:e2e` 已通过。 |
+| 验收标准 | 锁文件安装可复现 ✅；硬检查本地失败即非零退出 ✅；D04 安全分级已获用户确认并写入工作流 ✅；D37 预算有真实基线且已获用户确认 ✅；指定页面与错误路径 E2E ✅；GitHub 云端运行 ⏳；分支保护实际阻止合并 ⏳。 |
+| 证据位置 | `.github/workflows/quality.yml`、`e2e/`、`scripts/{check-openapi-diff,performance-budget}.test.mjs` 负向探针、`quality/coverage-baseline.json`、`quality/openapi-baseline.json`、`quality/performance-baseline.json` 与 `docs/10-testing-ci-quality.md`。 |
+| 已知限制 | 仓库没有 Git remote，不能声称工作流已在 GitHub 跑通或阻止合并。Chromium E2E 未覆盖真实管理员登录、跨版本 SW 更新/修复及 Safari；性能墙钟数仅报告，Linux CI 的字节预算尚未实测。覆盖率报告只计入 V8 捕获的文件。 |
+| 下一阶段 | 阶段 11 本地交付通过；云端 CI/分支保护仍待仓库连接验证。按阶段推进规则，阶段 12 暂不开始。 |

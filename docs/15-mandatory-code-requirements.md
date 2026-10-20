@@ -15,10 +15,12 @@
 | 注册表 / i18n 键 | `pnpm check:tools` / `check:i18n` | ✅ |
 | 本地包禁网 | `pnpm check:privacy`（fetch/XHR/WebSocket/EventSource/sendBeacon） | ✅ |
 | 外部资源 | `pnpm check:external`（构建产物不得引用外部 src/href/url） | ✅ |
-| 依赖漏洞 | `pnpm check:audit`（`pnpm audit --prod`） | ❌ 阶段 11 接 CI |
+| 依赖漏洞 | `pnpm check:audit`（生产依赖 high/critical 阻断，D04） | ✅ 工作流已配置；云端待验证 |
 | SSR/HTTP | `node scripts/verify-stage-4.mjs`（28 项） | ✅ |
 | PWA 构建/模拟 | `node scripts/verify-stage-10.mjs`（99 项，需先构建） | ✅ |
-| CI / 性能预算 | 未接入（阶段 11） | ❌ |
+| Playwright / OpenAPI | `pnpm test:e2e` / `pnpm check:openapi` | ✅ 本地；云端待验证 |
+| 覆盖率 / 重复代码 | `pnpm report:coverage` → `pnpm check:coverage`；`pnpm check:duplication` | ✅ |
+| CI / 性能预算 | `.github/workflows/quality.yml` / `pnpm check:performance`（D37） | ✅ 本地；云端待验证 |
 
 TS 编译基线（`tsconfig.base.json`）：`strict`、`noUncheckedIndexedAccess`、`exactOptionalPropertyTypes`、`verbatimModuleSyntax`、`noFallthroughCasesInSwitch`、NodeNext（相对导入必须带 `.js`）。
 
